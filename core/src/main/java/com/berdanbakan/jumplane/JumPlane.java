@@ -22,6 +22,7 @@ public class JumPlane extends ApplicationAdapter {
     private Texture creatureTexture;
     private Texture obstacleTexture;
 
+
     private int currentLevel;
     private float planeWidth;
     private float planeHeight;
