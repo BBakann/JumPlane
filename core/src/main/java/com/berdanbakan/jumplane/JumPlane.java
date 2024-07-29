@@ -21,6 +21,7 @@ public class JumPlane extends ApplicationAdapter {
     private Texture groundTexture;
     private Texture creatureTexture;
     private Texture obstacleTexture;
+    private Texture[] healthTextures;
 
 
     private int currentLevel;
@@ -47,6 +48,9 @@ public class JumPlane extends ApplicationAdapter {
     private float creatureSpawnInterval = 15f; // Yaratıkların oluşturulma aralığı
     private float obstacleSpawnInterval = 18f; // Engellerin oluşturulma aralığı
 
+    private int health=6;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -61,6 +65,12 @@ public class JumPlane extends ApplicationAdapter {
         groundTexture = new Texture("ground.png");
         creatureTexture = new Texture("creature.png");
         obstacleTexture = new Texture("obstacle.png");
+
+        healthTextures=new Texture[7];
+        for (int i=0;i<healthTextures.length;i++){
+            healthTextures[i]=new Texture("health"+i+".png");
+        }
+
 
         currentPlaneTexture = planeTextures[0];
 
@@ -142,7 +152,11 @@ public class JumPlane extends ApplicationAdapter {
             }
             enemy.rectangle.set(enemy.x, enemy.y, enemy.width, enemy.height);
             if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
-                gameOver();
+                health--;
+                if (health<=0){
+                    gameOver();
+                }
+                toRemoveFlyingEnemies.add(enemy);
             }
         }
         flyingEnemies.removeAll(toRemoveFlyingEnemies);
@@ -156,7 +170,11 @@ public class JumPlane extends ApplicationAdapter {
             }
             enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height); // Y koordinatı groundHeight
             if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
-                gameOver();
+                health--;
+                if (health<=0){
+                    gameOver();
+                }
+                toRemoveGroundEnemies.add(enemy);
             }
         }
         groundEnemies.removeAll(toRemoveGroundEnemies);
@@ -170,7 +188,11 @@ public class JumPlane extends ApplicationAdapter {
             }
             creature.rectangle.set(creature.x, creature.y, creature.width, creature.height);
             if (creature.rectangle.overlaps(playerPlaneRectangle)) {
-                gameOver();
+                health--;
+                if (health<=0){
+                    gameOver();
+                }
+                toRemoveCreatures.add(creature);
             }
         }
         creatures.removeAll(toRemoveCreatures);
@@ -183,7 +205,11 @@ public class JumPlane extends ApplicationAdapter {
             }
             obstacle.rectangle.set(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
             if (obstacle.rectangle.overlaps(playerPlaneRectangle)) {
-                gameOver();
+                health--;
+                if (health<=0){
+                    gameOver();
+                }
+
             }
         }
 
@@ -212,6 +238,7 @@ public class JumPlane extends ApplicationAdapter {
         for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
+        batch.draw(healthTextures[health],10,Gdx.graphics.getHeight()-50,200,50);
 
         batch.end();
     }
@@ -227,7 +254,7 @@ public class JumPlane extends ApplicationAdapter {
     private void spawnFlyingEnemy() {
         float enemyX = Gdx.graphics.getWidth();
         float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - enemyPlaneHeight);
-        float enemySpeed = 200 + random.nextFloat() * 100; // Hız artırıldı
+        float enemySpeed = 300 + random.nextFloat() * 100; // Hız artırıldı
 
         FlyingEnemy enemy = new FlyingEnemy(enemyX, enemyY, enemySpeed, enemyPlaneWidth, enemyPlaneHeight);
         flyingEnemies.add(enemy);
@@ -235,7 +262,7 @@ public class JumPlane extends ApplicationAdapter {
 
     private void spawnGroundEnemy() {
         float enemyX = Gdx.graphics.getWidth();
-        float enemySpeed = 150 + random.nextFloat() * 100; // Hız artırıldı
+        float enemySpeed = 150 + random.nextFloat() * 50; // Hız artırıldı
 
         GroundEnemy enemy = new GroundEnemy(enemyX, enemySpeed, enemyPlaneWidth, enemyPlaneHeight);
         groundEnemies.add(enemy);
@@ -265,6 +292,28 @@ public class JumPlane extends ApplicationAdapter {
 
     private void gameOver() {
         // Oyun bittiğinde yapılacak işlemler
+        health=6;
+        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Uçağın pozisyonunu sıfırla
+        flyingEnemies.clear();
+        groundEnemies.clear();
+        creatures.clear();
+        obstacles.clear();
+    }
+    @Override
+    public void dispose(){
+        batch.dispose();
+        background.dispose();
+        for (Texture planeTexture : planeTextures) {
+            planeTexture.dispose();
+        }
+        enemyPlaneTexture.dispose();
+        groundTexture.dispose();
+        creatureTexture.dispose();
+        obstacleTexture.dispose();
+        for (Texture healthTexture : healthTextures) {
+            healthTexture.dispose();
+        }
+
     }
 
     // Düşman uçak sınıfı
