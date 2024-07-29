@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-public class JumPlane extends ApplicationAdapter {
+public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private SpriteBatch batch;
     private Texture background;
     private Texture[] planeTextures;
@@ -33,6 +33,7 @@ public class JumPlane extends ApplicationAdapter {
     private Texture[] ammoTextures;
     private float touchDownTime;
     private static final float SHOOT_DELAY=0.2f;
+    private float touchStartX, touchStartY;
 
 
 
@@ -79,6 +80,7 @@ public class JumPlane extends ApplicationAdapter {
         }
         currentLevel = 1;
         updatePlaneTexture();
+        Gdx.input.setInputProcessor(this);
 
         enemyPlaneTexture = new Texture("enemyplane.png");
         enemyPlaneWidth = enemyPlaneTexture.getWidth() / 4;
@@ -124,9 +126,6 @@ public class JumPlane extends ApplicationAdapter {
 
         resetGame(); // Oyunu başlat
     }
-
-
-
     @Override
     public void render() {
         ScreenUtils.clear(0, 0, 0, 1);
@@ -134,14 +133,6 @@ public class JumPlane extends ApplicationAdapter {
         updatePlaneTexture();
 
         if (!isGameOver) {
-            if (Gdx.input.isTouched() && TimeUtils.nanoTime() - touchDownTime > SHOOT_DELAY * 1000000000) {
-                planeY = Gdx.graphics.getHeight() -Gdx.input.getY() - planeHeight / 2;
-            }
-
-            // Uçağın ekran sınırları içinde kalmasını sağla
-            if (planeY < 0) planeY = 0;
-            if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
-
             // Düşman uçaklarını hareket ettir ve temizle
             Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
             while (flyingEnemyIterator.hasNext()) {
@@ -155,8 +146,7 @@ public class JumPlane extends ApplicationAdapter {
                     health--;
                     if (health <= 0) {
                         gameOver();
-                    }
-                    flyingEnemyIterator.remove();
+                    }flyingEnemyIterator.remove();
                 }
             }
 
@@ -296,7 +286,7 @@ public class JumPlane extends ApplicationAdapter {
             batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
         }
 
-        for (Obstacle obstacle : obstacles) {
+        for (Obstacle obstacle :obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
 
@@ -307,13 +297,66 @@ public class JumPlane extends ApplicationAdapter {
         }
 
         if (isGameOver) {
-            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
+            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
         }
 
         font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
 
         batch.end();
     }
+
+
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        touchStartX = screenX;
+        touchStartY = screenY;
+        touchDownTime = TimeUtils.nanoTime();
+        return true;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if (!isGameOver) {
+            float deltaX = screenX - touchStartX;
+            float deltaY = touchStartY - screenY; // Y eksenini ters çevir
+
+            planeX += deltaX * 0.5f; // X eksenindeki hareketi ayarla (0.5f hız faktörü)
+            planeY += deltaY * 0.5f; // Y eksenindeki hareketi ayarla (0.5f hız faktörü)
+
+            // Uçağın ekran sınırları içinde kalmasını sağla
+            if (planeX < 0) planeX = 0;
+            if (planeX > Gdx.graphics.getWidth() - planeWidth) planeX = Gdx.graphics.getWidth() - planeWidth;
+            if (planeY < 0) planeY = 0;
+            if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
+
+            touchStartX = screenX; // Dokunmanın başladığı noktayı güncelle
+            touchStartY = screenY;
+        }
+        return true;
+    }
+
+    // Kullanılmayan metodları boş olarak override edin
+    @Override
+    public boolean keyDown(int keycode) { return false; }
+    @Override
+    public boolean keyUp(int keycode) { return false; }
+    @Override
+    public boolean keyTyped(char character) { return false; }
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (TimeUtils.nanoTime() - touchDownTime < 200000000) { // 200 milisaniyeden kısa dokunuşlar
+            shootBullet();
+        }
+        if (isGameOver){
+            resetGame();
+        }
+        return true;
+    }
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) { return false; }
+    @Override
+    public boolean scrolled(float amountX, float amountY) { return false; }
 
     private void updatePlaneTexture() {
         if (currentLevel >= 1 && currentLevel <= 5) {
@@ -464,5 +507,11 @@ public class JumPlane extends ApplicationAdapter {
         }
         font.dispose();
     }
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+
 
 }
