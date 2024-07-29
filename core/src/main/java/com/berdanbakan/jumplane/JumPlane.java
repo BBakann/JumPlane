@@ -25,6 +25,8 @@ public class JumPlane extends ApplicationAdapter {
     private Texture creatureTexture;
     private Texture obstacleTexture;
     private Texture[] healthTextures;
+    private BitmapFont font;
+
 
     private int currentLevel;
     private float planeWidth;
@@ -52,7 +54,7 @@ public class JumPlane extends ApplicationAdapter {
 
     private int health = 6;
     private boolean isGameOver;
-    private BitmapFont font;
+    private int level=1;
 
     @Override
     public void create() {
@@ -75,7 +77,7 @@ public class JumPlane extends ApplicationAdapter {
         }
 
         font = new BitmapFont();
-        font.getData().setScale(3); // Yazı boyutunu ayarla
+        font.getData().setScale(4); // Yazı boyutunu ayarla
 
         currentPlaneTexture = planeTextures[0];
 
@@ -154,7 +156,7 @@ public class JumPlane extends ApplicationAdapter {
 
         updatePlaneTexture();
 
-        if(!isGameOver) {
+        if (!isGameOver) {
             // Uçak kontrolü
             if (Gdx.input.isTouched()) {
                 planeY = Gdx.graphics.getHeight() - Gdx.input.getY() - planeHeight / 2;
@@ -164,7 +166,7 @@ public class JumPlane extends ApplicationAdapter {
             if (planeY < 0) planeY = 0;
             if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
 
-            // Düşman uçaklarını hareket ettirve temizle
+            // Düşman uçaklarını hareket ettir ve temizle
             List<FlyingEnemy> toRemoveFlyingEnemies = new ArrayList<>();
             for (FlyingEnemy enemy : flyingEnemies) {
                 enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
@@ -189,7 +191,7 @@ public class JumPlane extends ApplicationAdapter {
                 if (enemy.x < -enemy.width) {
                     toRemoveGroundEnemies.add(enemy);
                 }
-                enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height); // Y koordinatı groundHeight
+                enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height);
                 if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
                     health--;
                     if (health <= 0) {
@@ -219,10 +221,11 @@ public class JumPlane extends ApplicationAdapter {
             creatures.removeAll(toRemoveCreatures);
 
             // Engeller ile çarpışma kontrolü
+            List<Obstacle> toRemoveObstacles = new ArrayList<>();
             for (Obstacle obstacle : obstacles) {
                 obstacle.x -= obstacle.speed * Gdx.graphics.getDeltaTime();
                 if (obstacle.x < -obstacle.width) {
-                    obstacles.remove(obstacle);
+                    toRemoveObstacles.add(obstacle);
                 }
                 obstacle.rectangle.set(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                 if (obstacle.rectangle.overlaps(playerPlaneRectangle)) {
@@ -232,6 +235,7 @@ public class JumPlane extends ApplicationAdapter {
                     }
                 }
             }
+            obstacles.removeAll(toRemoveObstacles);
         }
 
         batch.begin();
@@ -242,7 +246,7 @@ public class JumPlane extends ApplicationAdapter {
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
 
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
-        playerPlaneRectangle.set(planeX, planeY,planeWidth, planeHeight);
+        playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
 
         for (FlyingEnemy enemy : flyingEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -265,8 +269,11 @@ public class JumPlane extends ApplicationAdapter {
             font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
         }
 
+        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 80);
+
         batch.end();
     }
+
 
     private void updatePlaneTexture() {
         if (currentLevel >= 1 && currentLevel <= 5) {
@@ -325,6 +332,9 @@ public class JumPlane extends ApplicationAdapter {
         creatures.clear();
         obstacles.clear();
     }
+    public void levelUp(){
+        level++;
+    }
 
     private void resetGame() {
         isGameOver = false;
@@ -334,6 +344,8 @@ public class JumPlane extends ApplicationAdapter {
         groundEnemies.clear();
         creatures.clear();
         obstacles.clear();
+        Timer.instance().clear();
+
 
         // Düşman uçakları oluşturma zamanlayıcısı
         Timer.schedule(new Timer.Task() {
