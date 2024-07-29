@@ -26,6 +26,8 @@ public class JumPlane extends ApplicationAdapter {
     private Texture obstacleTexture;
     private Texture[] healthTextures;
     private BitmapFont font;
+    private List<Bullet> bullets;
+    private Texture[] bulletTextures;
 
 
     private int currentLevel;
@@ -76,6 +78,14 @@ public class JumPlane extends ApplicationAdapter {
             healthTextures[i] = new Texture("health" + i + ".png");
         }
 
+        bulletTextures=new Texture[4];
+        for (int i=0;i<bulletTextures.length;i++){
+            bulletTextures[i]=new Texture("bullet"+(i+1)+".png");
+        }
+
+
+
+
         font = new BitmapFont();
         font.getData().setScale(4); // Yazı boyutunu ayarla
 
@@ -95,6 +105,7 @@ public class JumPlane extends ApplicationAdapter {
         groundEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
+        bullets=new ArrayList<>();
         random = new Random();
 
         playerPlaneRectangle = new Rectangle();
@@ -112,6 +123,7 @@ public class JumPlane extends ApplicationAdapter {
                     resetGame();
                 } else {
                     planeY = Gdx.graphics.getHeight() - screenY - planeHeight / 2;
+                    shootBullet();
                 }
                 return true;
             }
@@ -236,6 +248,38 @@ public class JumPlane extends ApplicationAdapter {
                 }
             }
             obstacles.removeAll(toRemoveObstacles);
+
+            // Mermileri hareket ettir ve temizle
+            List<Bullet> toRemoveBullets = new ArrayList<>();
+            for (Bullet bullet : bullets) {
+                bullet.x += bullet.speed * Gdx.graphics.getDeltaTime();
+                if (bullet.x > Gdx.graphics.getWidth()) {
+                    toRemoveBullets.add(bullet);
+                }
+                bullet.rectangle.set(bullet.x, bullet.y, bullet.width, bullet.height);
+
+                // Mermilerin düşmanlarla çarpışmasını kontrol et
+                for (FlyingEnemy enemy : flyingEnemies) {
+                    if (bullet.rectangle.overlaps(enemy.rectangle)) {
+                        toRemoveBullets.add(bullet);
+                        flyingEnemies.remove(enemy);
+                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabilirsiniz
+                        break;
+                    }
+                }
+
+                for (GroundEnemy enemy : groundEnemies) {
+                    if (bullet.rectangle.overlaps(enemy.rectangle)) {
+                        toRemoveBullets.add(bullet);
+                        groundEnemies.remove(enemy);
+                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabiliriz.
+                        break;
+                    }
+                }
+
+
+            }
+            bullets.removeAll(toRemoveBullets);
         }
 
         batch.begin();
@@ -263,7 +307,12 @@ public class JumPlane extends ApplicationAdapter {
         for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
+
         batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
+
+        for (Bullet bullet : bullets) {
+            batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height);
+        }
 
         if (isGameOver) {
             font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
@@ -321,6 +370,19 @@ public class JumPlane extends ApplicationAdapter {
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, obstacleSpeed, obstacleWidth, obstacleHeight);
         obstacles.add(obstacle);
     }
+
+    private void shootBullet() {
+        if (!isGameOver) {
+            Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
+            float bulletWidth = bulletTexture.getWidth() / 2;
+            float bulletHeight = bulletTexture.getHeight() / 2;
+            float bulletSpeed = 500; // Mermi hızını ayarla
+
+            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight);
+            bullets.add(bullet);
+        }
+    }
+
 
     private void gameOver() {
         isGameOver = true;
@@ -455,4 +517,20 @@ public class JumPlane extends ApplicationAdapter {
             this.rectangle = new Rectangle(x, y, width, height);
         }
     }
+    private static class Bullet {
+        float x, y, speed, width, height;
+        Texture texture;
+        Rectangle rectangle;
+
+        Bullet(float x, float y, float speed, Texture texture, float width, float height) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.texture = texture;
+            this.width = width;
+            this.height = height;
+            this.rectangle = new Rectangle(x, y, width, height);
+        }
+    }
+
 }
