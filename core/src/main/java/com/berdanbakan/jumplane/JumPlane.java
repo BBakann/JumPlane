@@ -170,14 +170,14 @@ public class JumPlane extends ApplicationAdapter {
 
     @Override
     public void render() {
-        ScreenUtils.clear(0, 0, 0, 1);
+        ScreenUtils.clear(0, 0, 0, 1); // Ekranı temizle
 
-        updatePlaneTexture();
+        updatePlaneTexture(); // Uçak dokusunu güncelle
 
         if (!isGameOver) {
             // Uçak kontrolü
             if (Gdx.input.isTouched()) {
-                planeY = Gdx.graphics.getHeight() - Gdx.input.getY() - planeHeight / 2;
+                planeY = Gdx.graphics.getHeight() - Gdx.input.getY()- planeHeight / 2;
             }
 
             // Uçağın ekran sınırları içinde kalmasını sağla
@@ -268,8 +268,10 @@ public class JumPlane extends ApplicationAdapter {
                 for (FlyingEnemy enemy : flyingEnemies) {
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
                         toRemoveBullets.add(bullet);
-                        flyingEnemies.remove(enemy);
-                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabilirsiniz
+                        enemy.health -= bullet.damage;
+                        if (enemy.health <= 0) {
+                            flyingEnemies.remove(enemy);
+                        }
                         break;
                     }
                 }
@@ -277,66 +279,73 @@ public class JumPlane extends ApplicationAdapter {
                 for (GroundEnemy enemy : groundEnemies) {
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
                         toRemoveBullets.add(bullet);
-                        groundEnemies.remove(enemy);
-                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabiliriz.
+                        enemy.health -= bullet.damage;
+                        if (enemy.health <= 0) {
+                            groundEnemies.remove(enemy);
+                        }
                         break;
                     }
                 }
+
                 for (Creature creature : creatures) {
                     if (bullet.rectangle.overlaps(creature.rectangle)) {
                         toRemoveBullets.add(bullet);
-                        creatures.remove(creature);
-                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabiliriz.
+                        creature.health -= bullet.damage;
+                        if (creature.health <= 0) {
+                            creatures.remove(creature);
+                        }
                         break;
                     }
                 }
-
             }
             bullets.removeAll(toRemoveBullets);
+
+            if (reloadTime > 0) {
+                reloadTime -= Gdx.graphics.getDeltaTime();
+            }
         }
 
-        batch.begin();
-        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.begin(); // Çizim işlemlerini başlat
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Arka planı çiz
 
-        batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight);
+        batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight); // Zemin dokusunu çiz
 
-        batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
+        batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight); // Uçağı çiz
 
-        batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() -165, 168, 168);
-
+        batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() -165, 168, 168); // Mermi sayısını gösteren dokuyu çiz
 
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
         playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
 
         for (FlyingEnemy enemy : flyingEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
+            batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height); // Düşman uçaklarını çiz
         }
 
-        for (GroundEnemy enemy : groundEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height); // Y koordinatı groundHeight
+        for(GroundEnemy enemy : groundEnemies) {
+            batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height); // Zemin düşmanlarını çiz
         }
 
         for (Creature creature : creatures) {
-            batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
+            batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height); // Yaratıkları çiz
         }
 
         for (Obstacle obstacle : obstacles) {
-            batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height); // Engelleri çiz
         }
 
-        batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
+        batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50); // Can dokusunu çiz
 
         for (Bullet bullet : bullets) {
-            batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height);
+            batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height); // Mermileri çiz
         }
 
         if (isGameOver) {
-            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
+            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2); // Oyun bittiyse "GAME OVER!" yaz
         }
 
-        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
+        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90); // Seviyeyi yaz
 
-        batch.end();
+        batch.end(); // Çizim işlemlerini bitir
     }
 
 
@@ -389,18 +398,22 @@ public class JumPlane extends ApplicationAdapter {
     }
 
     private void shootBullet() {
-        if (!isGameOver && ammo > 0) {
-            ammo--;
+        if (!isGameOver) { // Oyun bitmediyse
+            if (ammo > 0) {// Mermi varsa
+                ammo--; // Mermi sayısını azalt
 
-            Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
-            float bulletWidth = bulletTexture.getWidth() / 5;
-            float bulletHeight = bulletTexture.getHeight() / 5;
-            float bulletSpeed = 500; // Mermi hızını ayarla
+                Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)]; // Seviyeye göre mermi dokusunu seç
+                float bulletWidth = bulletTexture.getWidth()/ 5;
+                float bulletHeight = bulletTexture.getHeight() / 5;
+                float bulletSpeed = 500;
 
-            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight);
-            bullets.add(bullet);
-
-            reloadTime = 3f + random.nextFloat() * 2f; // 3 ile 5 saniye arasında rastgele bir süre
+                int bulletDamage = (level == 1) ? 1 : 2; // bullet1 hasarı 1, diğerleri 2
+                Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight/ 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight, bulletDamage); // Mermiyi oluştur ve hasar değerini ilet
+                bullets.add(bullet);reloadTime = 3f + random.nextFloat() * 2f; // Yeniden doldurma süresini ayarla (3-5 saniye arası)
+            } else if (reloadTime <= 0) { // Mermi yoksa ve yeniden doldurma süresi dolduysa
+                ammo = MAX_AMMO; // Mermiyi doldur
+                reloadTime = 3f + random.nextFloat() * 2f; // Yeniden doldurma süresini ayarla (3-5 saniye arası)
+            }
         }
     }
 
