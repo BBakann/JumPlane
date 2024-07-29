@@ -3,10 +3,13 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +25,6 @@ public class JumPlane extends ApplicationAdapter {
     private Texture creatureTexture;
     private Texture obstacleTexture;
     private Texture[] healthTextures;
-
 
     private int currentLevel;
     private float planeWidth;
@@ -48,8 +50,9 @@ public class JumPlane extends ApplicationAdapter {
     private float creatureSpawnInterval = 15f; // Yaratıkların oluşturulma aralığı
     private float obstacleSpawnInterval = 18f; // Engellerin oluşturulma aralığı
 
-    private int health=6;
-
+    private int health = 6;
+    private boolean isGameOver;
+    private BitmapFont font;
 
     @Override
     public void create() {
@@ -66,11 +69,13 @@ public class JumPlane extends ApplicationAdapter {
         creatureTexture = new Texture("creature.png");
         obstacleTexture = new Texture("obstacle.png");
 
-        healthTextures=new Texture[7];
-        for (int i=0;i<healthTextures.length;i++){
-            healthTextures[i]=new Texture("health"+i+".png");
+        healthTextures = new Texture[7];
+        for (int i = 0; i < healthTextures.length; i++) {
+            healthTextures[i] = new Texture("health" + i + ".png");
         }
 
+        font = new BitmapFont();
+        font.getData().setScale(3); // Yazı boyutunu ayarla
 
         currentPlaneTexture = planeTextures[0];
 
@@ -96,11 +101,25 @@ public class JumPlane extends ApplicationAdapter {
         planeX = 0; // Ekranın en sol noktası
         planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Y ekseninde ortala
 
+        isGameOver = false;
+
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (isGameOver) {
+                    resetGame();
+                } else {
+                    planeY = Gdx.graphics.getHeight() - screenY - planeHeight / 2;
+                }
+                return true;
+            }
+        });
+
         // Düşman uçakları oluşturma zamanlayıcısı
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnFlyingEnemy();
+                if (!isGameOver) spawnFlyingEnemy();
             }
         }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
 
@@ -108,7 +127,7 @@ public class JumPlane extends ApplicationAdapter {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnGroundEnemy();
+                if (!isGameOver) spawnGroundEnemy();
             }
         }, groundEnemySpawnInterval, groundEnemySpawnInterval);
 
@@ -116,7 +135,7 @@ public class JumPlane extends ApplicationAdapter {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnCreature();
+                if (!isGameOver) spawnCreature();
             }
         }, creatureSpawnInterval, creatureSpawnInterval);
 
@@ -124,7 +143,7 @@ public class JumPlane extends ApplicationAdapter {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnObstacle();
+                if (!isGameOver) spawnObstacle();
             }
         }, obstacleSpawnInterval, obstacleSpawnInterval);
     }
@@ -135,81 +154,83 @@ public class JumPlane extends ApplicationAdapter {
 
         updatePlaneTexture();
 
-        // Uçak kontrolü
-        if (Gdx.input.isTouched()) {
-            planeY = Gdx.input.getY() - planeHeight / 2;
-        }
-        // Uçağın ekran sınırları içinde kalmasını sağla
-        if (planeY < 0) planeY = 0;
-        if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
-
-        // Düşman uçaklarını hareket ettir ve temizle
-        List<FlyingEnemy> toRemoveFlyingEnemies = new ArrayList<>();
-        for (FlyingEnemy enemy : flyingEnemies) {
-            enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
-            if (enemy.x < -enemy.width) {
-                toRemoveFlyingEnemies.add(enemy);
+        if(!isGameOver) {
+            // Uçak kontrolü
+            if (Gdx.input.isTouched()) {
+                planeY = Gdx.graphics.getHeight() - Gdx.input.getY() - planeHeight / 2;
             }
-            enemy.rectangle.set(enemy.x, enemy.y, enemy.width, enemy.height);
-            if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
-                health--;
-                if (health<=0){
-                    gameOver();
+
+            // Uçağın ekran sınırları içinde kalmasını sağla
+            if (planeY < 0) planeY = 0;
+            if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
+
+            // Düşman uçaklarını hareket ettirve temizle
+            List<FlyingEnemy> toRemoveFlyingEnemies = new ArrayList<>();
+            for (FlyingEnemy enemy : flyingEnemies) {
+                enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
+                if (enemy.x < -enemy.width) {
+                    toRemoveFlyingEnemies.add(enemy);
                 }
-                toRemoveFlyingEnemies.add(enemy);
-            }
-        }
-        flyingEnemies.removeAll(toRemoveFlyingEnemies);
-
-        // Zemin düşmanlarını hareket ettir ve temizle
-        List<GroundEnemy> toRemoveGroundEnemies = new ArrayList<>();
-        for (GroundEnemy enemy : groundEnemies) {
-            enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
-            if (enemy.x < -enemy.width) {
-                toRemoveGroundEnemies.add(enemy);
-            }
-            enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height); // Y koordinatı groundHeight
-            if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
-                health--;
-                if (health<=0){
-                    gameOver();
+                enemy.rectangle.set(enemy.x, enemy.y, enemy.width, enemy.height);
+                if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
+                    health--;
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                    toRemoveFlyingEnemies.add(enemy);
                 }
-                toRemoveGroundEnemies.add(enemy);
             }
-        }
-        groundEnemies.removeAll(toRemoveGroundEnemies);
+            flyingEnemies.removeAll(toRemoveFlyingEnemies);
 
-        // Yaratıkları hareket ettir ve temizle
-        List<Creature> toRemoveCreatures = new ArrayList<>();
-        for (Creature creature : creatures) {
-            creature.x -= creature.speed * Gdx.graphics.getDeltaTime();
-            if (creature.x < -creature.width) {
-                toRemoveCreatures.add(creature);
-            }
-            creature.rectangle.set(creature.x, creature.y, creature.width, creature.height);
-            if (creature.rectangle.overlaps(playerPlaneRectangle)) {
-                health--;
-                if (health<=0){
-                    gameOver();
+            // Zemin düşmanlarını hareket ettir ve temizle
+            List<GroundEnemy> toRemoveGroundEnemies = new ArrayList<>();
+            for (GroundEnemy enemy : groundEnemies) {
+                enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
+                if (enemy.x < -enemy.width) {
+                    toRemoveGroundEnemies.add(enemy);
                 }
-                toRemoveCreatures.add(creature);
-            }
-        }
-        creatures.removeAll(toRemoveCreatures);
-
-        // Engeller ile çarpışma kontrolü
-        for (Obstacle obstacle : obstacles) {
-            obstacle.x -= obstacle.speed * Gdx.graphics.getDeltaTime();
-            if (obstacle.x < -obstacle.width) {
-                obstacles.remove(obstacle);
-            }
-            obstacle.rectangle.set(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            if (obstacle.rectangle.overlaps(playerPlaneRectangle)) {
-                health--;
-                if (health<=0){
-                    gameOver();
+                enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height); // Y koordinatı groundHeight
+                if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
+                    health--;
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                    toRemoveGroundEnemies.add(enemy);
                 }
+            }
+            groundEnemies.removeAll(toRemoveGroundEnemies);
 
+            // Yaratıkları hareket ettir ve temizle
+            List<Creature> toRemoveCreatures = new ArrayList<>();
+            for (Creature creature : creatures) {
+                creature.x -= creature.speed * Gdx.graphics.getDeltaTime();
+                if (creature.x < -creature.width) {
+                    toRemoveCreatures.add(creature);
+                }
+                creature.rectangle.set(creature.x, creature.y, creature.width, creature.height);
+                if (creature.rectangle.overlaps(playerPlaneRectangle)) {
+                    health--;
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                    toRemoveCreatures.add(creature);
+                }
+            }
+            creatures.removeAll(toRemoveCreatures);
+
+            // Engeller ile çarpışma kontrolü
+            for (Obstacle obstacle : obstacles) {
+                obstacle.x -= obstacle.speed * Gdx.graphics.getDeltaTime();
+                if (obstacle.x < -obstacle.width) {
+                    obstacles.remove(obstacle);
+                }
+                obstacle.rectangle.set(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                if (obstacle.rectangle.overlaps(playerPlaneRectangle)) {
+                    health--;
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                }
             }
         }
 
@@ -221,7 +242,7 @@ public class JumPlane extends ApplicationAdapter {
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
 
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
-        playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
+        playerPlaneRectangle.set(planeX, planeY,planeWidth, planeHeight);
 
         for (FlyingEnemy enemy : flyingEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -238,7 +259,11 @@ public class JumPlane extends ApplicationAdapter {
         for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
-        batch.draw(healthTextures[health],10,Gdx.graphics.getHeight()-50,200,50);
+        batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
+
+        if (isGameOver) {
+            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
+        }
 
         batch.end();
     }
@@ -291,16 +316,60 @@ public class JumPlane extends ApplicationAdapter {
     }
 
     private void gameOver() {
+        isGameOver = true;
         // Oyun bittiğinde yapılacak işlemler
-        health=6;
+        health = 6;
         planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Uçağın pozisyonunu sıfırla
         flyingEnemies.clear();
         groundEnemies.clear();
         creatures.clear();
         obstacles.clear();
     }
+
+    private void resetGame() {
+        isGameOver = false;
+        health = 6;
+        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Uçağın pozisyonunu sıfırla
+        flyingEnemies.clear();
+        groundEnemies.clear();
+        creatures.clear();
+        obstacles.clear();
+
+        // Düşman uçakları oluşturma zamanlayıcısı
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                spawnFlyingEnemy();
+            }
+        }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
+
+        // Zemin düşmanları oluşturma zamanlayıcısı
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                spawnGroundEnemy();
+            }
+        }, groundEnemySpawnInterval, groundEnemySpawnInterval);
+
+        // Yaratıklar oluşturma zamanlayıcısı
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                spawnCreature();
+            }
+        }, creatureSpawnInterval, creatureSpawnInterval);
+
+        // Engeller oluşturma zamanlayıcısı
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                spawnObstacle();
+            }
+        }, obstacleSpawnInterval, obstacleSpawnInterval);
+    }
+
     @Override
-    public void dispose(){
+    public void dispose() {
         batch.dispose();
         background.dispose();
         for (Texture planeTexture : planeTextures) {
@@ -313,7 +382,7 @@ public class JumPlane extends ApplicationAdapter {
         for (Texture healthTexture : healthTextures) {
             healthTexture.dispose();
         }
-
+        font.dispose();
     }
 
     // Düşman uçak sınıfı
