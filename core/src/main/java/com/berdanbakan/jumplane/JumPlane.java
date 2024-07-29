@@ -374,8 +374,8 @@ public class JumPlane extends ApplicationAdapter {
     private void shootBullet() {
         if (!isGameOver) {
             Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
-            float bulletWidth = bulletTexture.getWidth() / 2;
-            float bulletHeight = bulletTexture.getHeight() / 2;
+            float bulletWidth = bulletTexture.getWidth() / 5;
+            float bulletHeight = bulletTexture.getHeight() / 5;
             float bulletSpeed = 500; // Mermi hızını ayarla
 
             Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight);
@@ -532,5 +532,4 @@ public class JumPlane extends ApplicationAdapter {
             this.rectangle = new Rectangle(x, y, width, height);
         }
     }
-
 }
