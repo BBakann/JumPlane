@@ -282,7 +282,14 @@ public class JumPlane extends ApplicationAdapter {
                         break;
                     }
                 }
-
+                for (Creature creature : creatures) {
+                    if (bullet.rectangle.overlaps(creature.rectangle)) {
+                        toRemoveBullets.add(bullet);
+                        creatures.remove(creature);
+                        // Patlama efekti veya diğer çarpışma etkilerini burada başlatabiliriz.
+                        break;
+                    }
+                }
 
             }
             bullets.removeAll(toRemoveBullets);
