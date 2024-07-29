@@ -28,6 +28,7 @@ public class JumPlane extends ApplicationAdapter {
     private BitmapFont font;
     private List<Bullet> bullets;
     private Texture[] bulletTextures;
+    private Texture[] ammoTextures;
 
 
     private int currentLevel;
@@ -57,6 +58,9 @@ public class JumPlane extends ApplicationAdapter {
     private int health = 6;
     private boolean isGameOver;
     private int level=1;
+    private static final int MAX_AMMO=6;
+    private int ammo=MAX_AMMO;
+    private float reloadTime=0f;
 
     @Override
     public void create() {
@@ -83,8 +87,10 @@ public class JumPlane extends ApplicationAdapter {
             bulletTextures[i]=new Texture("bullet"+(i+1)+".png");
         }
 
-
-
+        ammoTextures=new Texture[7];
+        for (int i=0; i<ammoTextures.length;i++){
+            ammoTextures[i]=new Texture("ammo"+i+".png");
+        }
 
         font = new BitmapFont();
         font.getData().setScale(4); // Yazı boyutunu ayarla
@@ -289,6 +295,9 @@ public class JumPlane extends ApplicationAdapter {
 
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
 
+        batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() -165, 168, 168);
+
+
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
         playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
 
@@ -318,7 +327,7 @@ public class JumPlane extends ApplicationAdapter {
             font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
         }
 
-        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 80);
+        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
 
         batch.end();
     }
@@ -331,6 +340,7 @@ public class JumPlane extends ApplicationAdapter {
             planeHeight = currentPlaneTexture.getHeight() / 2;
         }
     }
+
 
     private void spawnFlyingEnemy() {
         float enemyX = Gdx.graphics.getWidth();
@@ -372,7 +382,9 @@ public class JumPlane extends ApplicationAdapter {
     }
 
     private void shootBullet() {
-        if (!isGameOver) {
+        if (!isGameOver && ammo > 0) {
+            ammo--;
+
             Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
             float bulletWidth = bulletTexture.getWidth() / 5;
             float bulletHeight = bulletTexture.getHeight() / 5;
@@ -380,8 +392,11 @@ public class JumPlane extends ApplicationAdapter {
 
             Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight);
             bullets.add(bullet);
+
+            reloadTime = 3f + random.nextFloat() * 2f; // 3 ile 5 saniye arasında rastgele bir süre
         }
     }
+
 
 
     private void gameOver() {
@@ -458,5 +473,4 @@ public class JumPlane extends ApplicationAdapter {
         }
         font.dispose();
     }
-
 }
