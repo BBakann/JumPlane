@@ -7,11 +7,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +31,10 @@ public class JumPlane extends ApplicationAdapter {
     private List<Bullet> bullets;
     private Texture[] bulletTextures;
     private Texture[] ammoTextures;
+    private float touchDownTime;
+    private static final float SHOOT_DELAY=0.2f;
+
+
 
 
     private int currentLevel;
@@ -65,119 +71,71 @@ public class JumPlane extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        background = new Texture("background.png");
+        background = new Texture("background.png"); // Arka plan dokusunu yükle
 
         planeTextures = new Texture[5];
-        for (int i = 0; i < planeTextures.length; i++) {
+        for (int i = 0; i < 5; i++) {
             planeTextures[i] = new Texture("plane" + (i + 1) + ".png");
         }
+        currentLevel = 1;
+        updatePlaneTexture();
 
         enemyPlaneTexture = new Texture("enemyplane.png");
+        enemyPlaneWidth = enemyPlaneTexture.getWidth() / 4;
+        enemyPlaneHeight = enemyPlaneTexture.getHeight() / 4;
+
         groundTexture = new Texture("ground.png");
+        groundHeight = groundTexture.getHeight();
+
         creatureTexture = new Texture("creature.png");
+
         obstacleTexture = new Texture("obstacle.png");
 
         healthTextures = new Texture[7];
-        for (int i = 0; i < healthTextures.length; i++) {
+        for (int i = 0; i < 7; i++) {
             healthTextures[i] = new Texture("health" + i + ".png");
         }
 
-        bulletTextures=new Texture[4];
-        for (int i=0;i<bulletTextures.length;i++){
-            bulletTextures[i]=new Texture("bullet"+(i+1)+".png");
-        }
-
-        ammoTextures=new Texture[7];
-        for (int i=0; i<ammoTextures.length;i++){
-            ammoTextures[i]=new Texture("ammo"+i+".png");
-        }
-
         font = new BitmapFont();
-        font.getData().setScale(4); // Yazı boyutunu ayarla
+        font.getData().setScale(4);
 
-        currentPlaneTexture = planeTextures[0];
+        bullets = new ArrayList<>();
+        bulletTextures = new Texture[3];
+        for (int i = 0; i < 3; i++) {
+            bulletTextures[i] = new Texture("bullet" + (i + 1) + ".png");
+        }
 
-        planeWidth = currentPlaneTexture.getWidth() / 2;
-        planeHeight = currentPlaneTexture.getHeight() / 2;
-
-        enemyPlaneWidth = enemyPlaneTexture.getWidth() / 2;
-        enemyPlaneHeight = enemyPlaneTexture.getHeight() / 2;
-
-        groundHeight = groundTexture.getHeight();
-
-        currentLevel = 1;
+        ammoTextures = new Texture[7];
+        for (int i = 0; i < 7; i++) {
+            ammoTextures[i] = new Texture("ammo" + i + ".png");
+        }
 
         flyingEnemies = new ArrayList<>();
         groundEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
-        bullets=new ArrayList<>();
+
         random = new Random();
 
         playerPlaneRectangle = new Rectangle();
 
-        // Uçağın başlangıç pozisyonunu ayarla
-        planeX = 0; // Ekranın en sol noktası
-        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Y ekseninde ortala
+        planeX = 50;
+        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2;
 
-        isGameOver = false;
-
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (isGameOver) {
-                    resetGame();
-                } else {
-                    planeY = Gdx.graphics.getHeight() - screenY - planeHeight / 2;
-                    shootBullet();
-                }
-                return true;
-            }
-        });
-
-        // Düşman uçakları oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver) spawnFlyingEnemy();
-            }
-        }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
-
-        // Zemin düşmanları oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver) spawnGroundEnemy();
-            }
-        }, groundEnemySpawnInterval, groundEnemySpawnInterval);
-
-        // Yaratıklar oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver) spawnCreature();
-            }
-        }, creatureSpawnInterval, creatureSpawnInterval);
-
-        // Engeller oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver) spawnObstacle();
-            }
-        }, obstacleSpawnInterval, obstacleSpawnInterval);
+        resetGame(); // Oyunu başlat
     }
+
+
 
     @Override
     public void render() {
-        ScreenUtils.clear(0, 0, 0, 1); // Ekranı temizle
+        ScreenUtils.clear(0, 0, 0, 1);
 
-        updatePlaneTexture(); // Uçak dokusunu güncelle
+        updatePlaneTexture();
 
         if (!isGameOver) {
-            // Uçak kontrolü
-            if (Gdx.input.isTouched()) {
-                planeY = Gdx.graphics.getHeight() - Gdx.input.getY()- planeHeight / 2;
+            if (Gdx.input.isTouched() && TimeUtils.nanoTime() - touchDownTime > SHOOT_DELAY * 1000000000) {
+                planeY = Gdx.graphics.getHeight() -Gdx.input.getY() - planeHeight / 2;
             }
 
             // Uçağın ekran sınırları içinde kalmasını sağla
@@ -185,11 +143,12 @@ public class JumPlane extends ApplicationAdapter {
             if (planeY > Gdx.graphics.getHeight() - planeHeight) planeY = Gdx.graphics.getHeight() - planeHeight;
 
             // Düşman uçaklarını hareket ettir ve temizle
-            List<FlyingEnemy> toRemoveFlyingEnemies = new ArrayList<>();
-            for (FlyingEnemy enemy : flyingEnemies) {
+            Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
+            while (flyingEnemyIterator.hasNext()) {
+                FlyingEnemy enemy = flyingEnemyIterator.next();
                 enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
                 if (enemy.x < -enemy.width) {
-                    toRemoveFlyingEnemies.add(enemy);
+                    flyingEnemyIterator.remove();
                 }
                 enemy.rectangle.set(enemy.x, enemy.y, enemy.width, enemy.height);
                 if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
@@ -197,17 +156,17 @@ public class JumPlane extends ApplicationAdapter {
                     if (health <= 0) {
                         gameOver();
                     }
-                    toRemoveFlyingEnemies.add(enemy);
+                    flyingEnemyIterator.remove();
                 }
             }
-            flyingEnemies.removeAll(toRemoveFlyingEnemies);
 
             // Zemin düşmanlarını hareket ettir ve temizle
-            List<GroundEnemy> toRemoveGroundEnemies = new ArrayList<>();
-            for (GroundEnemy enemy : groundEnemies) {
+            Iterator<GroundEnemy> groundEnemyIterator = groundEnemies.iterator();
+            while (groundEnemyIterator.hasNext()) {
+                GroundEnemy enemy = groundEnemyIterator.next();
                 enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
                 if (enemy.x < -enemy.width) {
-                    toRemoveGroundEnemies.add(enemy);
+                    groundEnemyIterator.remove();
                 }
                 enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height);
                 if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
@@ -215,17 +174,17 @@ public class JumPlane extends ApplicationAdapter {
                     if (health <= 0) {
                         gameOver();
                     }
-                    toRemoveGroundEnemies.add(enemy);
+                    groundEnemyIterator.remove();
                 }
             }
-            groundEnemies.removeAll(toRemoveGroundEnemies);
 
             // Yaratıkları hareket ettir ve temizle
-            List<Creature> toRemoveCreatures = new ArrayList<>();
-            for (Creature creature : creatures) {
+            Iterator<Creature> creatureIterator = creatures.iterator();
+            while (creatureIterator.hasNext()) {
+                Creature creature = creatureIterator.next();
                 creature.x -= creature.speed * Gdx.graphics.getDeltaTime();
                 if (creature.x < -creature.width) {
-                    toRemoveCreatures.add(creature);
+                    creatureIterator.remove();
                 }
                 creature.rectangle.set(creature.x, creature.y, creature.width, creature.height);
                 if (creature.rectangle.overlaps(playerPlaneRectangle)) {
@@ -233,10 +192,9 @@ public class JumPlane extends ApplicationAdapter {
                     if (health <= 0) {
                         gameOver();
                     }
-                    toRemoveCreatures.add(creature);
+                    creatureIterator.remove();
                 }
             }
-            creatures.removeAll(toRemoveCreatures);
 
             // Engeller ile çarpışma kontrolü
             List<Obstacle> toRemoveObstacles = new ArrayList<>();
@@ -264,35 +222,40 @@ public class JumPlane extends ApplicationAdapter {
                 }
                 bullet.rectangle.set(bullet.x, bullet.y, bullet.width, bullet.height);
 
-                // Mermilerin düşmanlarla çarpışmasını kontrol et
-                for (FlyingEnemy enemy : flyingEnemies) {
+                flyingEnemyIterator = flyingEnemies.iterator(); // Iterator'ü yeniden başlat
+                while (flyingEnemyIterator.hasNext()) {
+                    FlyingEnemy enemy = flyingEnemyIterator.next();
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
                         toRemoveBullets.add(bullet);
                         enemy.health -= bullet.damage;
                         if (enemy.health <= 0) {
-                            flyingEnemies.remove(enemy);
+                            flyingEnemyIterator.remove();
                         }
                         break;
                     }
                 }
 
-                for (GroundEnemy enemy : groundEnemies) {
+                groundEnemyIterator = groundEnemies.iterator(); // Iterator'ü yeniden başlat
+                while (groundEnemyIterator.hasNext()) {
+                    GroundEnemy enemy = groundEnemyIterator.next();
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
                         toRemoveBullets.add(bullet);
                         enemy.health -= bullet.damage;
                         if (enemy.health <= 0) {
-                            groundEnemies.remove(enemy);
+                            groundEnemyIterator.remove();
                         }
                         break;
                     }
                 }
 
-                for (Creature creature : creatures) {
+                creatureIterator = creatures.iterator(); // Iterator'ü yeniden başlat
+                while (creatureIterator.hasNext()) {
+                    Creature creature = creatureIterator.next();
                     if (bullet.rectangle.overlaps(creature.rectangle)) {
                         toRemoveBullets.add(bullet);
                         creature.health -= bullet.damage;
                         if (creature.health <= 0) {
-                            creatures.remove(creature);
+                            creatureIterator.remove();
                         }
                         break;
                     }
@@ -303,57 +266,60 @@ public class JumPlane extends ApplicationAdapter {
             if (reloadTime > 0) {
                 reloadTime -= Gdx.graphics.getDeltaTime();
             }
+
+            if (Gdx.input.justTouched()) {
+                shootBullet();
+            }
         }
 
-        batch.begin(); // Çizim işlemlerini başlat
-        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Arka planı çiz
+        batch.begin();
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight); // Zemin dokusunu çiz
+        batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight);
 
-        batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight); // Uçağı çiz
+        batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
 
-        batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() -165, 168, 168); // Mermi sayısını gösteren dokuyu çiz
+        batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() - 165, 168, 168);
 
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
         playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
 
         for (FlyingEnemy enemy : flyingEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height); // Düşman uçaklarını çiz
+            batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
         }
 
-        for(GroundEnemy enemy : groundEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height); // Zemin düşmanlarını çiz
+        for (GroundEnemy enemy : groundEnemies) {
+            batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height);
         }
 
         for (Creature creature : creatures) {
-            batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height); // Yaratıkları çiz
+            batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
         }
 
         for (Obstacle obstacle : obstacles) {
-            batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height); // Engelleri çiz
+            batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
 
-        batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50); // Can dokusunu çiz
+        batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
 
         for (Bullet bullet : bullets) {
-            batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height); // Mermileri çiz
+            batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height);
         }
 
         if (isGameOver) {
-            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2); // Oyun bittiyse "GAME OVER!" yaz
+            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
         }
 
-        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90); // Seviyeyi yaz
+        font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
 
-        batch.end(); // Çizim işlemlerini bitir
+        batch.end();
     }
-
 
     private void updatePlaneTexture() {
         if (currentLevel >= 1 && currentLevel <= 5) {
             currentPlaneTexture = planeTextures[currentLevel - 1];
-            planeWidth = currentPlaneTexture.getWidth() / 2;
-            planeHeight = currentPlaneTexture.getHeight() / 2;
+            planeWidth = currentPlaneTexture.getWidth() / 3;
+            planeHeight = currentPlaneTexture.getHeight() / 3;
         }
     }
 
@@ -390,8 +356,8 @@ public class JumPlane extends ApplicationAdapter {
         float obstacleX = Gdx.graphics.getWidth();
         float obstacleY = random.nextFloat() * (Gdx.graphics.getHeight() - groundHeight);
         float obstacleSpeed = 100 + random.nextFloat() * 50; // Hız artırıldı
-        float obstacleWidth = obstacleTexture.getWidth() / 2;
-        float obstacleHeight = obstacleTexture.getHeight() / 2;
+        float obstacleWidth = obstacleTexture.getWidth();
+        float obstacleHeight = obstacleTexture.getHeight();
 
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, obstacleSpeed, obstacleWidth, obstacleHeight);
         obstacles.add(obstacle);
@@ -476,7 +442,6 @@ public class JumPlane extends ApplicationAdapter {
             }
         }, obstacleSpawnInterval, obstacleSpawnInterval);
     }
-
     @Override
     public void dispose() {
         batch.dispose();
@@ -491,6 +456,13 @@ public class JumPlane extends ApplicationAdapter {
         for (Texture healthTexture : healthTextures) {
             healthTexture.dispose();
         }
+        for (Texture bulletTexture : bulletTextures) { // bulletTextures'ı dispose et
+            bulletTexture.dispose();
+        }
+        for (Texture ammoTexture : ammoTextures) { // ammoTextures'ı dispose et
+            ammoTexture.dispose();
+        }
         font.dispose();
     }
+
 }
