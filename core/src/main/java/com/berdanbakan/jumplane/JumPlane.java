@@ -34,6 +34,12 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private float touchDownTime;
     private static final float SHOOT_DELAY=0.2f;
     private float touchStartX, touchStartY;
+    private Texture shootButtonTexture;
+    private Texture shootButtonPressedTexture;
+    private boolean isButtonPressed;
+    private Rectangle buttonRectangle;
+    private boolean dugmeGeciciOlarakBasili;
+
 
 
 
@@ -97,6 +103,12 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         for (int i = 0; i < 7; i++) {
             healthTextures[i] = new Texture("health" + i + ".png");
         }
+        shootButtonTexture=new Texture("shootbutton.png");
+        shootButtonPressedTexture=new Texture("shootbuttonpressed.png");
+        buttonRectangle=new Rectangle(Gdx.graphics.getWidth() - 124, 50, 74, 66);
+        isButtonPressed=false;
+
+
 
         font = new BitmapFont();
         font.getData().setScale(4);
@@ -144,9 +156,9 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                 enemy.rectangle.set(enemy.x, enemy.y, enemy.width, enemy.height);
                 if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
                     health--;
-                    if (health <= 0) {
-                        gameOver();
-                    }flyingEnemyIterator.remove();
+                    if (health <= 0) {gameOver();
+                    }
+                    flyingEnemyIterator.remove();
                 }
             }
 
@@ -172,8 +184,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             Iterator<Creature> creatureIterator = creatures.iterator();
             while (creatureIterator.hasNext()) {
                 Creature creature = creatureIterator.next();
-                creature.x -= creature.speed * Gdx.graphics.getDeltaTime();
-                if (creature.x < -creature.width) {
+                creature.x -= creature.speed * Gdx.graphics.getDeltaTime();if (creature.x < -creature.width) {
                     creatureIterator.remove();
                 }
                 creature.rectangle.set(creature.x, creature.y, creature.width, creature.height);
@@ -206,7 +217,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             // Mermileri hareket ettir ve temizle
             List<Bullet> toRemoveBullets = new ArrayList<>();
             for (Bullet bullet : bullets) {
-                bullet.x += bullet.speed * Gdx.graphics.getDeltaTime();
+                bullet.x += bullet.speed * Gdx.graphics.getDeltaTime(); // Merminin x koordinatını güncelle
                 if (bullet.x > Gdx.graphics.getWidth()) {
                     toRemoveBullets.add(bullet);
                 }
@@ -227,7 +238,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
                 groundEnemyIterator = groundEnemies.iterator(); // Iterator'ü yeniden başlat
                 while (groundEnemyIterator.hasNext()) {
-                    GroundEnemy enemy = groundEnemyIterator.next();
+                    GroundEnemy enemy= groundEnemyIterator.next();
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
                         toRemoveBullets.add(bullet);
                         enemy.health -= bullet.damage;
@@ -256,10 +267,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             if (reloadTime > 0) {
                 reloadTime -= Gdx.graphics.getDeltaTime();
             }
-
-            if (Gdx.input.justTouched()) {
-                shootBullet();
-            }
         }
 
         batch.begin();
@@ -268,6 +275,12 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight);
 
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
+
+        if (isButtonPressed || dugmeGeciciOlarakBasili) { // Her iki bayrağı da kontrol et
+            batch.draw(shootButtonPressedTexture, buttonRectangle.x, buttonRectangle.y, buttonRectangle.width, buttonRectangle.height);
+        } else {
+            batch.draw(shootButtonTexture, buttonRectangle.x, buttonRectangle.y, buttonRectangle.width, buttonRectangle.height);
+        }
 
         batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() - 165, 168, 168);
 
@@ -286,7 +299,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
         }
 
-        for (Obstacle obstacle :obstacles) {
+        for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
 
@@ -305,15 +318,19 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         batch.end();
     }
 
-
-
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (buttonRectangle.contains(screenX, Gdx.graphics.getHeight() - screenY)) {
+            isButtonPressed = true;
+            shootBullet(); // Sadece düğmeye basıldığında ateş et
+            return true;
+        }
         touchStartX = screenX;
         touchStartY = screenY;
-        touchDownTime = TimeUtils.nanoTime();
         return true;
     }
+
+
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
@@ -343,12 +360,14 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     public boolean keyUp(int keycode) { return false; }
     @Override
     public boolean keyTyped(char character) { return false; }
+
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (TimeUtils.nanoTime() - touchDownTime < 200000000) { // 200 milisaniyeden kısa dokunuşlar
-            shootBullet();
+        if (isButtonPressed) {
+            isButtonPressed = false;
+            return true;
         }
-        if (isGameOver){
+        if (isGameOver) {
             resetGame();
         }
         return true;
@@ -407,24 +426,40 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     }
 
     private void shootBullet() {
-        if (!isGameOver) { // Oyun bitmediyse
-            if (ammo > 0) {// Mermi varsa
-                ammo--; // Mermi sayısını azalt
+        if (!isGameOver) {
+            if (ammo > 0) {
+                ammo--;
 
-                Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)]; // Seviyeye göre mermi dokusunu seç
-                float bulletWidth = bulletTexture.getWidth()/ 5;
+                Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
+                float bulletWidth= bulletTexture.getWidth() / 5;
                 float bulletHeight = bulletTexture.getHeight() / 5;
                 float bulletSpeed = 500;
 
-                int bulletDamage = (level == 1) ? 1 : 2; // bullet1 hasarı 1, diğerleri 2
-                Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight/ 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight, bulletDamage); // Mermiyi oluştur ve hasar değerini ilet
-                bullets.add(bullet);reloadTime = 3f + random.nextFloat() * 2f; // Yeniden doldurma süresini ayarla (3-5 saniye arası)
-            } else if (reloadTime <= 0) { // Mermi yoksa ve yeniden doldurma süresi dolduysa
-                ammo = MAX_AMMO; // Mermiyi doldur
-                reloadTime = 3f + random.nextFloat() * 2f; // Yeniden doldurma süresini ayarla (3-5 saniye arası)
+                int bulletDamage = (level == 1) ? 1 : 2;
+                Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight, bulletDamage);
+                bullets.add(bullet);
+
+                // Bayrağı true olarak ayarla
+                dugmeGeciciOlarakBasili= true;
+
+                // Gecikme ile butonu eski haline getir
+                Timer.schedule(new Timer.Task() {
+                    @Override
+                    public void run() {
+                        dugmeGeciciOlarakBasili = false; // Gecikmeden sonra bayrağı sıfırla
+                    }
+                }, 0.1f); // 0.1 saniye gecikme
+
+                if (ammo == 0) {
+                    reloadTime = 3f + random.nextFloat() * 2f;
+                }
+            } else if (reloadTime <= 0) {
+                ammo = MAX_AMMO;
+                reloadTime = 3f + random.nextFloat() * 2f;
             }
         }
     }
+
 
 
 
