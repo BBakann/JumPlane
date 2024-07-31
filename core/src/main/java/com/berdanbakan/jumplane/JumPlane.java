@@ -59,7 +59,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
     // Oyun nesneleri listeleri
     private List<FlyingEnemy> flyingEnemies;
-    private List<GroundEnemy> groundEnemies;
     private List<Creature> creatures;
     private List<Obstacle> obstacles;
 
@@ -79,10 +78,9 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private float planeY; // Uçağın dikey pozisyonu
 
     // Oyun nesnelerinin oluşturulma aralıkları
-    private float flyingEnemySpawnInterval = 10f;
-    private float groundEnemySpawnInterval = 12f;
-    private float creatureSpawnInterval = 15f;
-    private float obstacleSpawnInterval = 18f;
+    private float flyingEnemySpawnInterval = 6f;
+    private float creatureSpawnInterval = 9f;
+    private float obstacleSpawnInterval = 10f;
 
 
     // Oyun durumu ve seviye
@@ -93,10 +91,10 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     // Mermi sayısı ve yeniden doldurma süresi
     private static final int MAX_AMMO = 6;
     private int ammo = MAX_AMMO;
-    private float reloadTime = 0f;
+    private float reloadTime = 1f;
 
     // Sabitler
-    private static final float SHOOT_DELAY = 0.2f;
+    private static final float SHOOT_DELAY = 0.1f;
 
 
 
@@ -170,7 +168,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
         //OYUN NESNELERİ LİSTESİNİ OLUŞTURMA
         flyingEnemies = new ArrayList<>();
-        groundEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
 
@@ -195,6 +192,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         updatePlaneTexture();
 
         if (!isGameOver) {
+
             // Uçan Düşmanlar
             Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
             List<FlyingEnemy> flyingEnemiesToRemove = new ArrayList<>();
@@ -215,25 +213,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             }
             flyingEnemies.removeAll(flyingEnemiesToRemove);
 
-            // Zemin Düşmanları
-            Iterator<GroundEnemy> groundEnemyIterator= groundEnemies.iterator();
-            List<GroundEnemy> groundEnemiesToRemove = new ArrayList<>();
-            while (groundEnemyIterator.hasNext()) {
-                GroundEnemy enemy = groundEnemyIterator.next();
-                enemy.x -= enemy.speed * Gdx.graphics.getDeltaTime();
-                if (enemy.x < -enemy.width) {
-                    groundEnemiesToRemove.add(enemy);
-                }
-                enemy.rectangle.set(enemy.x, groundHeight, enemy.width, enemy.height);
-                if (enemy.rectangle.overlaps(playerPlaneRectangle)) {
-                    health--;
-                    if (health <= 0) {
-                        gameOver();
-                    }
-                    groundEnemiesToRemove.add(enemy);
-                }
-            }
-            groundEnemies.removeAll(groundEnemiesToRemove);
 
             // Yaratıklar
             Iterator<Creature> creatureIterator = creatures.iterator();
@@ -310,22 +289,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                 }
                 flyingEnemies.removeAll(flyingEnemiesToRemove2);
 
-                // Zemin düşmanları ile çarpışma kontrolü
-                groundEnemyIterator = groundEnemies.iterator();
-                List<GroundEnemy> groundEnemiesToRemove2 = new ArrayList<>();
-                while (groundEnemyIterator.hasNext()) {
-                    GroundEnemy enemy = groundEnemyIterator.next();
-                    if (bullet.rectangle.overlaps(enemy.rectangle)) {
-                        bulletsToRemove.add(bullet);
-                        enemy.health -= bullet.damage;
-                        if (enemy.health <= 0) {
-                            groundEnemiesToRemove2.add(enemy);
-                        } else {
-                        }
-                        break;
-                    }
-                }
-                groundEnemies.removeAll(groundEnemiesToRemove2);
+
 
                 // Yaratıklar ile çarpışma kontrolü
                 creatureIterator = creatures.iterator();
@@ -386,10 +350,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
         }
 
-        //Zemin düşmanının çizimi
-        for (GroundEnemy enemy : groundEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height);
-        }
 
         //yaratıkların çizimi
         for (Creature creature : creatures) {
@@ -416,7 +376,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
         //OYUN BİTTİYSE TRY AGAİN! YAZISINI ÇİZ
         if (isGameOver) {
-            font.draw(batch, "TRY AGAİN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
         }
 
         font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
@@ -506,13 +466,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         flyingEnemies.add(enemy);
     }
 
-    private void spawnGroundEnemy() {
-        float enemyX = Gdx.graphics.getWidth();
-        float enemySpeed = 150 + random.nextFloat() * 50; // Hız artırıldı
-
-        GroundEnemy enemy = new GroundEnemy(enemyX, enemySpeed, enemyPlaneWidth, enemyPlaneHeight);
-        groundEnemies.add(enemy);
-    }
 
     private void spawnCreature() {
         float creatureX = Gdx.graphics.getWidth();
@@ -576,27 +529,31 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
     private void gameOver() {
         isGameOver = true;
-        // Oyun bittiğinde yapılacak işlemler
-        health = 6;
-        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Uçağın pozisyonunu sıfırla
-        flyingEnemies.clear();
-        groundEnemies.clear();
-        creatures.clear();
-        obstacles.clear();
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                resetGame();
+            }
+        }, 3); // 3 saniye sonra oyunu sıfırla
     }
+
     public void levelUp(){
         level++;
     }
 
     private void resetGame() {
-        isGameOver = false;
-        health = 6;
-        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2; // Uçağın pozisyonunu sıfırla
         flyingEnemies.clear();
-        groundEnemies.clear();
         creatures.clear();
         obstacles.clear();
-        Timer.instance().clear();
+        bullets.clear();
+
+        // Oyuncu uçağını sıfırla
+        planeX = 50;
+        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2;
+        health = 6;
+        ammo = MAX_AMMO;
+        reloadTime = 0;
+        isGameOver = false;
 
 
         // Düşman uçakları oluşturma zamanlayıcısı
@@ -607,13 +564,6 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             }
         }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
 
-        // Zemin düşmanları oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                spawnGroundEnemy();
-            }
-        }, groundEnemySpawnInterval, groundEnemySpawnInterval);
 
         // Yaratıklar oluşturma zamanlayıcısı
         Timer.schedule(new Timer.Task() {
