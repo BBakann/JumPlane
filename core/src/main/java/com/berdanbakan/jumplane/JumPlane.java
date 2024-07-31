@@ -2,6 +2,7 @@ package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,22 +19,28 @@ import java.util.List;
 import java.util.Random;
 
 public class JumPlane extends ApplicationAdapter implements InputProcessor {
+
+    // SpriteBatch ve dokular
     private SpriteBatch batch;
-    private Texture background;
-    private Texture[] planeTextures;
+    private Texture background;private Texture[] planeTextures;
     private Texture currentPlaneTexture;
     private Texture enemyPlaneTexture;
     private Texture groundTexture;
     private Texture creatureTexture;
     private Texture obstacleTexture;
     private Texture[] healthTextures;
+
+    // Yazı tipi ve mermi dokuları
     private BitmapFont font;
     private List<Bullet> bullets;
     private Texture[] bulletTextures;
     private Texture[] ammoTextures;
-    private float touchDownTime;
-    private static final float SHOOT_DELAY=0.2f;
+
+    // Dokunma kontrolü
     private float touchStartX, touchStartY;
+
+
+    // Ateş etme düğmesi
     private Texture shootButtonTexture;
     private Texture shootButtonPressedTexture;
     private boolean isButtonPressed;
@@ -41,9 +48,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private boolean dugmeGeciciOlarakBasili;
 
 
-
-
-
+    // Oyun seviyesi ve uçak boyutları
     private int currentLevel;
     private float planeWidth;
     private float planeHeight;
@@ -51,35 +56,56 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private float enemyPlaneHeight;
     private float groundHeight;
 
+
+    // Oyun nesneleri listeleri
     private List<FlyingEnemy> flyingEnemies;
     private List<GroundEnemy> groundEnemies;
     private List<Creature> creatures;
     private List<Obstacle> obstacles;
 
+
+    // Rastgele sayı üreteci
     private Random random;
 
+
+    // Oyuncu uçağı çarpışma alanı
     private Rectangle playerPlaneRectangle;
 
+    // Uçak pozisyonu
     private float planeX; // Uçağın yatay pozisyonu (sabit)
     private float planeY; // Uçağın dikey pozisyonu
 
-    private float flyingEnemySpawnInterval = 10f; // Düşman uçaklarının oluşturulma aralığı
-    private float groundEnemySpawnInterval = 12f; // Zemin düşmanlarının oluşturulma aralığı
-    private float creatureSpawnInterval = 15f; // Yaratıkların oluşturulma aralığı
-    private float obstacleSpawnInterval = 18f; // Engellerin oluşturulma aralığı
+    // Oyun nesnelerinin oluşturulma aralıkları
+    private float flyingEnemySpawnInterval = 10f;
+    private float groundEnemySpawnInterval = 12f;
+    private float creatureSpawnInterval = 15f;
+    private float obstacleSpawnInterval = 18f;
 
+
+    // Oyun durumu ve seviye
     private int health = 6;
     private boolean isGameOver;
-    private int level=1;
-    private static final int MAX_AMMO=6;
-    private int ammo=MAX_AMMO;
-    private float reloadTime=0f;
+    private int level = 1;
+
+    // Mermi sayısı ve yeniden doldurma süresi
+    private static final int MAX_AMMO = 6;
+    private int ammo = MAX_AMMO;
+    private float reloadTime = 0f;
+
+    // Sabitler
+    private static final float SHOOT_DELAY = 0.2f;
+
+
+
+    private float touchDownTime;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
         background = new Texture("background.png"); // Arka plan dokusunu yükle
 
+
+        //Uçak dokularını yükle
         planeTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
             planeTextures[i] = new Texture("plane" + (i + 1) + ".png");
@@ -88,51 +114,70 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
         updatePlaneTexture();
         Gdx.input.setInputProcessor(this);
 
+
+        //Düşman uçağı dokusunu yükle ve boyut ayarı
         enemyPlaneTexture = new Texture("enemyplane.png");
         enemyPlaneWidth = enemyPlaneTexture.getWidth() / 4;
         enemyPlaneHeight = enemyPlaneTexture.getHeight() / 4;
 
+
+        //Zemin dokusunu yükle ve yüksekliğini ayarla
         groundTexture = new Texture("ground.png");
-        groundHeight = groundTexture.getHeight();
+        groundHeight = groundTexture.getHeight()*1.5f;
 
+
+        //Yaratık ve engel dokularını yükle
         creatureTexture = new Texture("creature.png");
-
         obstacleTexture = new Texture("obstacle.png");
 
+        //Can dokularını yükle
         healthTextures = new Texture[7];
         for (int i = 0; i < 7; i++) {
             healthTextures[i] = new Texture("health" + i + ".png");
         }
+
+
+
+        //Ateş etme düğmesi dokularını yükle ve düğme alanı oluşturma
         shootButtonTexture=new Texture("shootbutton.png");
         shootButtonPressedTexture=new Texture("shootbuttonpressed.png");
         buttonRectangle=new Rectangle(Gdx.graphics.getWidth() - 124, 50, 74, 66);
         isButtonPressed=false;
 
 
-
+        //Yazı tipini oluşturma ve ölçeklendirme ve renk ayarı
         font = new BitmapFont();
-        font.getData().setScale(4);
+        font.getData().setScale(3.5f);
+        font.setColor(Color.BLACK);
 
+
+        //Mermi listesini ve mermi dokularını oluşturma
         bullets = new ArrayList<>();
         bulletTextures = new Texture[3];
         for (int i = 0; i < 3; i++) {
             bulletTextures[i] = new Texture("bullet" + (i + 1) + ".png");
         }
 
+        //Mermi sayısının dokularını yükle
         ammoTextures = new Texture[7];
         for (int i = 0; i < 7; i++) {
             ammoTextures[i] = new Texture("ammo" + i + ".png");
         }
 
+
+        //OYUN NESNELERİ LİSTESİNİ OLUŞTURMA
         flyingEnemies = new ArrayList<>();
         groundEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
 
+        //Rastgele sayı üreteci oluşturma
         random = new Random();
 
+        //Uçağın çarpışma alanını oluşturma
         playerPlaneRectangle = new Rectangle();
 
+        //UÇAĞIN BAŞLANGIÇ POZİSYONUNU AYARLA
         planeX = 50;
         planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2;
 
@@ -140,12 +185,14 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     }
     @Override
     public void render() {
+        //Ekranı temizle
         ScreenUtils.clear(0, 0, 0, 1);
 
+        //Uçak dokusunu güncelle
         updatePlaneTexture();
 
+        //Düşman uçaklarını hareket ettir ve çarpışmaları kontrol et
         if (!isGameOver) {
-            // Düşman uçaklarını hareket ettir ve temizle
             Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
             while (flyingEnemyIterator.hasNext()) {
                 FlyingEnemy enemy = flyingEnemyIterator.next();
@@ -162,7 +209,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                 }
             }
 
-            // Zemin düşmanlarını hareket ettir ve temizle
+            // Zemin düşmanlarını hareket ettir ve çarpışmaları kontrol et
             Iterator<GroundEnemy> groundEnemyIterator = groundEnemies.iterator();
             while (groundEnemyIterator.hasNext()) {
                 GroundEnemy enemy = groundEnemyIterator.next();
@@ -180,7 +227,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                 }
             }
 
-            // Yaratıkları hareket ettir ve temizle
+            // Yaratıkları hareket ettir ve çarpışmaları kontrol et
             Iterator<Creature> creatureIterator = creatures.iterator();
             while (creatureIterator.hasNext()) {
                 Creature creature = creatureIterator.next();
@@ -214,7 +261,7 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             }
             obstacles.removeAll(toRemoveObstacles);
 
-            // Mermileri hareket ettir ve temizle
+            // Mermileri hareket ettir ve çarpışmaları kontrol et
             List<Bullet> toRemoveBullets = new ArrayList<>();
             for (Bullet bullet : bullets) {
                 bullet.x += bullet.speed * Gdx.graphics.getDeltaTime(); // Merminin x koordinatını güncelle
@@ -223,7 +270,9 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                 }
                 bullet.rectangle.set(bullet.x, bullet.y, bullet.width, bullet.height);
 
-                flyingEnemyIterator = flyingEnemies.iterator(); // Iterator'ü yeniden başlat
+
+                //Düşman uçakları ile çarpışma kontrolü
+                flyingEnemyIterator = flyingEnemies.iterator();
                 while (flyingEnemyIterator.hasNext()) {
                     FlyingEnemy enemy = flyingEnemyIterator.next();
                     if (bullet.rectangle.overlaps(enemy.rectangle)) {
@@ -236,6 +285,8 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                     }
                 }
 
+
+                //Zemin düşmanları ile çarpışma kontrolü
                 groundEnemyIterator = groundEnemies.iterator(); // Iterator'ü yeniden başlat
                 while (groundEnemyIterator.hasNext()) {
                     GroundEnemy enemy= groundEnemyIterator.next();
@@ -249,7 +300,9 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                     }
                 }
 
-                creatureIterator = creatures.iterator(); // Iterator'ü yeniden başlat
+
+                //Yaratıklar ile çarpışma kontrolü
+                creatureIterator = creatures.iterator();
                 while (creatureIterator.hasNext()) {
                     Creature creature = creatureIterator.next();
                     if (bullet.rectangle.overlaps(creature.rectangle)) {
@@ -264,53 +317,71 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             }
             bullets.removeAll(toRemoveBullets);
 
+
+            //Yeniden doldurma süresini güncelle
             if (reloadTime > 0) {
                 reloadTime -= Gdx.graphics.getDeltaTime();
             }
         }
 
-        batch.begin();
-        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+        //ÇİZİM KISMI
+        batch.begin();
+        //arkaplan çizimi
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //zemin çizimi
         batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight);
 
+        //uçak çizimi
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
 
+
+        //Ateş etme düğmesi çizimi
         if (isButtonPressed || dugmeGeciciOlarakBasili) { // Her iki bayrağı da kontrol et
             batch.draw(shootButtonPressedTexture, buttonRectangle.x, buttonRectangle.y, buttonRectangle.width, buttonRectangle.height);
         } else {
             batch.draw(shootButtonTexture, buttonRectangle.x, buttonRectangle.y, buttonRectangle.width, buttonRectangle.height);
         }
 
+        //Mermi sayısı revolver çizimi
         batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() - 165, 168, 168);
 
         // Oyuncu uçağı çarpışma dikdörtgenini güncelle
         playerPlaneRectangle.set(planeX, planeY, planeWidth, planeHeight);
 
+
+        //Düşman uçaklarının çizimi
         for (FlyingEnemy enemy : flyingEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
         }
 
+        //Zemin düşmanının çizimi
         for (GroundEnemy enemy : groundEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, groundHeight, enemy.width, enemy.height);
         }
 
+        //yaratıkların çizimi
         for (Creature creature : creatures) {
             batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
         }
 
+        //engellerin çizimi
         for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
 
+        //HEALTHBAR ÇİZİMİ
         batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
 
+        //MERMİLERİ ÇİZ
         for (Bullet bullet : bullets) {
             batch.draw(bullet.texture, bullet.x, bullet.y, bullet.width, bullet.height);
         }
 
+
+        //OYUN BİTTİYSE TRY AGAİN! YAZISINI ÇİZ
         if (isGameOver) {
-            font.draw(batch, "GAME OVER!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+            font.draw(batch, "TRY AGAİN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
         }
 
         font.draw(batch, "Level:" + level, 20, Gdx.graphics.getHeight() - 90);
@@ -546,7 +617,5 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
         return false;
     }
-
-
 
 }
