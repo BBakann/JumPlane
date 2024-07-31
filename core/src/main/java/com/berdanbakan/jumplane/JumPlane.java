@@ -77,24 +77,25 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
     private float planeX; // Uçağın yatay pozisyonu (sabit)
     private float planeY; // Uçağın dikey pozisyonu
 
-    // Oyun nesnelerinin oluşturulma aralıkları
-    private float flyingEnemySpawnInterval = 6f;
-    private float creatureSpawnInterval = 9f;
-    private float obstacleSpawnInterval = 10f;
+    // Oyun CANAVARLARI VE ENGELLERİN oluşturulma aralıkları
+    private float flyingEnemySpawnInterval = 10f;
+    private float creatureSpawnInterval = 12f;
+    private float obstacleSpawnInterval = 15f;
 
 
     // Oyun durumu ve seviye
     private int health = 6;
     private boolean isGameOver;
     private int level = 1;
+    private boolean gameStarted=false;
 
     // Mermi sayısı ve yeniden doldurma süresi
     private static final int MAX_AMMO = 6;
     private int ammo = MAX_AMMO;
-    private float reloadTime = 1f;
+    private float reloadTime = 0.25f;
 
     // Sabitler
-    private static final float SHOOT_DELAY = 0.1f;
+    private static final float SHOOT_DELAY = 0.125f;
 
 
 
@@ -373,6 +374,13 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
             explosion.draw(batch);
         }
 
+        //OYUN ÇALIŞMAYA BAŞLAYINCA WELCOME TO THE GAME YAZISINI ÇİZ
+        if (!gameStarted){
+            font.draw(batch,"WELCOME TO THE GAME!",Gdx.graphics.getWidth()/2-300,Gdx.graphics.getHeight()/2);
+            font.draw(batch,"CLICK TO START!",Gdx.graphics.getWidth()/2-200,Gdx.graphics.getHeight()/2.5f);
+
+        }
+
 
         //OYUN BİTTİYSE TRY AGAİN! YAZISINI ÇİZ
         if (isGameOver) {
@@ -386,15 +394,21 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (!gameStarted) {
+            gameStarted = true;
+            resetGame(); // Oyunu başlat
+            return true;
+        }
+
         if (buttonRectangle.contains(screenX, Gdx.graphics.getHeight() - screenY)) {
             isButtonPressed = true;
             // Gecikme eklemek için Timer kullanın
             Timer.schedule(new Timer.Task() {
                 @Override
                 public void run() {
-                    shootBullet();}
-            }, SHOOT_DELAY*1.55f); // SHOOT_DELAY saniye sonra ateş et
-
+                    shootBullet();
+                }
+            }, SHOOT_DELAY * 1.55f); // SHOOT_DELAY saniye sonra ateş et
         }
         touchStartX = screenX;
         touchStartY = screenY;
@@ -514,12 +528,12 @@ public class JumPlane extends ApplicationAdapter implements InputProcessor {
                     }
                 }, 0.1f); // 0.1 saniye gecikme
 
-                if (ammo == 0) {
-                    reloadTime = 3f + random.nextFloat() * 2f;
+                if (ammo == 0) { //MERMİ BİTİNCE DEĞİŞTİRME HIZINI AYARLAMA
+                    reloadTime = 1f + random.nextFloat() * 1f;
                 }
             } else if (reloadTime <= 0) {
                 ammo = MAX_AMMO;
-                reloadTime = 3f + random.nextFloat() * 2f;
+                reloadTime = 1f + random.nextFloat() * 1f;
             }
         }
     }
