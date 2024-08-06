@@ -22,7 +22,7 @@ public class HUD {
 
     public void draw(SpriteBatch batch, int health, int ammo) {
         if (health > 0) {
-            batch.draw(healthTextures[health], 10, Gdx.graphics.getHeight() - 50, 200, 50);
+            batch.draw(healthTextures[health], 15, Gdx.graphics.getHeight() - 80, 216, 80);
         }
 
         batch.draw(ammoTextures[ammo], 250, Gdx.graphics.getHeight() - 165, 168, 168);

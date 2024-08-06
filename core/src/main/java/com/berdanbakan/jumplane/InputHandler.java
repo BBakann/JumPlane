@@ -20,6 +20,8 @@ public class InputHandler extends InputAdapter {
     private Texture dpad_leftTexture;
     private Texture dpad_rightTexture;
 
+    private JumPlane game;
+
     private Rectangle upButtonBounds;
     private Rectangle downButtonBounds;
     private Rectangle leftButtonBounds;
@@ -32,6 +34,7 @@ public class InputHandler extends InputAdapter {
 
     private Player player;
     private LevelManager levelManager;
+    private EnemyManager enemyManager;
 
     private boolean gameStarted=false;
     private boolean dugmeGeciciOlarakBasili;
@@ -53,9 +56,11 @@ public class InputHandler extends InputAdapter {
     public boolean isRightButtonPressed = false;
 
 
-    public InputHandler(Player player,LevelManager levelManager) {
+    public InputHandler(JumPlane game,Player player,LevelManager levelManager,EnemyManager enemyManager) {
         this.player = player;
         this.levelManager=levelManager;
+        this.game=game;
+        this.enemyManager=enemyManager;
 
         dpadTexture=new Texture("dpad.png");
         dpad_leftTexture=new Texture("dpad_left.png");
@@ -81,13 +86,25 @@ public class InputHandler extends InputAdapter {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         screenY = Gdx.graphics.getHeight() - screenY; // Y koordinatını ters çevir
 
-        if (!levelManager.gameStarted) {
-            levelManager.gameStarted = true;
-            levelManager.reset();
+        if (levelManager.isGameOver) {
+            game.resetGame(); // Oyunu sıfırla
+            levelManager.isGameOver = false; // Oyun bitti durumunu sıfırla
             return true;
         }
 
-        if(buttonRectangle.contains(screenX, screenY)) {
+        if (levelManager.levelCompleted) {
+            levelManager.levelCompleted = false;
+            levelManager.gameStarted = true;
+            return true;
+        }
+
+        if (!levelManager.gameStarted) {
+            levelManager.gameStarted = true;
+            levelManager.reset(); // Oyunu sıfırla
+            return true;
+        }
+
+        if (buttonRectangle.contains(screenX, screenY)) {
             isButtonPressed = true;
             dugmeGeciciOlarakBasili = true; // Düğmeye basıldığında bayrağı ayarla
             Timer.schedule(new Timer.Task() {
@@ -105,9 +122,7 @@ public class InputHandler extends InputAdapter {
             isLeftButtonPressed = true;
         } else if (rightButtonBounds.contains(screenX, screenY)) {
             isRightButtonPressed = true;
-        }
-
-        return true;
+        }return true;
     }
 
     @Override

@@ -17,6 +17,8 @@ import java.util.Random;public class LevelManager {
     public float creatureSpawnInterval = 14f;
     public float obstacleSpawnInterval = 15f;
 
+    private EnemyManager enemyManager;
+
     private List<FlyingEnemy> flyingEnemies;
     private List<Creature>creatures;
     private List<Obstacle> obstacles;
@@ -34,7 +36,9 @@ import java.util.Random;public class LevelManager {
     private float planeX; // Uçağın yatay pozisyonu (sabit)
     private float planeY; // Uçağın dikey pozisyonu
 
-    public LevelManager() {
+    public LevelManager(EnemyManager enemyManager) {
+        this.enemyManager=enemyManager;
+
         flyingEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -80,7 +84,9 @@ import java.util.Random;public class LevelManager {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnFlyingEnemy();
+                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
+                    enemyManager.spawnFlyingEnemy(); // EnemyManager sınıfının metodunu çağır
+                }
             }
         }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
 
@@ -88,7 +94,9 @@ import java.util.Random;public class LevelManager {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnCreature();
+                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
+                    enemyManager.spawnCreature(); // EnemyManager sınıfının metodunu çağır
+                }
             }
         }, creatureSpawnInterval, creatureSpawnInterval);
 
@@ -96,19 +104,24 @@ import java.util.Random;public class LevelManager {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                spawnObstacle();
+                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
+                    enemyManager.spawnObstacle(); // EnemyManager sınıfının metodunu çağır
+                }
             }
         }, obstacleSpawnInterval, obstacleSpawnInterval);
     }
 
     public void gameOver() {
         isGameOver = true;
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                reset();
-            }
-        }, 2);
+        gameStarted=false;
+
+        currentLevel=1;
+        killedEnemies=0;
+        flyingEnemySpawnInterval = 12f;
+        creatureSpawnInterval = 14f;
+        obstacleSpawnInterval = 15f;
+
+
     }
 
     public void spawnFlyingEnemy() {

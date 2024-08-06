@@ -15,6 +15,7 @@ public class JumPlane extends ApplicationAdapter {
     private SpriteBatch batch;
     private Music music;
     private Player player;
+    private boolean tryAgainDrawn = false; // TRY AGAIN! yazısı çizildi mi?
     private InputHandler inputHandler;
     private LevelManager levelManager;
     private EnemyManager enemyManager;
@@ -31,8 +32,8 @@ public class JumPlane extends ApplicationAdapter {
 
         ground = new Ground();
         player = new Player(ground);
-        levelManager = new LevelManager();
-        inputHandler = new InputHandler(player,levelManager);
+        levelManager = new LevelManager(enemyManager);
+        inputHandler = new InputHandler(this, player, levelManager, enemyManager);
         enemyManager = new EnemyManager();
         background = new Background();
         hud = new HUD();
@@ -53,18 +54,22 @@ public class JumPlane extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // Oyuncuyu güncelle
-        player.update(Gdx.graphics.getDeltaTime(), inputHandler);
 
-        // Düşmanları güncelle
-        enemyManager.update(player, levelManager);
 
-        // Çarpışmaları kontrolet
-        enemyManager.checkCollisions(player, levelManager);
+        if (levelManager.gameStarted) {
 
-        // Seviyeyi kontrol et
-        levelManager.checkLevelUp(enemyManager.killedEnemies);
+            // Oyuncuyu güncelle
+            player.update(Gdx.graphics.getDeltaTime(), inputHandler);
 
+            // Düşmanları güncelle
+            enemyManager.update(player, levelManager);
+
+            // Çarpışmaları kontrol et
+            enemyManager.checkCollisions(player, levelManager);
+
+            // Seviyeyi kontrol et
+            levelManager.checkLevelUp(enemyManager.killedEnemies);
+        }
 
         // Çizim işlemleri
         batch.begin();
@@ -77,21 +82,22 @@ public class JumPlane extends ApplicationAdapter {
         inputHandler.drawDpad(batch);
         inputHandler.drawShootButton(batch);
 
-
-
-        if (!levelManager.gameStarted) {
+        if (levelManager.isGameOver) { // Önce oyunu bitti mi kontrol et
+            if (!tryAgainDrawn) {
+                font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+                tryAgainDrawn = true;
+            }
+        } else if (!levelManager.gameStarted) {
             font.draw(batch, "WELCOME TO THE GAME!", Gdx.graphics.getWidth() / 2 - 300, Gdx.graphics.getHeight() / 2);
-            font.draw(batch, "CLICK TO START!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2.5f);
-            inputHandler.drawDpad(batch);
-            inputHandler.drawShootButton(batch);
+            font.draw(batch, "CLICK TO START!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2 - 50);
+        } else {
+            tryAgainDrawn = false;
         }
 
-        if (levelManager.isGameOver) {
-            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+        if (levelManager.gameStarted && !levelManager.isGameOver) {
+            font.draw(batch, "Level: " + levelManager.currentLevel, 20, Gdx.graphics.getHeight() - 90);
+            font.draw(batch, "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1], Gdx.graphics.getWidth() - 570, Gdx.graphics.getHeight() - 20);
         }
-
-        font.draw(batch, "Level: " + levelManager.currentLevel, 20, Gdx.graphics.getHeight() - 90);
-        font.draw(batch, "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1], Gdx.graphics.getWidth() - 500, Gdx.graphics.getHeight() - 20);
 
         if (levelManager.levelCompleted) {
             font.draw(batch, "LEVEL: " + (levelManager.currentLevel - 1) + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
@@ -101,11 +107,15 @@ public class JumPlane extends ApplicationAdapter {
         batch.end();
     }
 
-    private void resetGame() {
+    public void resetGame() {
         // Oyunu sıfırla
         levelManager.reset();
         enemyManager.reset();
         player.reset();// Düşmanları oluşturma zamanlayıcısı
+        tryAgainDrawn=false;
+
+
+
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
