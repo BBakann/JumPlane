@@ -1,56 +1,52 @@
 package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Explosion {
-    public Texture[] frames;
-    private float x, y;
-    private int currentFrame;
+    public Animation<TextureRegion> animation;
     private float animationTime;
-    private float frameDuration;
-    private boolean isFinished;
-    private float scale =1f; // Ölçeklendirme faktörü
+    private float x, y;private boolean isSmall;
 
     public Explosion(float x, float y, boolean isSmall) {
         this.x = x;
         this.y = y;
-        frames = new Texture[10];
-        for (int i = 1; i <= 10; i++) {
-            frames[i - 1] = new Texture("patlama" + i + ".png");
-        }
-        currentFrame = 0;
+        this.isSmall = isSmall;
         animationTime = 0;
-        frameDuration = 0.05f;
-        isFinished = false;
 
-        if (isSmall) {
-            scale = 0.5f; // Küçük patlama için ölçeklendirme
+        // Patlama animasyonu için dokuları yükle
+        Texture[] frames = new Texture[10];
+        for (int i = 0; i < 10; i++) {
+            frames[i] = new Texture("patlama" + (i + 1) + ".png");
         }
+
+        //Animasyon oluştur
+        TextureRegion[] regions = new TextureRegion[frames.length];
+        for (int i = 0; i < frames.length; i++) {
+            regions[i] = new TextureRegion(frames[i]);
+        }
+        animation = new Animation<>(0.05f, regions); // Animasyon hızını ayarlayın (0.05 saniye)
     }
 
     public void update(float deltaTime) {
-        if (!isFinished) {
-            animationTime += deltaTime;
-            if (animationTime >= frameDuration) {
-                animationTime -= frameDuration;
-                currentFrame++;
-                if (currentFrame >= frames.length) {
-                    isFinished = true;
-                }
-            }
-        }
+        animationTime += deltaTime;
     }
 
     public void draw(SpriteBatch batch) {
-        if (!isFinished) {
-            float width = frames[currentFrame].getWidth() * scale*5f;
-            float height = frames[currentFrame].getHeight() * scale*5;
-            batch.draw(frames[currentFrame], x - width / 2, y - height / 2, width, height);
-        }
+        TextureRegion currentFrame = animation.getKeyFrame(animationTime);
+        float explosionSize = isSmall ? 50 : 100; // Küçük patlama için 50, büyük patlama için 100
+        batch.draw(currentFrame, x - explosionSize / 2, y - explosionSize / 2, explosionSize, explosionSize);
     }
 
     public boolean isFinished() {
-        return isFinished;
+        return animation.isAnimationFinished(animationTime);
+    }
+
+    public void dispose() {
+        for (TextureRegion frame : animation.getKeyFrames()) {
+            frame.getTexture().dispose();
+        }
     }
 }

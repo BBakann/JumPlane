@@ -1,10 +1,11 @@
 package com.berdanbakan.jumplane;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Creature {
     public float x, y, speed, width, height;
-    public int health; // Add health property
+    public int health;
     public Rectangle rectangle;
 
     public Creature(float x, float y, float speed, float width, float height) {
@@ -14,6 +15,11 @@ public class Creature {
         this.width = width;
         this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);
-        this.health = 2; // Initialize health (e.g., 2)
+        this.health = 2;
+    }
+
+    public void update() {
+        x -= speed * Gdx.graphics.getDeltaTime();
+        rectangle.set(x, y, width, height);
     }
 }

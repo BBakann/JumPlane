@@ -13,6 +13,6 @@ public class GroundEnemy {
         this.width = width;
         this.height = height;
         this.rectangle = new Rectangle(x, 0, width, height);
-        this.health = 2; // Initialize health (e.g., 2)
+        this.health = 2;
     }
 }
