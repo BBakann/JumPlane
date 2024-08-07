@@ -69,7 +69,7 @@ public class InputHandler extends InputAdapter {
         dpad_downTexture=new Texture("dpad_down.png");
         dpadX = 50;
         dpadY = 50;
-        dpadSize = 220;
+        dpadSize = 250;
 
         upButtonBounds = new Rectangle(dpadX + dpadSize / 3f, dpadY + 2 * dpadSize / 3f, dpadSize / 3f, dpadSize / 3f);
         downButtonBounds = new Rectangle(dpadX + dpadSize / 3f, dpadY, dpadSize / 3f, dpadSize / 3f);
@@ -78,7 +78,7 @@ public class InputHandler extends InputAdapter {
 
         shootButtonTexture = new Texture("shootbutton.png");
         shootButtonPressedTexture = new Texture("shootbuttonpressed.png");
-        buttonRectangle = new Rectangle(Gdx.graphics.getWidth() - 248, 50, 185, 165);
+        buttonRectangle = new Rectangle(Gdx.graphics.getWidth() - 400, 50, 300, 240);
         isButtonPressed = false;
 
     }

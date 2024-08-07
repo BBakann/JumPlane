@@ -95,8 +95,10 @@ public class JumPlane extends ApplicationAdapter {
         }
 
         if (levelManager.gameStarted && !levelManager.isGameOver) {
-            font.draw(batch, "Level: " + levelManager.currentLevel, 20, Gdx.graphics.getHeight() - 90);
-            font.draw(batch, "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1], Gdx.graphics.getWidth() - 570, Gdx.graphics.getHeight() - 20);
+            String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
+            float killedEnemiesWidth= font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 500, Gdx.graphics.getHeight() - 20).width; // Önce Killed Enemies'i çiz ve genişliğini al
+
+            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 370 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 20); // Level'ı sola hizala
         }
 
         if (levelManager.levelCompleted) {
