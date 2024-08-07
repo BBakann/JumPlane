@@ -10,7 +10,7 @@ public class Creature {
 
     private float jumpTimer = 0; // Zıplama zamanlayıcısı
     private boolean isJumping = false; // Zıplıyor mu?
-    private float jumpHeight = 100; // Zıplama yüksekliği
+    private float jumpHeight = 70; // Zıplama yüksekliği
     private float initialY; // Başlangıç Y pozisyonu
 
     public Creature(float x, float y, float speed, float width, float height) {
@@ -26,7 +26,7 @@ public class Creature {
 
     public void update() {
         x -= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x, y, width, height);
+        rectangle.set(x + width * 0.45f, y + height * 0.45f, width * 0.1f, height * 0.1f);
 
         // Zıplama zamanlayıcısını güncelle
         jumpTimer += Gdx.graphics.getDeltaTime();

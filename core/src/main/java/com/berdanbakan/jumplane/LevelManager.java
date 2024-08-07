@@ -117,9 +117,9 @@ import java.util.Random;public class LevelManager {
 
         currentLevel=1;
         killedEnemies=0;
-        flyingEnemySpawnInterval = 12f;
-        creatureSpawnInterval = 14f;
-        obstacleSpawnInterval = 15f;
+        flyingEnemySpawnInterval = 13f;
+        creatureSpawnInterval = 15f;
+        obstacleSpawnInterval = 20f;
 
 
     }

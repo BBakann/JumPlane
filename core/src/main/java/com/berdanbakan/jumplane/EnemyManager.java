@@ -211,7 +211,9 @@ public class EnemyManager {
             }
         }   // Oyuncu uçağının sınırlarını güncelle
         player.playerPlaneRectangle.set(player.planeX, player.planeY, player.planeWidth, player.planeHeight);
-    }public void reset() {
+
+    }
+    public void reset() {
         flyingEnemies.clear();
         creatures.clear();
         obstacles.clear();

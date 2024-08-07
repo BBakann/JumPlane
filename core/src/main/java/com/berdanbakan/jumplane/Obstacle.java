@@ -21,6 +21,6 @@ public class Obstacle {
 
     public void update() {
         x -= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x, y, width, height);
+        rectangle.set(x + width * 0.3f, y + height * 0.2f, width * 0.4f, height * 0.6f);
     }
 }
