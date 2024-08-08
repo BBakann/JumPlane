@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class Bullet {
     public float x, y, speed, width, height;
     public Texture texture;
-    public Rectangle rectangle;
+    public Rectangle rectangle;//Çarpışma Alanı
     int damage;
 
     public Bullet(float x, float y, float speed, Texture texture, float width, float height,int damage) {

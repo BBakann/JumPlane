@@ -19,6 +19,6 @@ public class FlyingEnemy {
     }
     public void update() {
         x-= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x + width * 0.45f, y + height * 0.45f, width * 0.1f, height * 0.1f);
+        rectangle.set(x + width * 0.50f, y + height * 0.50f, width * 0.1f, height * 0.1f);
     }
 }

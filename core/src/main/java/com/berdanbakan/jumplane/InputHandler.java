@@ -35,6 +35,7 @@ public class InputHandler extends InputAdapter {
     private Player player;
     private LevelManager levelManager;
     private EnemyManager enemyManager;
+    private final GameScreen gameScreen;
 
     private boolean gameStarted=false;
     private boolean dugmeGeciciOlarakBasili;
@@ -56,10 +57,10 @@ public class InputHandler extends InputAdapter {
     public boolean isRightButtonPressed = false;
 
 
-    public InputHandler(JumPlane game,Player player,LevelManager levelManager,EnemyManager enemyManager) {
+    public InputHandler(GameScreen gameScreen,Player player,LevelManager levelManager,EnemyManager enemyManager) {
         this.player = player;
         this.levelManager=levelManager;
-        this.game=game;
+        this.gameScreen=gameScreen;
         this.enemyManager=enemyManager;
 
         dpadTexture=new Texture("dpad.png");
@@ -87,7 +88,7 @@ public class InputHandler extends InputAdapter {
         screenY = Gdx.graphics.getHeight() - screenY; // Y koordinatını ters çevir
 
         if (levelManager.isGameOver) {
-            game.resetGame(); // Oyunu sıfırla
+            gameScreen.resetGame(); // Oyunu sıfırla
             levelManager.isGameOver = false; // Oyun bitti durumunu sıfırla
             return true;
         }

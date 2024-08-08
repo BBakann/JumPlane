@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class Creature {
     public float x, y, speed, width, height;
     public int health;
-    public Rectangle rectangle;
+    public Rectangle rectangle;//Çarpışma Alanı
 
     private float jumpTimer = 0; // Zıplama zamanlayıcısı
     private boolean isJumping = false; // Zıplıyor mu?
@@ -25,7 +25,9 @@ public class Creature {
     }
 
     public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime();
+        x -= speed * Gdx.graphics.getDeltaTime();//Hareket
+
+        //Çarpışma alanı boyutu
         rectangle.set(x + width * 0.45f, y + height * 0.45f, width * 0.1f, height * 0.1f);
 
         // Zıplama zamanlayıcısını güncelle

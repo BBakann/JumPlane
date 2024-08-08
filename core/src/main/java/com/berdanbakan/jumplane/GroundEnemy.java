@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class GroundEnemy {
     public float x, speed, width, height;
-    public int health; // Add health property
+    public int health;
     public Rectangle rectangle;
 
     public GroundEnemy(float x, float speed, float width, float height) {

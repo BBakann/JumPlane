@@ -12,7 +12,7 @@ public class Ground {
     public Ground() {
         groundTexture = new Texture("ground.png");
 
-        groundHeight = groundTexture.getHeight()*1.5f;
+        groundHeight = groundTexture.getHeight()*0.2f;
     }
 
     public void draw(SpriteBatch batch) {

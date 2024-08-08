@@ -9,7 +9,7 @@ public class Background {
 
 
     public Background() {
-        background = new Texture("background.png");
+        background = new Texture("background.png");//Arka Planımızı Yükledi
 
     }
 

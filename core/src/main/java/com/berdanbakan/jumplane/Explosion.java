@@ -36,7 +36,7 @@ public class Explosion {
 
     public void draw(SpriteBatch batch) {
         TextureRegion currentFrame = animation.getKeyFrame(animationTime);
-        float explosionSize = isSmall ? 50 : 100; // Küçük patlama için 50, büyük patlama için 100
+        float explosionSize = isSmall ? 100: 200; // EXPLOSİON BOYUTU AYARI **
         batch.draw(currentFrame, x - explosionSize / 2, y - explosionSize / 2, explosionSize, explosionSize);
     }
 

@@ -37,6 +37,7 @@ public class EnemyManager {
     }
 
     public void update(Player player, LevelManager levelManager) {
+
         Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
         while (flyingEnemyIterator.hasNext()) {
             FlyingEnemy enemy = flyingEnemyIterator.next();
@@ -78,6 +79,8 @@ public class EnemyManager {
     }
 
     public void draw(SpriteBatch batch) {
+
+
         for (FlyingEnemy enemy : flyingEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
         }
@@ -127,7 +130,10 @@ public class EnemyManager {
         obstacles.add(obstacle);
     }
 
+
+    //MERMİLERİN DÜŞMANLA ÇARPIŞMASI KONTROLÜ
     private void checkBulletCollisions(Player player, LevelManager levelManager) {
+
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : player.getBullets()) {
             // Düşman uçakları ile çarpışma kontrolü
@@ -165,8 +171,24 @@ public class EnemyManager {
                     break;
                 }
             }
+            // Engeller ile çarpışma kontrolü
+            Iterator<Obstacle> obstacleIterator = obstacles.iterator();
+            while (obstacleIterator.hasNext()) {
+                Obstacle obstacle = obstacleIterator.next();
+                if (bullet.rectangle.overlaps(obstacle.rectangle)) {
+                    bulletsToRemove.add(bullet);
+                    // Sadece patlama efekti oluştur
+                    explosions.add(new Explosion(bullet.x, bullet.y, true));
+                    break;}
+            }
+
+
+
+
         }
         player.getBullets().removeAll(bulletsToRemove);
+
+
     }
 
     public void checkCollisions(Player player, LevelManager levelManager) {

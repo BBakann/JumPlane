@@ -13,9 +13,7 @@ import java.util.Random;public class LevelManager {
     private long levelCompletedTime;
     public boolean isGameOver = false;
     public boolean gameStarted=false;
-    public float flyingEnemySpawnInterval = 12f;
-    public float creatureSpawnInterval = 14f;
-    public float obstacleSpawnInterval = 15f;
+
 
     private EnemyManager enemyManager;
 
@@ -60,7 +58,7 @@ import java.util.Random;public class LevelManager {
     }
 
     public void levelUp() {
-        flyingEnemySpawnInterval *= 0.9f;
+
         // Diğer levelUp işlemleri
     }
 
@@ -72,7 +70,7 @@ import java.util.Random;public class LevelManager {
 
         // Oyuncu uçağını sıfırla
         planeX = 50;
-        planeY = Gdx.graphics.getHeight() / 2 - planeHeight / 2;
+        planeY = Gdx.graphics.getHeight() / 2- planeHeight / 2;
         health = 6;
         ammo = MAX_AMMO;
         reloadTime = 0;
@@ -80,35 +78,28 @@ import java.util.Random;public class LevelManager {
         killedEnemies = 0;
         currentLevel = 1;
 
-        // Düşman uçakları oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
-                    enemyManager.spawnFlyingEnemy(); // EnemyManager sınıfının metodunu çağır
-                }
-            }
-        }, flyingEnemySpawnInterval, flyingEnemySpawnInterval);
+        Random random = new Random();
 
-        // Yaratıklar oluşturma zamanlayıcısı
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
-                    enemyManager.spawnCreature(); // EnemyManager sınıfının metodunu çağır
-                }
-            }
-        }, creatureSpawnInterval, creatureSpawnInterval);
+                if (!isGameOver && gameStarted) {
+                    float randomDelay = random.nextFloat() * 7f + 1f; // 1 ile 7saniye arasında rastgele gecikme
 
-        // Engeller oluşturma zamanlayıcısı
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver && gameStarted) { // Oyun bitmediyse ve başladıysa
-                    enemyManager.spawnObstacle(); // EnemyManager sınıfının metodunu çağır
+                    float chance = random.nextFloat();
+                    if (chance < 0.33f) {
+                        enemyManager.spawnFlyingEnemy();
+                    } else if (chance < 0.66f) {
+                        enemyManager.spawnCreature();
+                    } else {
+                        enemyManager.spawnObstacle();
+                    }
+
+                    // Zamanlayıcıyı yeni gecikme değeri ile yeniden başlat
+                    Timer.schedule(this, randomDelay);
                 }
             }
-        }, obstacleSpawnInterval, obstacleSpawnInterval);
+        }, 0f); // İlk gecikme 0 saniye
     }
 
     public void gameOver() {
@@ -117,9 +108,8 @@ import java.util.Random;public class LevelManager {
 
         currentLevel=1;
         killedEnemies=0;
-        flyingEnemySpawnInterval = 13f;
-        creatureSpawnInterval = 15f;
-        obstacleSpawnInterval = 20f;
+
+
 
 
     }
