@@ -2,7 +2,9 @@ package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Timer;
 
@@ -29,6 +31,12 @@ public class Player{
     private float groundHeight;
     private Ground ground;
 
+    private Animation<TextureRegion> roketAnimation;
+    private float roketAnimationTime;
+    private float roketWidth;
+    private float roketHeight;
+
+
 
 
 
@@ -46,6 +54,28 @@ public class Player{
             bulletTextures[i] = new Texture("bullet" + (i + 1) + ".png");
         }
 
+        // Roket animasyonunu yükle
+        Texture[] roketFrames = new Texture[30];
+        for (int i = 0; i < 30; i++) {
+            roketFrames[i] = new Texture("roket" + (i + 1) + ".png");
+        }
+        TextureRegion[] roketRegions = new TextureRegion[roketFrames.length];
+        for (int i = 0; i < roketFrames.length; i++) {
+            roketRegions[i] = new TextureRegion(roketFrames[i]);
+        }
+        roketAnimation = new Animation<>(0.10f, roketRegions); // Animasyon hızını ayarlayın
+
+        roketAnimation.setPlayMode(Animation.PlayMode.LOOP);
+        roketAnimationTime = 0;
+
+        // Roket boyutlarını ayarla (roket1.png boyutuna göre)
+        roketWidth = roketFrames[0].getWidth()*3; // Ölçeklendirme faktörünü 5 olarak ayarladık
+        roketHeight = roketFrames[0].getHeight()*3; // Ölçeklendirme faktörünü 5 olarak ayarladık
+
+
+
+
+
         reset();
     }
 
@@ -62,6 +92,8 @@ public class Player{
         if (inputHandler.isRightButtonPressed()) {
             planeX += planeSpeed * deltaTime;
         }
+
+        roketAnimationTime += deltaTime;
 
         // Ekran sınırlarını kontrol et
 
@@ -87,6 +119,15 @@ public class Player{
 
     public void draw(SpriteBatch batch) {
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
+
+        // Roket animasyonunu çiz
+        TextureRegion currentRoketFrame =roketAnimation.getKeyFrame(roketAnimationTime, true);
+        batch.draw(currentRoketFrame, planeX - roketWidth / 2, planeY + planeHeight / 2 - roketHeight / 2 -10, roketWidth-100, roketHeight); // +10 piksel yukarı // Roketin konumunu ve boyutunu ayarlayın
+
+
+
+
+
 
         // Mermileri çiz
         for (Bullet bullet : bullets) {
@@ -153,5 +194,11 @@ public class Player{
         for (Texture bulletTexture : bulletTextures) {
             bulletTexture.dispose();
         }
+
+        for (TextureRegion frame : roketAnimation.getKeyFrames()) {
+            frame.getTexture().dispose();
+        }
+
+
     }
 }

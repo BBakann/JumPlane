@@ -36,6 +36,7 @@ public class LevelMenuScreen implements Screen {
         music=Gdx.audio.newMusic(Gdx.files.internal("backgroundmusic.mp3"));
         music.setLooping(true);
         music.play();
+        music.setVolume(0.5f);
     }
 
 

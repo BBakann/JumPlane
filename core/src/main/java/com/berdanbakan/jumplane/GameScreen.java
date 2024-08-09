@@ -52,7 +52,7 @@ public class GameScreen implements Screen {
 
         fontGen=new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params= new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color=Color.BLACK;
+        params.color=new Color(0x4681F4FF);
         params.size=40;
 
         font=fontGen.generateFont(params);
@@ -69,7 +69,7 @@ public class GameScreen implements Screen {
             if (level == levelMenuScreen.unlockedLevel && level < 5) {
                 levelMenuScreen.setUnlockedLevel(level+1);
             }
-            // ... diğer işlemler
+
         }
     }
 

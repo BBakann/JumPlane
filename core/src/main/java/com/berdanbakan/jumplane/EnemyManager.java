@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.audio.Sound;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,6 +23,8 @@ public class EnemyManager {
     public int killedEnemies = 0;
     private Random random;
     private List<Explosion> explosions;
+    private Sound explosionSound;
+    private boolean soundPlayed;
 
     public EnemyManager() {
         enemyPlaneTexture = new Texture("enemyplane.png");
@@ -34,6 +37,7 @@ public class EnemyManager {
         obstacles = new ArrayList<>();
         random = new Random();
         explosions = new ArrayList<>();
+        explosionSound=Gdx.audio.newSound(Gdx.files.internal("explosion01.wav"));
     }
 
     public void update(Player player, LevelManager levelManager) {
@@ -133,6 +137,8 @@ public class EnemyManager {
 
     //MERMİLERİN DÜŞMANLA ÇARPIŞMASI KONTROLÜ
     private void checkBulletCollisions(Player player, LevelManager levelManager) {
+        soundPlayed=false;
+
 
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : player.getBullets()) {
@@ -150,6 +156,13 @@ public class EnemyManager {
                     } else {
                         explosions.add(new Explosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, true));
                     }
+
+                    if (!soundPlayed) {
+                        explosionSound.play();
+                        soundPlayed = true;
+                    }
+
+
                     break;
                 }
             }
@@ -168,6 +181,15 @@ public class EnemyManager {
                     } else {
                         explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, true));
                     }
+
+                    if (!soundPlayed) {
+                        explosionSound.play();
+                        soundPlayed = true;
+                    }
+
+
+
+
                     break;
                 }
             }
@@ -179,7 +201,15 @@ public class EnemyManager {
                     bulletsToRemove.add(bullet);
                     // Sadece patlama efekti oluştur
                     explosions.add(new Explosion(bullet.x, bullet.y, true));
-                    break;}
+
+                    if (!soundPlayed) {
+                        explosionSound.play();
+                        soundPlayed = true;
+                    }
+
+                    break;
+
+                }
             }
 
 
@@ -247,6 +277,9 @@ public class EnemyManager {
         enemyPlaneTexture.dispose();
         creatureTexture.dispose();
         obstacleTexture.dispose();
+        explosionSound.dispose();
+
+
         // Patlama efektlerini dispose et
         for (Explosion explosion : explosions) {
             for (TextureRegion frame : explosion.animation.getKeyFrames()) {
