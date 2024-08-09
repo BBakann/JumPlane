@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+
 
 
 public class GameScreen implements Screen {
@@ -23,6 +26,9 @@ public class GameScreen implements Screen {
     private Ground ground;
     private HUD hud;
     private BitmapFont font;
+    private FreeTypeFontGenerator fontGen;
+
+
     private int level;
     private LevelMenuScreen levelMenuScreen;
     private boolean levelCompleted=false;
@@ -44,9 +50,14 @@ public class GameScreen implements Screen {
         background = new Background();
         hud = new HUD();
 
-        font = new BitmapFont();
-        font.getData().setScale(3.5f);
-        font.setColor(Color.BLACK);
+        fontGen=new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter params= new FreeTypeFontGenerator.FreeTypeFontParameter();
+        params.color=Color.BLACK;
+        params.size=40;
+
+        font=fontGen.generateFont(params);
+
+
 
         Gdx.input.setInputProcessor(inputHandler);
 
@@ -156,5 +167,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         batch.dispose();
         music.dispose();
+        font.dispose();
+        fontGen.dispose();
     }
 }
