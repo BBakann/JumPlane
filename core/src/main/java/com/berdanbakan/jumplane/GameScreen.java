@@ -39,15 +39,21 @@ public class GameScreen implements Screen {
         this.levelMenuScreen=levelMenuScreen;
         batch = new SpriteBatch();
 
+        background=new Background();
+        background.setLevel(level);
+
 
         ground = new Ground();
-        player = new Player(ground);
+
 
         enemyManager = new EnemyManager(); // Önce EnemyManager'ı oluşturun
         levelManager = new LevelManager(enemyManager); // Sonra LevelManager'ı oluşturun
+        levelManager.currentLevel=this.level;
+        player = new Player(ground,levelManager);
+
 
         inputHandler = new InputHandler(this, player, levelManager, enemyManager); // GameScreen instance'ını InputHandler'a geçiyoruz
-        background = new Background();
+
         hud = new HUD();
 
         fontGen=new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
@@ -111,28 +117,38 @@ public class GameScreen implements Screen {
         inputHandler.drawDpad(batch);
         inputHandler.drawShootButton(batch);
 
-        if (levelManager.isGameOver) { // Önce oyunu bitti mi kontrol et
+        if (levelManager.isGameOver) {
             if (!tryAgainDrawn) {
                 font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
                 tryAgainDrawn = true;
             }
-        } else if (!levelManager.gameStarted) {
-            font.draw(batch, "WELCOME TO THE GAME!", Gdx.graphics.getWidth() / 2 - 300, Gdx.graphics.getHeight() / 2);
-            font.draw(batch, "CLICK TO START!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2 - 50);
-        } else {
-            tryAgainDrawn = false;
-        }
+        } else if (!levelManager.gameStarted && levelManager.firstStart) { // Sadece oyun ilk kez başlatılıyorsa
+            font.draw(batch, "LEVEL: " + (levelManager.currentLevel - 1) + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
+            font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
 
-        if (levelManager.gameStarted && !levelManager.isGameOver) {
+
+
+        } else if (levelManager.gameStarted && !levelManager.isGameOver) { // Sadece oyun başladıysa ve bitmediyse
             String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            float killedEnemiesWidth= font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 500, Gdx.graphics.getHeight() - 20).width; // Önce Killed Enemies'i çiz ve genişliğini al
+            float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 500, Gdx.graphics.getHeight() - 20).width;
 
-            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 370 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 20); // Level'ı sola hizala
+            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 370 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 20);
         }
 
         if (levelManager.levelCompleted) {
             font.draw(batch, "LEVEL: " + (levelManager.currentLevel - 1) + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
             font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
+            player.updatePlaneTexture(levelManager.currentLevel);
+            background.setLevel(levelManager.currentLevel);
+
+            if (Gdx.input.justTouched()) {
+                levelManager.levelCompleted = false;
+                levelManager.gameStarted = false;
+                levelManager.firstStart = false;
+                player.reset();
+
+
+            }
         }
 
         batch.end();
@@ -142,8 +158,9 @@ public class GameScreen implements Screen {
         // Oyunu sıfırla
         levelManager.reset();
         enemyManager.reset();
-        player.reset();// Düşmanları oluşturma zamanlayıcısı
+        // Düşmanları oluşturma zamanlayıcısı
         tryAgainDrawn = false;
+        player.health=6;
 
     }
 

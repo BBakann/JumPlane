@@ -13,6 +13,7 @@ import java.util.Random;public class LevelManager {
     private long levelCompletedTime;
     public boolean isGameOver = false;
     public boolean gameStarted=false;
+    public boolean firstStart=true;
 
 
     private EnemyManager enemyManager;
@@ -46,20 +47,26 @@ import java.util.Random;public class LevelManager {
     public void checkLevelUp(int killedEnemies) {
         if (killedEnemies >= levelTargets[currentLevel - 1]) {
             levelCompleted = true;
+            gameStarted=false;
             levelCompletedTime = TimeUtils.millis();
-            currentLevel++;
-            if (currentLevel > levelTargets.length) {
-                currentLevel = levelTargets.length; // Maksimum seviyeyi aşma
+            if (currentLevel < 5) {
+                levelUp(); // Level atlama işlemlerini bu metoda taşı
+            } else {
+                // Oyunu tamamla
+                isGameOver = true;
             }
-            levelUp();
-        }if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {
-            levelCompleted = false;
+        }
+        if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {levelCompleted = false;
         }
     }
 
     public void levelUp() {
+        currentLevel++;
+        enemyManager.reset();
+        killedEnemies=0;
+        gameStarted=false;
+        health=6;
 
-        // Diğer levelUp işlemleri
     }
 
     public void reset() {
@@ -83,7 +90,7 @@ import java.util.Random;public class LevelManager {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                if (!isGameOver && gameStarted) {
+                if (!isGameOver) {
                     float randomDelay = random.nextFloat() * 7f + 1f; // 1 ile 7saniye arasında rastgele gecikme
 
                     float chance = random.nextFloat();
@@ -99,17 +106,16 @@ import java.util.Random;public class LevelManager {
                     Timer.schedule(this, randomDelay);
                 }
             }
-        }, 0f); // İlk gecikme 0 saniye
+        }, 2f); // İlk gecikme 2 saniye
     }
 
     public void gameOver() {
         isGameOver = true;
         gameStarted=false;
 
-        currentLevel=1;
+
         killedEnemies=0;
-
-
+        health=6;
 
 
     }

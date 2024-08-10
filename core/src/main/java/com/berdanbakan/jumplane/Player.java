@@ -36,21 +36,24 @@ public class Player{
     private float roketWidth;
     private float roketHeight;
 
+    private LevelManager levelManager;
 
 
 
 
-    public Player(Ground ground) {
+
+    public Player(Ground ground,LevelManager levelManager) {
         this.ground=ground;
+        this.levelManager=levelManager;
         planeTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
             planeTextures[i] = new Texture("plane" + (i + 1) + ".png");
         }
-        updatePlaneTexture(1); // Başlangıç seviyesi 1
+
         playerPlaneRectangle = new Rectangle();
         bullets = new ArrayList<>();
-        bulletTextures = new Texture[3];
-        for (int i = 0; i < 3; i++) {
+        bulletTextures = new Texture[4];
+        for (int i = 0; i < 4; i++) {
             bulletTextures[i] = new Texture("bullet" + (i + 1) + ".png");
         }
 
@@ -135,7 +138,7 @@ public class Player{
         }
     }
 
-    private void updatePlaneTexture(int currentLevel) {
+    public void updatePlaneTexture(int currentLevel) {
         if (currentLevel >= 1 && currentLevel <= 5) {
             currentPlaneTexture = planeTextures[currentLevel - 1];
             planeWidth = currentPlaneTexture.getWidth() / 3;
@@ -150,6 +153,9 @@ public class Player{
         ammo = MAX_AMMO;
         reloadTime = 0;
         bullets.clear();
+
+        updatePlaneTexture(levelManager.currentLevel);
+
     }
 
     public void shootBullet(int level) {

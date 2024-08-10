@@ -5,20 +5,33 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Background {
-    private Texture background;
+    private Texture[] backgrounds;
+    private int currentLevel;
 
 
     public Background() {
-        background = new Texture("background.png");//Arka Planımızı Yükledi
+        backgrounds =new Texture[5];
+        for (int i=0;i<5;i++){
+            backgrounds[i]=new Texture("background"+(i+1)+".png");
+        }
+        currentLevel=1;
 
     }
+    public void setLevel(int level) {
+        currentLevel = level;
+    }
+
+
+
 
     public void draw(SpriteBatch batch) {
-        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(backgrounds[currentLevel-1], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
     }
 
     public void dispose() {
-        background.dispose();
+        for (Texture background: backgrounds){
+            background.dispose();
+        }
     }
 }
