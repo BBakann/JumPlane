@@ -106,7 +106,7 @@ public class Player{
         // Mermileri güncelle
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : bullets) {
-            bullet.x += bullet.speed * deltaTime;
+            bullet.x += bullet.speedX * deltaTime;
             if (bullet.x > Gdx.graphics.getWidth()) {
                 bulletsToRemove.add(bullet);
             }
@@ -168,7 +168,7 @@ public class Player{
             float bulletSpeed = 500;
 
             int bulletDamage = (level == 1) ? 1 : 2;
-            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, bulletTexture, bulletWidth, bulletHeight, bulletDamage);
+            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, 0 , bulletTexture, bulletWidth, bulletHeight, bulletDamage);
             bullets.add(bullet);
 
             dugmeGeciciOlarakBasili = true;

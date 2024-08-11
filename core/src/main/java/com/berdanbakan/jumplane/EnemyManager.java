@@ -87,6 +87,15 @@ public class EnemyManager {
 
         for (FlyingEnemy enemy : flyingEnemies) {
             batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
+
+            // Düşman mermilerini çiz
+            for (Bullet bullet : enemy.getBullets()) {
+                batch.draw(enemy.enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
+            }
+
+
+
+
         }
 
         for (Creature creature : creatures) {
@@ -96,6 +105,7 @@ public class EnemyManager {
         for (Obstacle obstacle : obstacles) {
             batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         }
+
 
         // Patlama efektlerini çiz
         for (Explosion explosion : explosions) {
@@ -135,10 +145,8 @@ public class EnemyManager {
     }
 
 
-    //MERMİLERİN DÜŞMANLA ÇARPIŞMASI KONTROLÜ
     private void checkBulletCollisions(Player player, LevelManager levelManager) {
-        soundPlayed=false;
-
+        soundPlayed = false;
 
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : player.getBullets()) {
@@ -149,7 +157,7 @@ public class EnemyManager {
                 if (bullet.rectangle.overlaps(enemy.rectangle)) {
                     bulletsToRemove.add(bullet);
                     enemy.health -= bullet.damage;
-                    if (enemy.health <= 0){
+                    if (enemy.health <= 0) {
                         flyingEnemyIterator.remove();
                         explosions.add(new Explosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, false));
                         killedEnemies++; // Düşman öldürüldüğünde sayacı artır
@@ -161,8 +169,6 @@ public class EnemyManager {
                         explosionSound.play();
                         soundPlayed = true;
                     }
-
-
                     break;
                 }
             }
@@ -178,21 +184,17 @@ public class EnemyManager {
                         creatureIterator.remove();
                         explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, false));
                         killedEnemies++; // Yaratık öldürüldüğünde sayacı artır
-                    } else {
-                        explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, true));
+                    } else {explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, true));
                     }
 
                     if (!soundPlayed) {
                         explosionSound.play();
                         soundPlayed = true;
                     }
-
-
-
-
                     break;
                 }
             }
+
             // Engeller ile çarpışma kontrolü
             Iterator<Obstacle> obstacleIterator = obstacles.iterator();
             while (obstacleIterator.hasNext()) {
@@ -206,19 +208,34 @@ public class EnemyManager {
                         explosionSound.play();
                         soundPlayed = true;
                     }
-
                     break;
-
                 }
             }
 
+            // Düşman mermileri ile çarpışma kontrolü
+            Iterator<FlyingEnemy> enemyIterator = flyingEnemies.iterator();
+            while (enemyIterator.hasNext()) {
+                FlyingEnemy enemy = enemyIterator.next();
+                Iterator<Bullet> bulletIterator = enemy.getBullets().iterator();
+                while (bulletIterator.hasNext()) {
+                    Bullet enemyBullet = bulletIterator.next();
+                    if (enemyBullet.rectangle.overlaps(player.playerPlaneRectangle)) {
+                        player.health--;
+                        if (player.health <= 0) {
+                            levelManager.gameOver();
+                        }
+                        bulletIterator.remove(); // Mermiyi yok et
+                        explosions.add(new Explosion(player.planeX + player.planeWidth / 2, player.planeY + player.planeHeight / 2, false)); // Patlama efekti ekle
 
-
-
+                        if (!soundPlayed) {
+                            explosionSound.play();
+                            soundPlayed = true;
+                        }
+                    }
+                }
+            }
         }
         player.getBullets().removeAll(bulletsToRemove);
-
-
     }
 
     public void checkCollisions(Player player, LevelManager levelManager) {
@@ -261,7 +278,35 @@ public class EnemyManager {
                 explosions.add(new Explosion(obstacle.x + obstacle.width/ 2, obstacle.y + obstacle.height /2, false));
                 obstacleIterator.remove();
             }
-        }   // Oyuncu uçağının sınırlarını güncelle
+        }
+        // Düşman mermileri ile çarpışma kontrolü
+        Iterator<FlyingEnemy> enemyIterator = flyingEnemies.iterator();
+        while (enemyIterator.hasNext()) {
+            FlyingEnemy enemy = enemyIterator.next();
+            Iterator<Bullet> bulletIterator = enemy.getBullets().iterator();
+            while (bulletIterator.hasNext()) {
+                Bullet enemyBullet = bulletIterator.next();
+                if (enemyBullet.rectangle.overlaps(player.playerPlaneRectangle)) {
+                    player.health--;
+                    if (player.health <= 0) {
+                        levelManager.gameOver();
+                    }
+                    bulletIterator.remove(); // Mermiyi yok et
+
+                    // Çarpışma efekti ve ses
+                    explosions.add(new Explosion(player.planeX + player.planeWidth / 2, player.planeY + player.planeHeight / 2, false));
+                    explosionSound.play();
+                }
+            }
+        }
+
+
+
+
+
+
+
+        // Oyuncu uçağının sınırlarını güncelle
         player.playerPlaneRectangle.set(player.planeX, player.planeY, player.planeWidth, player.planeHeight);
 
     }
