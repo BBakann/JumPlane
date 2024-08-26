@@ -17,8 +17,8 @@ public class Explosion {
         animationTime = 0;
 
         // Patlama animasyonu için dokuları yükle
-        Texture[] frames = new Texture[30];
-        for (int i = 0; i < 30; i++) {
+        Texture[] frames = new Texture[10];
+        for (int i = 0; i < 10; i++) {
             frames[i] = new Texture("patlama" + (i + 1) + ".png");
         }
 

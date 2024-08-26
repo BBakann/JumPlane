@@ -54,25 +54,22 @@ public class FlyingEnemy {
         Iterator<Bullet> iter = bullets.iterator();
         while (iter.hasNext()) {
             Bullet bullet = iter.next();
-            bullet.x -= bullet.speedX * Gdx.graphics.getDeltaTime(); // Mermiyi sola doğru hareket ettir
+            bullet.x += bullet.speedX * Gdx.graphics.getDeltaTime(); // Mermiyi sağa doğru hareket ettir
             bullet.rectangle.set(bullet.x, bullet.y, bullet.width, bullet.height);
-            if (bullet.x < -bullet.width) {
+            if (bullet.x > Gdx.graphics.getWidth()) { // Ekranın sağından çıkınca kaldır
                 iter.remove();
             }
         }
     }
     private void shoot() {
-        float bulletX = x;
-        float bulletY = y + height / 2;
-        float bulletSpeed = 400; // Mermi hızı
-        float angle=random.nextFloat()*360;
-        float bulletSpeedX = bulletSpeed * (float) Math.cos(Math.toRadians(angle));
-        float bulletSpeedY = bulletSpeed * (float) Math.sin(Math.toRadians(angle));
+        float bulletX = x+width/3;
+        float bulletY = y + height / 3;
+        float bulletSpeed = 600; // Mermi hızı
         float bulletWidth = enemyBulletTexture.getWidth();
         float bulletHeight = enemyBulletTexture.getHeight();
         int damage = 1; // Merminin hasarı
 
-        Bullet bullet = new Bullet(bulletX, bulletY, bulletSpeedX, bulletSpeedY, enemyBulletTexture, bulletWidth/6, bulletHeight/6, damage);
+        Bullet bullet = new Bullet(bulletX, bulletY, -bulletSpeed, 0, enemyBulletTexture, bulletWidth/6, bulletHeight/6, damage); // Sola doğru hareket ettirmek için -bulletSpeed
         bullets.add(bullet);
     }
 

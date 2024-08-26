@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -58,7 +59,7 @@ public class GameScreen implements Screen {
 
         fontGen=new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params= new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color=new Color(0x4681F4FF);
+        params.color=Color.BLACK;
         params.size=40;
 
         font=fontGen.generateFont(params);
@@ -111,11 +112,7 @@ public class GameScreen implements Screen {
 
         background.draw(batch);
         ground.draw(batch);
-        player.draw(batch);
-        enemyManager.draw(batch);
-        hud.draw(batch, player.health, player.ammo);
-        inputHandler.drawDpad(batch);
-        inputHandler.drawShootButton(batch);
+
 
         if (levelManager.isGameOver) {
             if (!tryAgainDrawn) {
@@ -129,10 +126,19 @@ public class GameScreen implements Screen {
 
 
         } else if (levelManager.gameStarted && !levelManager.isGameOver) { // Sadece oyun başladıysa ve bitmediyse
-            String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 500, Gdx.graphics.getHeight() - 20).width;
 
-            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 370 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 20);
+            // Önce label'ları çiz
+            batch.draw(new Texture("label1.png"), Gdx.graphics.getWidth() - 850, Gdx.graphics.getHeight() - 110, 650, 100); // Killed Enemies label'ı
+
+            // killedEnemiesWidth değişkenini tanımla
+            String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
+            float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40).width;
+
+            batch.draw(new Texture("label.png"), Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100); // Level label'ı
+
+            // Metinleri çiz
+            font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40);
+            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
         }
 
         if (levelManager.levelCompleted) {
@@ -150,6 +156,12 @@ public class GameScreen implements Screen {
 
             }
         }
+
+        player.draw(batch);
+        enemyManager.draw(batch);
+        hud.draw(batch, player.health, player.ammo);
+        inputHandler.drawDpad(batch);
+        inputHandler.drawShootButton(batch);
 
         batch.end();
     }

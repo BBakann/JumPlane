@@ -3,6 +3,7 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,6 +23,7 @@ public class LevelMenuScreen implements Screen {
     private SpriteBatch batch;
     public int unlockedLevel=1;
     private Music music;
+    private Sound clickSound;
 
 
     public LevelMenuScreen(JumPlane game){
@@ -37,6 +39,9 @@ public class LevelMenuScreen implements Screen {
         music.setLooping(true);
         music.play();
         music.setVolume(0.5f);
+
+
+        clickSound=Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
     }
 
 
@@ -53,7 +58,8 @@ public class LevelMenuScreen implements Screen {
 
 
     private void createLevelButtons(){
-        float buttonWidth = 0; // Buton genişliğini hesaplamak için değişken
+        float buttonWidth = 450; // Buton genişliği
+        float buttonHeight = 300;
 
         ImageButton[] levelButtons = new ImageButton[5]; // Butonları saklamak için dizi
 
@@ -62,29 +68,29 @@ public class LevelMenuScreen implements Screen {
             ImageButton.ImageButtonStyle buttonStyle=new ImageButton.ImageButtonStyle();buttonStyle.imageUp=new com.badlogic.gdx.scenes.scene2d.ui.Image(levelbuttonTexture).getDrawable();
 
             ImageButton levelButton = new ImageButton(buttonStyle);
-            levelButtons[i-1] = levelButton; // Butonu diziye ekle
-
-            if (buttonWidth == 0) {
-                buttonWidth = levelButton.getWidth(); // İlk butonun genişliğini al
-            }
-
-
+            levelButtons[i-1] = levelButton;
+            levelButton.setSize(buttonWidth,buttonHeight);
         }
 
         // Butonları konumlandır
-        float offset = 50f; // Kaydırma miktarı
+        float offsetX = 250f; // Kaydırma miktarı
+        float offsetY = 150f;
 
-        levelButtons[0].setPosition(Gdx.graphics.getWidth() / 4 - buttonWidth / 2 - offset, Gdx.graphics.getHeight() / 5); // level1button sola kaydır
-        levelButtons[1].setPosition(Gdx.graphics.getWidth() / 2 - buttonWidth / 2, Gdx.graphics.getHeight() / 5); // level2button (değişiklik yok)
-        levelButtons[2].setPosition(Gdx.graphics.getWidth() * 3 / 4 - buttonWidth / 2 + offset, Gdx.graphics.getHeight() / 5); // level3button sağa kaydır
-        levelButtons[3].setPosition(Gdx.graphics.getWidth() / 2- buttonWidth / 2, Gdx.graphics.getHeight() / 5 - 160); // level4button (değişiklik yok)
-        levelButtons[4].setPosition(Gdx.graphics.getWidth() / 2 - buttonWidth / 2, Gdx.graphics.getHeight() / 5 - 320); // level5button (değişiklik yok)
+
+        levelButtons[0].setPosition(offsetX, offsetY);
+        levelButtons[1].setPosition(Gdx.graphics.getWidth() / 2 - buttonWidth / 2, offsetY);
+        levelButtons[2].setPosition(Gdx.graphics.getWidth() - buttonWidth - offsetX, offsetY);
+
+
+        levelButtons[3].setPosition(Gdx.graphics.getWidth() / 4 - buttonWidth / 2 + 180,  offsetY - buttonHeight + 100);
+        levelButtons[4].setPosition(Gdx.graphics.getWidth() * 3 /4 - buttonWidth / 2 - 180, offsetY - buttonHeight + 100);
 
         for (int i=1;i<=5;i++){
             final int level = i;
             levelButtons[i-1].addListener(new ClickListener(){
                 @Override
                 public void clicked(InputEvent event,float x,float y){
+                    clickSound.play();
                     if (level<=unlockedLevel){
                         game.setScreen(new GameScreen(game, level,LevelMenuScreen.this));
                         dispose();
@@ -153,7 +159,7 @@ public class LevelMenuScreen implements Screen {
     }
    @Override
     public void dispose(){
-
+    clickSound.dispose();
 
    }
 }
