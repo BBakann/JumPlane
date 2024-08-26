@@ -31,7 +31,7 @@ public class FlyingEnemy {
 
         bullets=new ArrayList<>();
         shootTimer=0;
-        shootDelay=1f;
+        shootDelay=3f;
         enemyBulletTexture=new Texture("bullet1.png");
         random=new Random();
 
@@ -45,7 +45,7 @@ public class FlyingEnemy {
         shootTimer += Gdx.graphics.getDeltaTime();
         if (shootTimer >= shootDelay) {
             shootTimer = 0;
-            if (random.nextFloat() < 0.40f) { // %40 ihtimalle ateş et
+            if (random.nextFloat() < 0.35f) { // %40 ihtimalle ateş et
                 shoot();
             }
         }

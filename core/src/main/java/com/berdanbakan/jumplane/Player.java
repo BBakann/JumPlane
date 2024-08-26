@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Timer;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Player{
@@ -145,6 +146,28 @@ public class Player{
             planeHeight = currentPlaneTexture.getHeight() / 3;
         }
     }
+
+    public void checkPotionCollision(List<Potion> potions) {
+        Iterator<Potion> iter = potions.iterator();
+        while (iter.hasNext()) {
+            Potion potion = iter.next();
+            if (playerPlaneRectangle.overlaps(potion.rectangle)) {
+                if (potion.type == Potion.PotionType.HEALTH) {
+                    health = Math.min(health + 1, 6); // Canı en fazla 6 yap
+                } else {
+                    health--;
+                }
+                potion.sound.play();
+                iter.remove(); // İksiri listeden kaldır
+            }
+        }
+    }
+
+
+
+
+
+
 
     public void reset() {
         planeX = 50;

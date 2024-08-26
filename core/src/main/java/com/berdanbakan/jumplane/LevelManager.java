@@ -15,6 +15,7 @@ import java.util.Random;public class LevelManager {
     public boolean gameStarted=false;
     public boolean firstStart=true;
 
+    public boolean winSoundPlayed=false;
 
     private EnemyManager enemyManager;
 
@@ -47,16 +48,21 @@ import java.util.Random;public class LevelManager {
     public void checkLevelUp(int killedEnemies) {
         if (killedEnemies >= levelTargets[currentLevel - 1]) {
             levelCompleted = true;
-            gameStarted=false;
+            gameStarted = false;
+            firstStart = false;
             levelCompletedTime = TimeUtils.millis();
-            if (currentLevel < 5) {
-                levelUp(); // Level atlama işlemlerini bu metoda taşı
+
+            if (currentLevel < 5) {currentLevel++; // Bir sonraki seviyeye geç
             } else {
                 // Oyunu tamamla
                 isGameOver = true;
             }
+
+            winSoundPlayed = false; // Sesi sıfırla
         }
-        if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {levelCompleted = false;
+
+        if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {
+            levelCompleted = false;
         }
     }
 

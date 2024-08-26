@@ -10,7 +10,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-
+import com.badlogic.gdx.audio.Sound;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 
 public class GameScreen implements Screen {
@@ -33,6 +37,15 @@ public class GameScreen implements Screen {
     private int level;
     private LevelMenuScreen levelMenuScreen;
     private boolean levelCompleted=false;
+
+
+    private List<Potion> potions;
+    private float potionSpawnTimer;
+    private float potionSpawnDelay;
+    private Random random;
+
+    private Sound winSound;
+
 
     public GameScreen(JumPlane game,int level,LevelMenuScreen levelMenuScreen) {
         this.game = game;
@@ -64,9 +77,16 @@ public class GameScreen implements Screen {
 
         font=fontGen.generateFont(params);
 
-
+        potions=new ArrayList<>();
+        potionSpawnTimer=0;
+        potionSpawnDelay=10f;//İksir çıkma aralığımız
+        random=new Random();
 
         Gdx.input.setInputProcessor(inputHandler);
+
+
+        winSound=Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
+
 
         resetGame();
     }
@@ -78,6 +98,35 @@ public class GameScreen implements Screen {
             }
 
         }
+    }
+
+    private void spawnPotion(){
+        float potionX = Gdx.graphics.getWidth();
+        float potionY = random.nextFloat() * (Gdx.graphics.getHeight() - ground.groundHeight - 100) + ground.groundHeight; // Yere değmeyecek şekilde rastgele Y pozisyonu
+        Potion.PotionType type = random.nextBoolean() ? Potion.PotionType.HEALTH : Potion.PotionType.POISON; // Rastgele iksir tipi
+
+        Potion potion = new Potion(potionX, potionY, type);
+        potions.add(potion);
+    }
+
+    private void updatePotions(float deltaTime){
+        potionSpawnTimer+=deltaTime;
+        if (potionSpawnTimer>=potionSpawnDelay){
+            potionSpawnTimer=0;
+            spawnPotion();
+        }
+
+        Iterator<Potion> iter = potions.iterator();
+        while (iter.hasNext()) {
+            Potion potion = iter.next();
+            potion.x -= 200 * deltaTime; // İksirleri sola doğru hareket ettir
+            potion.rectangle.set(potion.x, potion.y, potion.width, potion.height);
+
+            if (potion.x < -potion.width) {
+                iter.remove();
+            }
+        }
+
     }
 
 
@@ -96,6 +145,8 @@ public class GameScreen implements Screen {
         if (levelManager.gameStarted) {
             // Oyuncuyu güncelle
             player.update(Gdx.graphics.getDeltaTime(), inputHandler);
+            updatePotions(delta);
+            player.checkPotionCollision(potions);//İksir çarpışması kontrolü
 
             // Düşmanları güncelle
             enemyManager.update(player, levelManager);
@@ -112,6 +163,11 @@ public class GameScreen implements Screen {
 
         background.draw(batch);
         ground.draw(batch);
+
+        for (Potion potion:potions){
+            batch.draw(potion.texture,potion.x,potion.y,potion.width,potion.height);
+        }
+
 
 
         if (levelManager.isGameOver) {
@@ -147,13 +203,16 @@ public class GameScreen implements Screen {
             player.updatePlaneTexture(levelManager.currentLevel);
             background.setLevel(levelManager.currentLevel);
 
+            if (!levelManager.winSoundPlayed) { // Sesi sadece bir kez çal
+                winSound.play();
+                levelManager.winSoundPlayed = true;
+            }
+
             if (Gdx.input.justTouched()) {
                 levelManager.levelCompleted = false;
                 levelManager.gameStarted = false;
                 levelManager.firstStart = false;
                 player.reset();
-
-
             }
         }
 
@@ -198,5 +257,9 @@ public class GameScreen implements Screen {
         music.dispose();
         font.dispose();
         fontGen.dispose();
+
+        for (Potion potion:potions){
+            potion.dispose();
+        }
     }
 }

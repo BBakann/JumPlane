@@ -316,6 +316,7 @@ public class EnemyManager {
         obstacles.clear();
         explosions.clear();
         killedEnemies = 0;
+
     }
 
     public void dispose() {
