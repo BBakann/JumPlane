@@ -8,7 +8,6 @@ public class JumPlane extends Game {
         setScreen(new MainMenuScreen(this));
     }
 
-
     @Override
     public void dispose() {
         getScreen().dispose();

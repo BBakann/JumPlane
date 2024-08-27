@@ -18,7 +18,9 @@ public class Background {
 
     }
     public void setLevel(int level) {
-        currentLevel = level;
+        if (level >= 1 && level <= 5) { // Geçerli aralığı kontrol et
+            currentLevel = level;
+        }
     }
 
 

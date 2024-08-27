@@ -10,8 +10,12 @@ public class Creature {
 
     private float jumpTimer = 0; // Zıplama zamanlayıcısı
     private boolean isJumping = false; // Zıplıyor mu?
-    private float jumpHeight = 70; // Zıplama yüksekliği
-    private float initialY; // Başlangıç Y pozisyonu
+    private final float jumpHeight = 70; // Zıplama yüksekliği
+    private final float initialY; // Başlangıç Y pozisyonu
+
+    private static final float JUMP_INTERVAL = 3f; // Zıplama aralığı
+    private static final float COLLISION_OFFSET = 0.40f; // Çarpışma alanı ofseti
+    private static final float COLLISION_SCALE = 0.15f; // Çarpışma alanı ölçeği
 
     public Creature(float x, float y, float speed, float width, float height) {
         this.x = x;
@@ -25,16 +29,13 @@ public class Creature {
     }
 
     public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime();//Hareket
-
-        //Çarpışma alanı boyutu
-        rectangle.set(x + width * 0.45f, y + height * 0.45f, width * 0.1f, height * 0.1f);
+        x -= speed * Gdx.graphics.getDeltaTime();//Hareket sol yönde -=
 
         // Zıplama zamanlayıcısını güncelle
         jumpTimer += Gdx.graphics.getDeltaTime();
 
-        // 3 saniyede bir zıpla
-        if (jumpTimer >= 3) {
+        // JUMP_INTERVAL saniyede bir zıpla
+        if (jumpTimer >= JUMP_INTERVAL) {
             isJumping = true;
             jumpTimer = 0;
         }
@@ -42,16 +43,20 @@ public class Creature {
         // Zıplıyorsa yukarı hareket ettir
         if (isJumping) {
             y += jumpHeight * Gdx.graphics.getDeltaTime();
-            if (y >= initialY + jumpHeight) { // Zıplama yüksekliğine ulaşıldığında
+            if (y >= initialY +jumpHeight) { // Zıplama yüksekliğine ulaşıldığında
                 isJumping = false;
             }
         } else if (y > initialY) { // Yere düşme
-            y -= jumpHeight * Gdx.graphics.getDeltaTime();if (y <= initialY) {
+            y -= jumpHeight * Gdx.graphics.getDeltaTime();
+            if (y <= initialY) {
                 y = initialY;
             }
         }
+        // Y değerini kontrol et
+        y = Math.max(y, initialY);
+
 
         // Rectangle'ı güncelle
-        rectangle.set(x, y, width, height);
+        rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
     }
 }

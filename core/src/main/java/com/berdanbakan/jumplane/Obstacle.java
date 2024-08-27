@@ -5,10 +5,16 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class Obstacle {
     public float x;
-    public float y;public float speed;
-    public float width;
-    public float height;
+    public final float y;
+    private final float speed;
+    public final float width;
+    public final float height;
     public Rectangle rectangle;
+
+    private static final float RECT_OFFSET_X_FACTOR = 0.3f;
+    private static final float RECT_OFFSET_Y_FACTOR = 0.2f;
+    private static final float RECT_WIDTH_FACTOR = 0.4f;
+    private static final float RECT_HEIGHT_FACTOR = 0.6f;
 
     public Obstacle(float x, float y, float speed, float width, float height) {
         this.x = x;
@@ -20,7 +26,8 @@ public class Obstacle {
     }
 
     public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x + width * 0.3f, y + height * 0.2f, width * 0.4f, height * 0.6f);
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        x -= speed * deltaTime;
+        rectangle.set(x + width * RECT_OFFSET_X_FACTOR, y + height * RECT_OFFSET_Y_FACTOR, width * RECT_WIDTH_FACTOR, height * RECT_HEIGHT_FACTOR);
     }
 }

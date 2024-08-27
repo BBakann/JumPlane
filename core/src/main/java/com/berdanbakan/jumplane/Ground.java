@@ -5,23 +5,26 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Ground {
-    private Texture groundTexture;
+    private static final float GROUND_SCALE = 0.4f; // Zemin ölçeği
 
-    public float groundHeight; // Zemin yüksekliği
+    private static Texture groundTexture; // Statik olarak tanımlandı
+    public final float groundHeight; // Zemin yüksekliği (final olarak tanımlandı)
 
     public Ground() {
-        groundTexture = new Texture("ground.png");
+        if (groundTexture == null) {
+            groundTexture = new Texture("ground.png");
+        }
 
-        groundHeight = groundTexture.getHeight()*0.2f;
+        groundHeight = groundTexture.getHeight() * GROUND_SCALE;
     }
 
     public void draw(SpriteBatch batch) {
         batch.draw(groundTexture, 0, 0, Gdx.graphics.getWidth(), groundHeight);
-
-
     }
 
     public void dispose() {
-        groundTexture.dispose();
+        if (groundTexture != null) {groundTexture.dispose();
+            groundTexture = null;
+        }
     }
 }

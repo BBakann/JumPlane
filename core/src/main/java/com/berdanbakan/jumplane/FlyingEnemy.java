@@ -16,9 +16,18 @@ public class FlyingEnemy {
 
     private List<Bullet> bullets;
     private float shootTimer;
-    private float shootDelay;
-    public Texture enemyBulletTexture; // Public yapıldı
-    private Random random;
+    private static final int INITIAL_HEALTH = 2; // Başlangıç canı
+    private static final float SHOOT_DELAY = 3f; // Ateş gecikmesi
+    private static final float SHOOT_PROBABILITY = 0.35f; // Ateş etme olasılığı
+    private static final float COLLISION_OFFSET = 0.50f; //Çarpışma alanı ofseti
+    private static final float COLLISION_SCALE = 0.1f; // Çarpışma alanı ölçeği
+    private static final float BULLET_SPEED = 600f; // Mermi hızı
+    private static final int BULLET_DAMAGE = 1; // Mermi hasarı
+    private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği
+
+    public static Texture enemyBulletTexture; // Statik olarak tanımlandı
+    private static Random random; // Statik olarak tanımlandı
+
 
     public FlyingEnemy(float x, float y, float speed, float width, float height) {
         this.x = x;
@@ -27,25 +36,27 @@ public class FlyingEnemy {
         this.width = width;
         this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);
-        this.health = 2;
+        this.health = INITIAL_HEALTH;
 
         bullets=new ArrayList<>();
         shootTimer=0;
-        shootDelay=3f;
-        enemyBulletTexture=new Texture("bullet1.png");
-        random=new Random();
 
-
+        if (enemyBulletTexture == null) {
+            enemyBulletTexture = new Texture("bullet1.png");
+        }
+        if (random == null) {
+            random = new Random();
+        }
 
     }
     public void update() {
         x-= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x + width * 0.50f, y + height * 0.50f, width * 0.1f, height * 0.1f);
+        rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
 
         shootTimer += Gdx.graphics.getDeltaTime();
-        if (shootTimer >= shootDelay) {
+        if (shootTimer >= SHOOT_DELAY) {
             shootTimer = 0;
-            if (random.nextFloat() < 0.35f) { // %40 ihtimalle ateş et
+            if (random.nextFloat() <SHOOT_PROBABILITY) { // %35 ihtimalle ateş et
                 shoot();
             }
         }
@@ -54,27 +65,30 @@ public class FlyingEnemy {
         Iterator<Bullet> iter = bullets.iterator();
         while (iter.hasNext()) {
             Bullet bullet = iter.next();
-            bullet.x += bullet.speedX * Gdx.graphics.getDeltaTime(); // Mermiyi sağa doğru hareket ettir
-            bullet.rectangle.set(bullet.x, bullet.y, bullet.width, bullet.height);
+            bullet.update();
             if (bullet.x > Gdx.graphics.getWidth()) { // Ekranın sağından çıkınca kaldır
                 iter.remove();
             }
         }
     }
     private void shoot() {
-        float bulletX = x+width/3;
+        float bulletX = x+ width / 3;
         float bulletY = y + height / 3;
         float bulletSpeed = 600; // Mermi hızı
-        float bulletWidth = enemyBulletTexture.getWidth();
-        float bulletHeight = enemyBulletTexture.getHeight();
-        int damage = 1; // Merminin hasarı
 
-        Bullet bullet = new Bullet(bulletX, bulletY, -bulletSpeed, 0, enemyBulletTexture, bulletWidth/6, bulletHeight/6, damage); // Sola doğru hareket ettirmek için -bulletSpeed
+        Bullet bullet = new Bullet(bulletX, bulletY, -BULLET_SPEED, 0, enemyBulletTexture, enemyBulletTexture.getWidth() * BULLET_SCALE, enemyBulletTexture.getHeight() * BULLET_SCALE, BULLET_DAMAGE);
         bullets.add(bullet);
+
     }
 
     public List<Bullet> getBullets() {
         return bullets;
     }
 
+    public void dispose(){
+        if (enemyBulletTexture != null) {
+            enemyBulletTexture.dispose();
+            enemyBulletTexture = null;
+        }
+    }
 }
