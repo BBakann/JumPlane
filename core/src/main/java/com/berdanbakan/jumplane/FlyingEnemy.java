@@ -14,11 +14,11 @@ public class FlyingEnemy {
     int health;
     Rectangle rectangle;
 
-    private List<Bullet> bullets;
+    private final List<Bullet> bullets;
     private float shootTimer;
     private static final int INITIAL_HEALTH = 2; // Başlangıç canı
     private static final float SHOOT_DELAY = 3f; // Ateş gecikmesi
-    private static final float SHOOT_PROBABILITY = 0.35f; // Ateş etme olasılığı
+    private static final float SHOOT_PROBABILITY = 0.41f; // Ateş etme olasılığı
     private static final float COLLISION_OFFSET = 0.50f; //Çarpışma alanı ofseti
     private static final float COLLISION_SCALE = 0.1f; // Çarpışma alanı ölçeği
     private static final float BULLET_SPEED = 600f; // Mermi hızı
@@ -49,14 +49,14 @@ public class FlyingEnemy {
         }
 
     }
-    public void update() {
+    public void update(float deltaTime) {
         x-= speed * Gdx.graphics.getDeltaTime();
         rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
 
         shootTimer += Gdx.graphics.getDeltaTime();
         if (shootTimer >= SHOOT_DELAY) {
             shootTimer = 0;
-            if (random.nextFloat() <SHOOT_PROBABILITY) { // %35 ihtimalle ateş et
+            if (random.nextFloat() <SHOOT_PROBABILITY) {
                 shoot();
             }
         }
@@ -86,9 +86,6 @@ public class FlyingEnemy {
     }
 
     public void dispose(){
-        if (enemyBulletTexture != null) {
-            enemyBulletTexture.dispose();
-            enemyBulletTexture = null;
-        }
+        enemyBulletTexture.dispose();
     }
 }

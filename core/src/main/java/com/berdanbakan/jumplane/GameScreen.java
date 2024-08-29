@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.audio.Sound;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +22,6 @@ public class GameScreen implements Screen {
     private SpriteBatch batch;
     private Music music;
     private Player player;
-    private boolean tryAgainDrawn = false; // TRY AGAIN! yazısı çizildi mi?
     private InputHandler inputHandler;
     private LevelManager levelManager;
     private EnemyManager enemyManager;
@@ -33,11 +31,8 @@ public class GameScreen implements Screen {
     private BitmapFont font;
     private FreeTypeFontGenerator fontGen;
 
-
     private int level;
     private LevelMenuScreen levelMenuScreen;
-    private boolean levelCompleted=false;
-
 
     private List<Potion> potions;
     private float potionSpawnTimer;
@@ -45,48 +40,47 @@ public class GameScreen implements Screen {
     private Random random;
 
     private Sound winSound;
+    private Texture labelTexture;
+
+    private boolean levelCompleted = false;
 
 
-    public GameScreen(JumPlane game,int level,LevelMenuScreen levelMenuScreen) {
+    public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
-        this.level=level;
-        this.levelMenuScreen=levelMenuScreen;
+        this.level = level;
+        this.levelMenuScreen = levelMenuScreen;
         batch = new SpriteBatch();
 
-        background=new Background();
+        background = new Background();
         background.setLevel(level);
-
 
         ground = new Ground();
 
+        enemyManager = new EnemyManager();
+        levelManager =new LevelManager(enemyManager);
+        levelManager.currentLevel = this.level;
+        player = new Player(ground, levelManager);
 
-        enemyManager = new EnemyManager(); // Önce EnemyManager'ı oluşturun
-        levelManager = new LevelManager(enemyManager); // Sonra LevelManager'ı oluşturun
-        levelManager.currentLevel=this.level;
-        player = new Player(ground,levelManager);
-
-
-        inputHandler = new InputHandler(this, player, levelManager, enemyManager); // GameScreen instance'ını InputHandler'a geçiyoruz
+        inputHandler = new InputHandler(this, player, levelManager, enemyManager);
 
         hud = new HUD();
 
-        fontGen=new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter params= new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color=Color.BLACK;
-        params.size=40;
+        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        params.color = Color.BLACK;
+        params.size = 40;
 
-        font=fontGen.generateFont(params);
+        font = fontGen.generateFont(params);
 
-        potions=new ArrayList<>();
-        potionSpawnTimer=0;
-        potionSpawnDelay=10f;//İksir çıkma aralığımız
-        random=new Random();
+        potions = new ArrayList<>();
+        potionSpawnTimer = 0;
+        potionSpawnDelay = 10f;
+        random = new Random();
 
         Gdx.input.setInputProcessor(inputHandler);
 
-
-        winSound=Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
-
+        winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
+        labelTexture = new Texture("label.png");
 
         resetGame();
     }
@@ -94,9 +88,8 @@ public class GameScreen implements Screen {
     private void checkLevelCompleted() {
         if (levelCompleted) {
             if (level == levelMenuScreen.unlockedLevel && level < 5) {
-                levelMenuScreen.setUnlockedLevel(level+1);
+                levelMenuScreen.setUnlockedLevel(level + 1);
             }
-
         }
     }
 
@@ -140,80 +133,44 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        float deltaTime = Gdx.graphics.getDeltaTime();
         ScreenUtils.clear(0, 0, 0, 1);
 
+        updateGameLogic(deltaTime);
+        drawGame(deltaTime);
+    }
+
+    private void updateGameLogic(float deltaTime) {
         if (levelManager.gameStarted) {
-            // Oyuncuyu güncelle
-            player.update(Gdx.graphics.getDeltaTime(), inputHandler);
-            updatePotions(delta);
-            player.checkPotionCollision(potions);//İksir çarpışması kontrolü
-
-            // Düşmanları güncelle
+            player.update(deltaTime, inputHandler);
+            updatePotions(deltaTime);
+            player.checkPotionCollision(potions);
             enemyManager.update(player, levelManager);
-
-            // Çarpışmaları kontrol et
             enemyManager.checkCollisions(player, levelManager);
-
-            // Seviyeyi kontrol et
             levelManager.checkLevelUp(enemyManager.killedEnemies);
         }
-
-        // Çizim işlemleri
+    }
+    private void drawGame(float deltaTime) {
         batch.begin();
 
         background.draw(batch);
         ground.draw(batch);
 
-        for (Potion potion:potions){
-            batch.draw(potion.texture,potion.x,potion.y,potion.width,potion.height);
+        for (Potion potion : potions) {
+            batch.draw(potion.texture, potion.x, potion.y, potion.width, potion.height);
         }
 
-
-
         if (levelManager.isGameOver) {
-            if (!tryAgainDrawn) {
-                font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
-                tryAgainDrawn = true;
-            }
-        } else if (!levelManager.gameStarted && levelManager.firstStart) { // Sadece oyun ilk kez başlatılıyorsa
-            font.draw(batch, "LEVEL: " + (levelManager.currentLevel - 1) + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
-            font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
-
-
-
-        } else if (levelManager.gameStarted && !levelManager.isGameOver) { // Sadece oyun başladıysa ve bitmediyse
-
-            // Önce label'ları çiz
-            batch.draw(new Texture("label1.png"), Gdx.graphics.getWidth() - 850, Gdx.graphics.getHeight() - 110, 650, 100); // Killed Enemies label'ı
-
-            // killedEnemiesWidth değişkenini tanımla
-            String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40).width;
-
-            batch.draw(new Texture("label.png"), Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100); // Level label'ı
-
-            // Metinleri çiz
-            font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40);
-            font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
+            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+        } else if (!levelManager.gameStarted && levelManager.firstStart) {
+            drawLevelCompletedMessage(levelManager.currentLevel - 1);
+        } else if (levelManager.gameStarted && !levelManager.isGameOver) {
+            drawGameLabels();
         }
 
         if (levelManager.levelCompleted) {
-            font.draw(batch, "LEVEL: " + (levelManager.currentLevel - 1) + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
-            font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
-            player.updatePlaneTexture(levelManager.currentLevel);
-            background.setLevel(levelManager.currentLevel);
-
-            if (!levelManager.winSoundPlayed) { // Sesi sadece bir kez çal
-                winSound.play();
-                levelManager.winSoundPlayed = true;
-            }
-
-            if (Gdx.input.justTouched()) {
-                levelManager.levelCompleted = false;
-                levelManager.gameStarted = false;
-                levelManager.firstStart = false;
-                player.reset();
-            }
+            drawLevelCompletedMessage(levelManager.currentLevel - 1);
+            handleLevelCompleted();
         }
 
         player.draw(batch);
@@ -225,14 +182,43 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
+    private void drawLevelCompletedMessage(int level) {
+        font.draw(batch, "LEVEL: " + level + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
+        font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
+    }
+
+    private void handleLevelCompleted() {
+        player.updatePlaneTexture(levelManager.currentLevel);
+        background.setLevel(levelManager.currentLevel);
+
+        if (!levelManager.winSoundPlayed) {
+            winSound.play();
+            levelManager.winSoundPlayed = true;
+        }
+
+        if (Gdx.input.justTouched()) {
+            levelManager.levelCompleted = false;
+            levelManager.gameStarted = false;
+            levelManager.firstStart = false;
+            player.reset();
+        }
+    }
+
+    private void drawGameLabels() {
+        String killedEnemiesText = "Killed Enemies: " + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
+        float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40).width;
+
+        batch.draw(labelTexture, Gdx.graphics.getWidth() - 850, Gdx.graphics.getHeight() - 110, 650, 100);
+        batch.draw(labelTexture, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100);
+
+        font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40);
+        font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
+    }
+
     public void resetGame() {
-        // Oyunu sıfırla
         levelManager.reset();
         enemyManager.reset();
-        // Düşmanları oluşturma zamanlayıcısı
-        tryAgainDrawn = false;
-        player.health=6;
-
+        player.health = 6;
     }
 
     @Override
@@ -257,8 +243,9 @@ public class GameScreen implements Screen {
         music.dispose();
         font.dispose();
         fontGen.dispose();
+        labelTexture.dispose(); // Önbelleğe alınan dokuyu serbest bırakın
 
-        for (Potion potion:potions){
+        for (Potion potion : potions) {
             potion.dispose();
         }
     }

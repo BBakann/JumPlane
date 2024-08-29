@@ -42,10 +42,12 @@ public class EnemyManager {
 
     public void update(Player player, LevelManager levelManager) {
 
+        float deltaTime = Gdx.graphics.getDeltaTime(); // deltaTime değerini alın
+
         Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
         while (flyingEnemyIterator.hasNext()) {
             FlyingEnemy enemy = flyingEnemyIterator.next();
-            enemy.update();
+            enemy.update(deltaTime);
             if (enemy.x < -enemy.width) {
                 flyingEnemyIterator.remove();
             }

@@ -14,12 +14,13 @@ import java.util.List;
 
 public class Player{
     private static final int MAX_AMMO = 6;
-    private Texture groundTexture;
-    private Texture[] planeTextures;
+    private static Texture[] planeTextures;
+    private static Texture[] bulletTextures;
+
+
     public Texture currentPlaneTexture;
     public float planeWidth;
-    public float planeHeight;
-    public float planeX;
+    public float planeHeight;public float planeX;
     public float planeY;
     private float planeSpeed = 450f;
     public int health;
@@ -27,60 +28,31 @@ public class Player{
     private float reloadTime;
     public Rectangle playerPlaneRectangle;
     private List<Bullet> bullets;
-    private Texture[] bulletTextures;
     private boolean dugmeGeciciOlarakBasili;
-    private float groundHeight;
     private Ground ground;
-
-    private Animation<TextureRegion> roketAnimation;
-    private float roketAnimationTime;
-    private float roketWidth;
-    private float roketHeight;
-
     private LevelManager levelManager;
 
-
-
-
-
-    public Player(Ground ground,LevelManager levelManager) {
-        this.ground=ground;
-        this.levelManager=levelManager;
+    static { // Statik blok içinde yükleyin
         planeTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
             planeTextures[i] = new Texture("plane" + (i + 1) + ".png");
         }
 
-        playerPlaneRectangle = new Rectangle();
-        bullets = new ArrayList<>();
         bulletTextures = new Texture[4];
         for (int i = 0; i < 4; i++) {
             bulletTextures[i] = new Texture("bullet" + (i + 1) + ".png");
         }
 
-        // Roket animasyonunu yükle
-        Texture[] roketFrames = new Texture[30];
-        for (int i = 0; i < 30; i++) {
-            roketFrames[i] = new Texture("roket" + (i + 1) + ".png");
-        }
-        TextureRegion[] roketRegions = new TextureRegion[roketFrames.length];
-        for (int i = 0; i < roketFrames.length; i++) {
-            roketRegions[i] = new TextureRegion(roketFrames[i]);
-        }
-        roketAnimation = new Animation<>(0.10f, roketRegions); // Animasyon hızını ayarlayın
-
-        roketAnimation.setPlayMode(Animation.PlayMode.LOOP);
-        roketAnimationTime = 0;
-
-        // Roket boyutlarını ayarla (roket1.png boyutuna göre)
-        roketWidth = roketFrames[0].getWidth()*3; // Ölçeklendirme faktörünü 5 olarak ayarladık
-        roketHeight = roketFrames[0].getHeight()*3; // Ölçeklendirme faktörünü 5 olarak ayarladık
+    }
 
 
-
-
-
+    public Player(Ground ground,LevelManager levelManager) {
+        this.ground=ground;
+        this.levelManager=levelManager;
+        playerPlaneRectangle=new Rectangle();
+        bullets=new ArrayList<>();
         reset();
+
     }
 
     public void update(float deltaTime, InputHandler inputHandler) {
@@ -97,7 +69,6 @@ public class Player{
             planeX += planeSpeed * deltaTime;
         }
 
-        roketAnimationTime += deltaTime;
 
         // Ekran sınırlarını kontrol et
 
@@ -123,13 +94,6 @@ public class Player{
 
     public void draw(SpriteBatch batch) {
         batch.draw(currentPlaneTexture, planeX, planeY, planeWidth, planeHeight);
-
-        // Roket animasyonunu çiz
-        TextureRegion currentRoketFrame =roketAnimation.getKeyFrame(roketAnimationTime, true);
-        batch.draw(currentRoketFrame, planeX - roketWidth / 2, planeY + planeHeight / 2 - roketHeight / 2 -10, roketWidth-100, roketHeight); // +10 piksel yukarı // Roketin konumunu ve boyutunu ayarlayın
-
-
-
 
 
 
@@ -176,9 +140,7 @@ public class Player{
         ammo = MAX_AMMO;
         reloadTime = 0;
         bullets.clear();
-
         updatePlaneTexture(levelManager.currentLevel);
-
     }
 
     public void shootBullet(int level) {
@@ -186,12 +148,12 @@ public class Player{
             ammo--;
 
             Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
-            float bulletWidth= bulletTexture.getWidth() / 5;
+            float bulletWidth = bulletTexture.getWidth() / 5;
             float bulletHeight = bulletTexture.getHeight() / 5;
             float bulletSpeed = 500;
 
             int bulletDamage = (level == 1) ? 1 : 2;
-            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, 0 , bulletTexture, bulletWidth, bulletHeight, bulletDamage);
+            Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, 0, bulletTexture, bulletWidth, bulletHeight, bulletDamage);
             bullets.add(bullet);
 
             dugmeGeciciOlarakBasili = true;
@@ -216,18 +178,13 @@ public class Player{
         return bullets;
     }
 
-    public void dispose() {
+    public static void dispose() {
         for (Texture planeTexture : planeTextures) {
             planeTexture.dispose();
         }
         for (Texture bulletTexture : bulletTextures) {
             bulletTexture.dispose();
         }
-
-        for (TextureRegion frame : roketAnimation.getKeyFrames()) {
-            frame.getTexture().dispose();
-        }
-
 
     }
 }
