@@ -25,6 +25,7 @@ public class EnemyManager {
     private List<Explosion> explosions;
     private Sound explosionSound;
     private boolean soundPlayed;
+    private Sound crashSound;
 
     public EnemyManager() {
         enemyPlaneTexture = new Texture("enemyplane.png");
@@ -38,6 +39,7 @@ public class EnemyManager {
         random = new Random();
         explosions = new ArrayList<>();
         explosionSound=Gdx.audio.newSound(Gdx.files.internal("explosion01.wav"));
+        crashSound=Gdx.audio.newSound(Gdx.files.internal("crash.mp3"));
     }
 
     public void update(Player player, LevelManager levelManager) {
@@ -241,11 +243,13 @@ public class EnemyManager {
     }
 
     public void checkCollisions(Player player, LevelManager levelManager) {
+
         Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
         while (flyingEnemyIterator.hasNext()) {
             FlyingEnemy enemy = flyingEnemyIterator.next();
             if (enemy.rectangle.overlaps(player.playerPlaneRectangle)) {
                 player.health--;
+                crashSound.play(150f);
                 if (player.health <= 0) {
                     levelManager.gameOver();
                 }
@@ -260,6 +264,7 @@ public class EnemyManager {
             Creature creature = creatureIterator.next();
             if (creature.rectangle.overlaps(player.playerPlaneRectangle)) {
                 player.health--;
+                crashSound.play(150f);
                 if (player.health <= 0) {
                     levelManager.gameOver();
                 }
@@ -274,6 +279,7 @@ public class EnemyManager {
             Obstacle obstacle = obstacleIterator.next();
             if (obstacle.rectangle.overlaps(player.playerPlaneRectangle)) {
                 player.health--;
+                crashSound.play(150f);
                 if (player.health<= 0) {
                     levelManager.gameOver();
                 }
@@ -326,7 +332,7 @@ public class EnemyManager {
         creatureTexture.dispose();
         obstacleTexture.dispose();
         explosionSound.dispose();
-
+        crashSound.dispose();
 
         // Patlama efektlerini dispose et
         for (Explosion explosion : explosions) {

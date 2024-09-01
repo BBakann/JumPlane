@@ -25,11 +25,11 @@ import java.util.Random;public class LevelManager {
     private float reloadTime = 0.25f;
     private int health = 6;
 
+    private GameScreen gameScreen;
 
-
-    public LevelManager(EnemyManager enemyManager) {
+    public LevelManager(EnemyManager enemyManager,GameScreen gameScreen) {
         this.enemyManager=enemyManager;
-
+        this.gameScreen=gameScreen;
     }
 
     public void checkLevelUp(int killedEnemies) {
@@ -46,6 +46,7 @@ import java.util.Random;public class LevelManager {
             }
 
             winSoundPlayed = false;
+            gameScreen.resetGame();
         }
 
         if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {
@@ -58,7 +59,6 @@ import java.util.Random;public class LevelManager {
         ammo = MAX_AMMO;
         reloadTime = 0;
         isGameOver = false;
-        currentLevel = 1;
 
         Timer.schedule(new Timer.Task() {
             @Override
@@ -69,7 +69,7 @@ import java.util.Random;public class LevelManager {
                     Timer.schedule(this, randomDelay);
                 }
             }
-        }, 2f);
+        }, 5f);
     }
 
     private void spawnRandomEnemy() {
@@ -83,9 +83,16 @@ import java.util.Random;public class LevelManager {
     }
 
     public void gameOver() {
-        isGameOver = true;
+        isGameOver= true;
         gameStarted = false;
-        health = 6;
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                reset();
+                gameStarted = true;
+                isGameOver = false;
+            }
+        }, 2f);
     }
 
     public int getAmmo() {

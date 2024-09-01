@@ -20,7 +20,6 @@ public class GameScreen implements Screen {
 
     private final JumPlane game;
     private SpriteBatch batch;
-    private Music music;
     private Player player;
     private InputHandler inputHandler;
     private LevelManager levelManager;
@@ -57,7 +56,7 @@ public class GameScreen implements Screen {
         ground = new Ground();
 
         enemyManager = new EnemyManager();
-        levelManager =new LevelManager(enemyManager);
+        levelManager =new LevelManager(enemyManager,this);
         levelManager.currentLevel = this.level;
         player = new Player(ground, levelManager);
 
@@ -81,6 +80,7 @@ public class GameScreen implements Screen {
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
         labelTexture = new Texture("label.png");
+
 
         resetGame();
     }
@@ -161,7 +161,11 @@ public class GameScreen implements Screen {
         }
 
         if (levelManager.isGameOver) {
-            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2);
+
+            font.getData().setScale(2f);
+            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 320, Gdx.graphics.getHeight() / 2+20);
+            font.getData().setScale(1f);
+
         } else if (!levelManager.gameStarted && levelManager.firstStart) {
             drawLevelCompletedMessage(levelManager.currentLevel - 1);
         } else if (levelManager.gameStarted && !levelManager.isGameOver) {
@@ -183,8 +187,9 @@ public class GameScreen implements Screen {
     }
 
     private void drawLevelCompletedMessage(int level) {
-        font.draw(batch, "LEVEL: " + level + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 250, Gdx.graphics.getHeight() / 2);
-        font.draw(batch, "Click to continue", Gdx.graphics.getWidth() / 2 - 150, Gdx.graphics.getHeight() / 2 - 50);
+        font.getData().setScale(2f);
+        font.draw(batch, "LEVEL: " + level + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 500, Gdx.graphics.getHeight() / 2);
+        font.getData().setScale(1f);
     }
 
     private void handleLevelCompleted() {
@@ -198,9 +203,8 @@ public class GameScreen implements Screen {
 
         if (Gdx.input.justTouched()) {
             levelManager.levelCompleted = false;
-            levelManager.gameStarted = false;
+            levelManager.gameStarted = true;
             levelManager.firstStart = false;
-            player.reset();
         }
     }
 
@@ -219,6 +223,7 @@ public class GameScreen implements Screen {
         levelManager.reset();
         enemyManager.reset();
         player.health = 6;
+        potions.clear();
     }
 
     @Override
@@ -240,10 +245,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        music.dispose();
         font.dispose();
         fontGen.dispose();
-        labelTexture.dispose(); // Önbelleğe alınan dokuyu serbest bırakın
+        labelTexture.dispose();
 
         for (Potion potion : potions) {
             potion.dispose();

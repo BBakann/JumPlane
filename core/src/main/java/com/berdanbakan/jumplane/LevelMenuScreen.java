@@ -22,7 +22,6 @@ public class LevelMenuScreen implements Screen {
     private Texture levelbackgroundTexture;
     private SpriteBatch batch;
     public int unlockedLevel=1;
-    private Music music;
     private Sound clickSound;
 
 
@@ -35,10 +34,7 @@ public class LevelMenuScreen implements Screen {
         createLevelButtons();
 
 
-        music=Gdx.audio.newMusic(Gdx.files.internal("backgroundmusic.mp3"));
-        music.setLooping(true);
-        music.play();
-        music.setVolume(0.5f);
+
 
 
         clickSound=Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
@@ -160,6 +156,7 @@ public class LevelMenuScreen implements Screen {
    @Override
     public void dispose(){
     clickSound.dispose();
+
 
    }
 }

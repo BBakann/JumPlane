@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -22,6 +23,8 @@ public class MainMenuScreen implements Screen {
     private ImageButton settingsButton;
     private Music music;
     private Sound clickSound;
+    private ImageButton voiceButton;
+    private boolean isMusicPlaying = true;
 
 
     public MainMenuScreen(JumPlane game) {
@@ -31,6 +34,7 @@ public class MainMenuScreen implements Screen {
         batch = new SpriteBatch();
         createStartButton();
         createSettingsButton();
+        createVoiceButton();
 
         music=Gdx.audio.newMusic(Gdx.files.internal("backgroundmusic.mp3"));
         music.setLooping(true);
@@ -69,6 +73,7 @@ public class MainMenuScreen implements Screen {
         float startY = startButton.getY() + startButton.getHeight() / 2 - settingsButton.getHeight() / 2;
 
         settingsButton.setPosition(1000, startY);
+
         settingsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -77,6 +82,32 @@ public class MainMenuScreen implements Screen {
             }
         });
         stage.addActor(settingsButton);
+    }
+    private void createVoiceButton(){
+        Texture buttonTexture= new Texture("voiceup.png");
+        ImageButton.ImageButtonStyle buttonStyle=new ImageButton.ImageButtonStyle();
+        buttonStyle.imageUp=new com.badlogic.gdx.scenes.scene2d.ui.Image(buttonTexture).getDrawable();
+
+        voiceButton=new ImageButton(buttonStyle);
+
+        float startY=startButton.getY()+startButton.getHeight()/2-voiceButton.getHeight()/2;
+        voiceButton.setPosition(1160,startY);
+
+        voiceButton.addListener(new ClickListener(){
+            public void clicked(InputEvent event,float x ,float y){
+                isMusicPlaying=!isMusicPlaying;//Müziğin durumunu değiştirmek için
+
+                if (isMusicPlaying){
+                    music.play();
+                     voiceButton.getStyle().imageUp = new Image(new Texture("voiceup.png")).getDrawable();
+                }
+                else {
+                    music.pause();
+                     voiceButton.getStyle().imageUp = new Image(new Texture("voice_down.png")).getDrawable();
+                }
+            }
+        });
+        stage.addActor(voiceButton);
     }
 
     @Override
@@ -121,7 +152,9 @@ public class MainMenuScreen implements Screen {
         backgroundTexture.dispose();
         startButton.clearListeners();
         settingsButton.clearListeners();
+        music.stop();
         music.dispose();
         clickSound.dispose(); // Tıklama sesini serbest bırak
+        voiceButton.clearListeners();
     }
 }
