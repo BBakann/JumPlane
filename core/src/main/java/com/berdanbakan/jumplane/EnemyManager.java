@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.audio.Sound;
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,8 +14,6 @@ import java.util.Random;
 
 public class EnemyManager {
     private Texture enemyPlaneTexture;
-    private float enemyPlaneWidth;
-    private float enemyPlaneHeight;
     private Texture creatureTexture;
     private Texture obstacleTexture;
     private List<FlyingEnemy> flyingEnemies;
@@ -26,13 +25,9 @@ public class EnemyManager {
     private Sound explosionSound;
     private boolean soundPlayed;
     private Sound crashSound;
+    private int currentLevel=1;
 
-    public EnemyManager() {
-        enemyPlaneTexture = new Texture("enemyplane.png");
-        enemyPlaneWidth= enemyPlaneTexture.getWidth() / 4;
-        enemyPlaneHeight = enemyPlaneTexture.getHeight() / 4;
-        creatureTexture = new Texture("creature.png");
-        obstacleTexture = new Texture("obstacle.png");
+    public EnemyManager() {;
         flyingEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -89,8 +84,8 @@ public class EnemyManager {
     public void draw(SpriteBatch batch) {
 
 
-        for (FlyingEnemy enemy : flyingEnemies) {
-            batch.draw(enemyPlaneTexture, enemy.x, enemy.y, enemy.width, enemy.height);
+            for (FlyingEnemy enemy : flyingEnemies) {
+            enemy.draw(batch); // FlyingEnemy'nin kendi draw metodunu kullan
 
             // Düşman mermilerini çiz
             for (Bullet bullet : enemy.getBullets()) {
@@ -98,16 +93,13 @@ public class EnemyManager {
             }
 
 
-
-
         }
 
-        for (Creature creature : creatures) {
-            batch.draw(creatureTexture, creature.x, creature.y, creature.width, creature.height);
+        for (Creature creature : creatures) {creature.draw(batch);
         }
 
         for (Obstacle obstacle : obstacles) {
-            batch.draw(obstacleTexture, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            obstacle.draw(batch); // Obstacle'ın kendi draw metodunu kullan
         }
 
 
@@ -116,13 +108,19 @@ public class EnemyManager {
             explosion.draw(batch);
         }
     }
+    public void setLevel(int level) { // Yeni metod: Seviyeyi ayarla
+         this.currentLevel = level;
+    }
 
     public void spawnFlyingEnemy() {
         float enemyX = Gdx.graphics.getWidth();
-        float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - enemyPlaneHeight);
+        float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - new Texture("enemyplane5.png").getHeight());
         float enemySpeed = 300 + random.nextFloat() * 100;
+        float enemyWidth = new Texture("enemyplane5.png").getWidth()/3f;
+        float enemyHeight = new Texture("enemyplane5.png").getHeight()/3f;
 
-        FlyingEnemy enemy = new FlyingEnemy(enemyX, enemyY, enemySpeed, enemyPlaneWidth, enemyPlaneHeight);
+        FlyingEnemy enemy = new FlyingEnemy(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+        enemy.setLevel(currentLevel); // Mevcut seviyeyi flying enemy'e ilet
         flyingEnemies.add(enemy);
     }
 
@@ -130,10 +128,53 @@ public class EnemyManager {
         float creatureX = Gdx.graphics.getWidth();
         float creatureY = 150; // Yaratıklar zeminde
         float creatureSpeed = 100 + random.nextFloat() * 50; // Hız artırıldı
-        float creatureWidth = creatureTexture.getWidth() / 2;
-        float creatureHeight = creatureTexture.getHeight() / 2;
 
-        Creature creature = new Creature(creatureX, creatureY, creatureSpeed, creatureWidth, creatureHeight);
+        Creature creature;
+        switch (currentLevel) { // currentLevel değişkenini kullanın
+            case 1:
+                Texture texture1 = new Texture("creature1_1.png");
+                float creatureWidth1 = texture1.getWidth() / 2;
+                float creatureHeight1 = texture1.getHeight() / 2;
+                creature = new Creature1(creatureX, creatureY, creatureSpeed, creatureWidth1, creatureHeight1);
+                texture1.dispose();
+                break;
+            case 2:
+                Texture texture2 = new Texture("creature2_1.png");
+                float creatureWidth2 = texture2.getWidth()/1.5f;
+                float creatureHeight2 = texture2.getHeight()/1.5f;
+                creature = new Creature2(creatureX, creatureY, creatureSpeed, creatureWidth2, creatureHeight2);
+                texture2.dispose();
+                break;
+            case 3:
+                Texture texture3 = new Texture("creature3_1.png");
+                float creatureWidth3 = texture3.getWidth();
+                float creatureHeight3 = texture3.getHeight();
+                creature = new Creature3(creatureX, creatureY, creatureSpeed, creatureWidth3, creatureHeight3);
+                texture3.dispose();
+                break;
+            case 4:
+                Texture texture4 = new Texture("creature4_1.png");
+                float creatureWidth4 = texture4.getWidth() /1.2f;
+                float creatureHeight4 = texture4.getHeight() /1.2f;
+                creature= new Creature4(creatureX, creatureY, creatureSpeed, creatureWidth4, creatureHeight4);
+                texture4.dispose();
+                break;
+            case 5:
+                Texture texture5 = new Texture("creature5_1.png");
+                float creatureWidth5 = texture5.getWidth() /1.5f;
+                float creatureHeight5 = texture5.getHeight() /1.5f;
+                creature = new Creature5(creatureX, creatureY, creatureSpeed, creatureWidth5, creatureHeight5);
+                texture5.dispose();
+                break;
+            default:
+                Texture textureDefault = new Texture("creature1_1.png");
+                float creatureWidthDefault = textureDefault.getWidth()/2;
+                float creatureHeightDefault = textureDefault.getHeight()/2;
+                creature = new Creature1(creatureX, creatureY, creatureSpeed, creatureWidthDefault, creatureHeightDefault);
+                textureDefault.dispose();
+                break;
+        }
+
         creatures.add(creature);
     }
 
@@ -141,10 +182,11 @@ public class EnemyManager {
         float obstacleX = Gdx.graphics.getWidth();
         float obstacleY = random.nextFloat() * (Gdx.graphics.getHeight() - 200) + 200; // Engellerin yüksekliği
         float obstacleSpeed = 100 + random.nextFloat() * 50; // Hız artırıldı
-        float obstacleWidth = obstacleTexture.getWidth();
-        float obstacleHeight = obstacleTexture.getHeight();
+        float obstacleWidth = new Texture("obstacle1.png").getWidth()/1.18f;
+        float obstacleHeight = new Texture("obstacle1.png").getHeight()/1.18f;
 
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, obstacleSpeed, obstacleWidth, obstacleHeight);
+        obstacle.setLevel(currentLevel); // Mevcut seviyeyi obstacle'a ilet
         obstacles.add(obstacle);
     }
 

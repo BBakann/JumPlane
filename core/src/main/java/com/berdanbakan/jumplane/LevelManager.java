@@ -6,7 +6,8 @@ import com.badlogic.gdx.utils.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;public class LevelManager {
+import java.util.Random;
+public class LevelManager {
 
     public int currentLevel = 1;
     public int[] levelTargets = {10,15, 20, 25, 30};
@@ -41,6 +42,7 @@ import java.util.Random;public class LevelManager {
 
             if (currentLevel < 5) {
                 currentLevel++;
+                enemyManager.setLevel(currentLevel);
             } else {
                 isGameOver = true;
             }

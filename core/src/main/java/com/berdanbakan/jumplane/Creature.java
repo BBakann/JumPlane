@@ -1,62 +1,47 @@
 package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;import com.badlogic.gdx.math.Rectangle;
 
-public class Creature {
+public abstract class Creature {
     public float x, y, speed, width, height;
     public int health;
-    public Rectangle rectangle;//Çarpışma Alanı
+    public Rectangle rectangle; // Çarpışma Alanı
 
-    private float jumpTimer = 0; // Zıplama zamanlayıcısı
-    private boolean isJumping = false; // Zıplıyor mu?
-    private final float jumpHeight = 70; // Zıplama yüksekliği
-    private final float initialY; // Başlangıç Y pozisyonu
-
-    private static final float JUMP_INTERVAL = 3f; // Zıplama aralığı
-    private static final float COLLISION_OFFSET = 0.40f; // Çarpışma alanı ofseti
-    private static final float COLLISION_SCALE = 0.15f; // Çarpışma alanı ölçeği
+    protected Animation<TextureRegion> animation; // Animasyon değişkeni
+    protected float animationTime; // Animasyon zamanı
 
     public Creature(float x, float y, float speed, float width, float height) {
         this.x = x;
         this.y = y;
         this.speed = speed;
-        this.width = width;
-        this.height= height;
+        this.width= width;
+        this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);
         this.health = 2;
-        this.initialY = y; // Başlangıç Y pozisyonunu kaydet
+        animationTime = 0;
     }
 
-    public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime();//Hareket sol yönde -=
+    public abstract void update(); // Soyut update metodu
 
-        // Zıplama zamanlayıcısını güncelle
-        jumpTimer += Gdx.graphics.getDeltaTime();
+    public void draw(SpriteBatch batch) {
+        animationTime += Gdx.graphics.getDeltaTime();
+        TextureRegion currentFrame = animation.getKeyFrame(animationTime, true);
+        batch.draw(currentFrame, x, y, width, height);
+    }
 
-        // JUMP_INTERVAL saniyede bir zıpla
-        if (jumpTimer >= JUMP_INTERVAL) {
-            isJumping = true;
-            jumpTimer = 0;
+    protected void updateRectangle() {
+        float collisionWidth = width * 0.6f; // Çarpışma alanının genişliği
+        float collisionHeight = height * 0.8f; // Çarpışma alanının yüksekliği
+        float collisionXOffset = (width - collisionWidth) / 2; // X ekseni ofseti
+        float collisionYOffset = (height - collisionHeight) * 0.2f; // Y ekseni ofseti
+
+        rectangle.set(x + collisionXOffset, y + collisionYOffset, collisionWidth, collisionHeight);
+    }public void dispose() {
+        for (TextureRegion frame : animation.getKeyFrames()) {
+            frame.getTexture().dispose();
         }
-
-        // Zıplıyorsa yukarı hareket ettir
-        if (isJumping) {
-            y += jumpHeight * Gdx.graphics.getDeltaTime();
-            if (y >= initialY +jumpHeight) { // Zıplama yüksekliğine ulaşıldığında
-                isJumping = false;
-            }
-        } else if (y > initialY) { // Yere düşme
-            y -= jumpHeight * Gdx.graphics.getDeltaTime();
-            if (y <= initialY) {
-                y = initialY;
-            }
-        }
-        // Y değerini kontrol et
-        y = Math.max(y, initialY);
-
-
-        // Rectangle'ı güncelle
-        rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
     }
 }

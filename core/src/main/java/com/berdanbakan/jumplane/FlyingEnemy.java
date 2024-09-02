@@ -2,6 +2,7 @@ package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
@@ -25,6 +26,10 @@ public class FlyingEnemy {
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
     private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği
 
+    private Texture textures[];
+    private int currentLevel;
+
+
     public static Texture enemyBulletTexture; // Statik olarak tanımlandı
     private static Random random; // Statik olarak tanımlandı
 
@@ -41,6 +46,12 @@ public class FlyingEnemy {
         bullets=new ArrayList<>();
         shootTimer=0;
 
+        textures=new Texture[5];
+        for (int i=0;i<5;i++){
+            textures[i]=new Texture("enemyplane"+(i+1)+".png");
+        }
+
+
         if (enemyBulletTexture == null) {
             enemyBulletTexture = new Texture("bullet1.png");
         }
@@ -48,7 +59,23 @@ public class FlyingEnemy {
             random = new Random();
         }
 
+        currentLevel=1;
     }
+
+    public void setLevel(int level) {
+        currentLevel = level;
+    }
+
+    public void draw(SpriteBatch batch) {
+        int index = (currentLevel - 1) % 5;
+        batch.draw(textures[index], x, y, width, height);
+
+        // Düşman mermilerini çiz
+        for (Bullet bullet : bullets) {
+            batch.draw(enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
+        }
+    }
+
     public void update(float deltaTime) {
         x-= speed * Gdx.graphics.getDeltaTime();
         rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
@@ -87,5 +114,8 @@ public class FlyingEnemy {
 
     public void dispose(){
         enemyBulletTexture.dispose();
+        for (Texture texture : textures) {
+            texture.dispose();
+        }
     }
 }
