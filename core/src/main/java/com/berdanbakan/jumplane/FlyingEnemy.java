@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -18,21 +19,15 @@ public class FlyingEnemy {
     private final List<Bullet> bullets;
     private float shootTimer;
     private static final int INITIAL_HEALTH = 2; // Başlangıç canı
-    private static final float SHOOT_DELAY = 3f; // Ateş gecikmesi
-    private static final float SHOOT_PROBABILITY = 0.41f; // Ateş etme olasılığı
-    private static final float COLLISION_OFFSET = 0.50f; //Çarpışma alanı ofseti
-    private static final float COLLISION_SCALE = 0.1f; // Çarpışma alanı ölçeği
+    private static final float SHOOT_DELAY = 2f; // Ateş gecikmesi
+    private static final float SHOOT_PROBABILITY = 0.41f; //Ateş etme olasılığı
+    private static final float COLLISION_SCALE = 0.8f; // Çarpışma alanı ölçeği
     private static final float BULLET_SPEED = 600f; // Mermi hızı
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
     private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği
 
-    private Texture textures[];
-    private int currentLevel;
-
-
     public static Texture enemyBulletTexture; // Statik olarak tanımlandı
     private static Random random; // Statik olarak tanımlandı
-
 
     public FlyingEnemy(float x, float y, float speed, float width, float height) {
         this.x = x;
@@ -42,48 +37,36 @@ public class FlyingEnemy {
         this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);
         this.health = INITIAL_HEALTH;
-
-        bullets=new ArrayList<>();
-        shootTimer=0;
-
-        textures=new Texture[5];
-        for (int i=0;i<5;i++){
-            textures[i]=new Texture("enemyplane"+(i+1)+".png");
-        }
-
+        bullets = new ArrayList<>();
+        shootTimer = 0;
 
         if (enemyBulletTexture == null) {
             enemyBulletTexture = new Texture("bullet1.png");
         }
-        if (random == null) {
+        if(random == null) {
             random = new Random();
         }
-
-        currentLevel=1;
-    }
-
-    public void setLevel(int level) {
-        currentLevel = level;
     }
 
     public void draw(SpriteBatch batch) {
-        int index = (currentLevel - 1) % 5;
-        batch.draw(textures[index], x, y, width, height);
-
-        // Düşman mermilerini çiz
-        for (Bullet bullet : bullets) {
-            batch.draw(enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
-        }
+        // Alt sınıflar bu metodu override edecek
     }
 
     public void update(float deltaTime) {
-        x-= speed * Gdx.graphics.getDeltaTime();
-        rectangle.set(x + width * COLLISION_OFFSET, y + height * COLLISION_OFFSET, width * COLLISION_SCALE, height * COLLISION_SCALE);
+        x -= speed * Gdx.graphics.getDeltaTime();
+
+        // Çarpışma alanını görselin ortasına ve boyutuna göre ayarla
+        float collisionOffsetX = width * (1 - COLLISION_SCALE) / 2;
+        float collisionOffsetY = height * (1 - COLLISION_SCALE) / 2;
+        float collisionWidth = width * COLLISION_SCALE;
+        float collisionHeight = height * COLLISION_SCALE;
+
+        rectangle.set(x + collisionOffsetX, y + collisionOffsetY, collisionWidth, collisionHeight);
 
         shootTimer += Gdx.graphics.getDeltaTime();
         if (shootTimer >= SHOOT_DELAY) {
             shootTimer = 0;
-            if (random.nextFloat() <SHOOT_PROBABILITY) {
+            if (random.nextFloat() < SHOOT_PROBABILITY) {
                 shoot();
             }
         }
@@ -93,19 +76,18 @@ public class FlyingEnemy {
         while (iter.hasNext()) {
             Bullet bullet = iter.next();
             bullet.update();
-            if (bullet.x > Gdx.graphics.getWidth()) { // Ekranın sağından çıkınca kaldır
+            if (bullet.x < 0) { // Ekranın solundan çıkınca kaldır
                 iter.remove();
             }
         }
     }
+
     private void shoot() {
-        float bulletX = x+ width / 3;
+        float bulletX = x + width / 3;
         float bulletY = y + height / 3;
-        float bulletSpeed = 600; // Mermi hızı
 
         Bullet bullet = new Bullet(bulletX, bulletY, -BULLET_SPEED, 0, enemyBulletTexture, enemyBulletTexture.getWidth() * BULLET_SCALE, enemyBulletTexture.getHeight() * BULLET_SCALE, BULLET_DAMAGE);
         bullets.add(bullet);
-
     }
 
     public List<Bullet> getBullets() {
@@ -114,8 +96,5 @@ public class FlyingEnemy {
 
     public void dispose(){
         enemyBulletTexture.dispose();
-        for (Texture texture : textures) {
-            texture.dispose();
-        }
     }
 }

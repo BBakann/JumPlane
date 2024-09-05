@@ -5,11 +5,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.math.Vector2;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class EnemyManager {
@@ -27,6 +30,8 @@ public class EnemyManager {
     private Sound crashSound;
     private int currentLevel=1;
 
+    private Map<Integer, Vector2> flyingEnemySizes;
+
     public EnemyManager() {;
         flyingEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
@@ -35,11 +40,20 @@ public class EnemyManager {
         explosions = new ArrayList<>();
         explosionSound=Gdx.audio.newSound(Gdx.files.internal("explosion01.wav"));
         crashSound=Gdx.audio.newSound(Gdx.files.internal("crash.mp3"));
+
+
+        flyingEnemySizes = new HashMap<>();
+        flyingEnemySizes.put(1, new Vector2(473 / 3f, 468 / 3f)); // enemyplane1_1
+        flyingEnemySizes.put(2, new Vector2(958 / 3f, 586 / 3f)); // enemyplane2_1
+        flyingEnemySizes.put(3, new Vector2(401 / 3f, 249/ 3f)); // enemyplane3_1
+        flyingEnemySizes.put(4, new Vector2(748 / 3f, 354 / 3f)); // enemyplane4_1
+        flyingEnemySizes.put(5, new Vector2(641 / 3f, 546 / 3f)); // enemyplane5_1
+
     }
 
     public void update(Player player, LevelManager levelManager) {
 
-        float deltaTime = Gdx.graphics.getDeltaTime(); // deltaTime değerini alın
+        float deltaTime = Gdx.graphics.getDeltaTime();
 
         Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
         while (flyingEnemyIterator.hasNext()) {
@@ -108,29 +122,51 @@ public class EnemyManager {
             explosion.draw(batch);
         }
     }
-    public void setLevel(int level) { // Yeni metod: Seviyeyi ayarla
+    public void setLevel(int level) {
          this.currentLevel = level;
     }
 
     public void spawnFlyingEnemy() {
         float enemyX = Gdx.graphics.getWidth();
-        float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - new Texture("enemyplane5.png").getHeight());
+        float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - new Texture("enemyplane5_1.png").getHeight());
         float enemySpeed = 300 + random.nextFloat() * 100;
-        float enemyWidth = new Texture("enemyplane5.png").getWidth()/3f;
-        float enemyHeight = new Texture("enemyplane5.png").getHeight()/3f;
+        Vector2 size = flyingEnemySizes.get(currentLevel);
+        float enemyWidth = size.x;
+        float enemyHeight = size.y;
 
-        FlyingEnemy enemy = new FlyingEnemy(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-        enemy.setLevel(currentLevel); // Mevcut seviyeyi flying enemy'e ilet
+        FlyingEnemy enemy;
+
+        switch (currentLevel) {
+            case 1:
+                enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+            case 2:
+                enemy = new FlyingEnemy2(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+            case 3:
+                enemy = new FlyingEnemy3(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+            case 4:
+                enemy = new FlyingEnemy4(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+            case 5:
+                enemy = new FlyingEnemy5(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+            default:
+                enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
+                break;
+        }
+
         flyingEnemies.add(enemy);
     }
 
     public void spawnCreature() {
         float creatureX = Gdx.graphics.getWidth();
         float creatureY = 150; // Yaratıklar zeminde
-        float creatureSpeed = 100 + random.nextFloat() * 50; // Hız artırıldı
+        float creatureSpeed = 100 + random.nextFloat() * 50;
 
         Creature creature;
-        switch (currentLevel) { // currentLevel değişkenini kullanın
+        switch (currentLevel) {
             case 1:
                 Texture texture1 = new Texture("creature1_1.png");
                 float creatureWidth1 = texture1.getWidth() / 2;
@@ -181,7 +217,7 @@ public class EnemyManager {
     public void spawnObstacle() {
         float obstacleX = Gdx.graphics.getWidth();
         float obstacleY = random.nextFloat() * (Gdx.graphics.getHeight() - 200) + 200; // Engellerin yüksekliği
-        float obstacleSpeed = 100 + random.nextFloat() * 50; // Hız artırıldı
+        float obstacleSpeed = 100 + random.nextFloat() * 50;
         float obstacleWidth = new Texture("obstacle1.png").getWidth()/1.18f;
         float obstacleHeight = new Texture("obstacle1.png").getHeight()/1.18f;
 
@@ -206,7 +242,7 @@ public class EnemyManager {
                     if (enemy.health <= 0) {
                         flyingEnemyIterator.remove();
                         explosions.add(new Explosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, false));
-                        killedEnemies++; // Düşman öldürüldüğünde sayacı artır
+                        killedEnemies++;
                     } else {
                         explosions.add(new Explosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, true));
                     }
@@ -229,7 +265,7 @@ public class EnemyManager {
                     if (creature.health <= 0) {
                         creatureIterator.remove();
                         explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, false));
-                        killedEnemies++; // Yaratık öldürüldüğünde sayacı artır
+                        killedEnemies++;
                     } else {explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, true));
                     }
 
@@ -343,7 +379,7 @@ public class EnemyManager {
                     }
                     bulletIterator.remove(); // Mermiyi yok et
 
-                    // Çarpışma efekti ve ses
+
                     explosions.add(new Explosion(player.planeX + player.planeWidth / 2, player.planeY + player.planeHeight / 2, false));
                     explosionSound.play();
                 }
@@ -376,7 +412,7 @@ public class EnemyManager {
         explosionSound.dispose();
         crashSound.dispose();
 
-        // Patlama efektlerini dispose et
+
         for (Explosion explosion : explosions) {
             for (TextureRegion frame : explosion.animation.getKeyFrames()) {
                 frame.getTexture().dispose();
