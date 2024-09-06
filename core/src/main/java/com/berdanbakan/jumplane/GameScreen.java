@@ -76,7 +76,7 @@ public class GameScreen implements Screen {
         fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
         params.color = Color.BLACK;
-        params.size = 40;
+        params.size = 65;
 
         font = fontGen.generateFont(params);
 
@@ -240,13 +240,13 @@ public class GameScreen implements Screen {
         batch.begin();
         font.getData().setScale(2f);
         // "Devam Et" label'ı
-        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f + 10f, 580, 80);
+        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f + 10f, 580, 150);
 
-        font.draw(batch, "DEVAM ET !", Gdx.graphics.getWidth() / 2f - 245f, Gdx.graphics.getHeight() / 2f + 80f); // Sola kaydırmak için x koordinatını azaltın
+        font.draw(batch, "DEVAM ET !", Gdx.graphics.getWidth() / 2f - 234f, Gdx.graphics.getHeight() / 2f + 145f); // Sola kaydırmak için x koordinatını azaltın
 
         //"Ana Menü" label'ı
-        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f - 150f, 580, 80);
-        font.draw(batch, "ANA MENU !", Gdx.graphics.getWidth() / 2f - 245f, Gdx.graphics.getHeight() / 2f - 80f); // Sola kaydırmak için x koordinatını azaltın
+        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f - 200f, 580, 150);
+        font.draw(batch, "ANA MENU !", Gdx.graphics.getWidth() / 2f - 254f, Gdx.graphics.getHeight() / 2f - 65f); // Sola kaydırmak için x koordinatını azaltın
         font.getData().setScale(1f);
         batch.end();
     }

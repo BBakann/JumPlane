@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -58,6 +59,8 @@ public class MainMenuScreen implements Screen {
     private Texture languageButtonTexture;
     private Texture closeButtonTexture;
 
+    private ShapeRenderer shapeRenderer;
+
 
     public MainMenuScreen(JumPlane game) {
         this.game = game;
@@ -75,11 +78,12 @@ public class MainMenuScreen implements Screen {
 
         fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color = Color.BLACK;
-        params.size = 30;
+        params.color = Color.WHITE;
+        params.size = 40;
         font = fontGen.generateFont(params);
 
         game.playMusic("backgroundmusic.mp3");
+        shapeRenderer=new ShapeRenderer();
 
         clickSound = Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
     }
@@ -142,7 +146,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 clickSound.play();
-                infoButtonClicked = true;
+                infoButtonClicked = !infoButtonClicked;
             }
         });
         stage.addActor(infoButton);
@@ -188,8 +192,8 @@ public class MainMenuScreen implements Screen {
             }
 
         });
-            stage.addActor(resultButton);
-        }
+        stage.addActor(resultButton);
+    }
     private void createVoiceButton() {
         voiceButtonTexture = new Texture("voiceup.png");
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
@@ -269,17 +273,48 @@ public class MainMenuScreen implements Screen {
     }
 
     @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+    public void render(float delta) {Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.end(); // Batch'i burada kapatın
+
         if (infoButtonClicked) {
-            font.draw(batch, "Oyun Hakkında Bilgi...", 500, 500);
-            infoButtonClicked = true;
+            // Ekranı karart
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(0, 0, 0, 0.5f); // Siyah, %50 saydam
+            shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            shapeRenderer.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+
+            batch.begin();
+            font.draw(batch, "JumpLane\n\n" +
+                    "Get ready for an adrenaline-fueled adventure as youpilot your plane through treacherous skies!\n" +
+                    "Tap the screen to make your plane soar, dodge obstacles, and collect coins to unlock awesome new planes and challenging levels.\n\n" +
+                    "Features:\n" +
+                    "* Simple and addictive one-touch gameplay\n" +"* Stunning graphics and immersive sound effects\n" +
+                    "* A variety of unique planes to collect\n" +
+                    "* Endless levels with increasing difficulty\n" +
+                    "* Compete with friends and players worldwide on the leaderboards\n\n" +
+                    "Developed by Berdan Bakan\n\n" +
+                    "Design inspirations taken from bevoullin.com\n\n" +
+                    "All rights reserved @ 2024.", 20, 900);
+            batch.end();
+
+
+            startButton.setVisible(false);
+            settingsButton.setVisible(false);
+            resultButton.setVisible(false);
+            exitButton.setVisible(false);
+        } else {
+
+            startButton.setVisible(true);
+            settingsButton.setVisible(true);resultButton.setVisible(true);
+            exitButton.setVisible(true);
         }
-        batch.end();
 
         stage.act(delta);
         stage.draw();
@@ -308,28 +343,32 @@ public class MainMenuScreen implements Screen {
         batch.dispose();
         backgroundTexture.dispose();
         startButtonTexture.dispose();
-        startButton.clearListeners();
         settingsButtonTexture.dispose();
-        settingsButton.clearListeners();
-        music.stop();
-        music.dispose();
-        game.stopMusic();
+        if (music != null) {
+            music.stop();
+            music.dispose();
+        }
         clickSound.dispose();
         voiceButtonTexture.dispose();
-        voiceButton.clearListeners();
         infoButtonTexture.dispose();
-        infoButton.clearListeners();
         font.dispose();
         fontGen.dispose();
         exitButtonTexture.dispose();
-        exitButton.clearListeners();
         resultButtonTexture.dispose();
-        resultButton.clearListeners();
+        shapeRenderer.dispose();
 
-        // Ayarlar ekranı için
+
         settingsBackgroundTexture.dispose();
         languageButtonTexture.dispose();
-        closeButtonTexture.dispose();
+
         settingsScreen.clear();
+
+
+        startButton.clearListeners();
+        settingsButton.clearListeners();
+        voiceButton.clearListeners();
+        infoButton.clearListeners();
+        exitButton.clearListeners();
+        resultButton.clearListeners();
     }
 }
