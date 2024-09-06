@@ -406,9 +406,6 @@ public class EnemyManager {
     }
 
     public void dispose() {
-        enemyPlaneTexture.dispose();
-        creatureTexture.dispose();
-        obstacleTexture.dispose();
         explosionSound.dispose();
         crashSound.dispose();
 

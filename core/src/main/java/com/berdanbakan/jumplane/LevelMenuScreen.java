@@ -24,6 +24,12 @@ public class LevelMenuScreen implements Screen {
     public int unlockedLevel=1;
     private Sound clickSound;
 
+    private Texture exitButtonTexture;
+    private ImageButton exitButton;
+
+    private Texture backButtonTexture;
+    private ImageButton  backButton;
+
 
     public LevelMenuScreen(JumPlane game){
         this.game=game;
@@ -32,21 +38,18 @@ public class LevelMenuScreen implements Screen {
         batch=new SpriteBatch();
 
         createLevelButtons();
-
-
-
-
+        createExitButton();
+        createBackButton();
 
         clickSound=Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
     }
-
 
 
     public int getUnlockedLevel() {
         return unlockedLevel;
     }
 
-    public void setUnlockedLevel(int unlockedLevel) { // Setter metodu ekleyin
+    public void setUnlockedLevel(int unlockedLevel) {
         this.unlockedLevel = unlockedLevel;
     }
 
@@ -54,10 +57,10 @@ public class LevelMenuScreen implements Screen {
 
 
     private void createLevelButtons(){
-        float buttonWidth = 450; // Buton genişliği
+        float buttonWidth = 450;
         float buttonHeight = 300;
 
-        ImageButton[] levelButtons = new ImageButton[5]; // Butonları saklamak için dizi
+        ImageButton[] levelButtons = new ImageButton[5];
 
         for (int i=1;i<=5;i++){
             Texture levelbuttonTexture=new Texture("level"+i+"button.png");
@@ -97,13 +100,52 @@ public class LevelMenuScreen implements Screen {
         }
     }
 
+    private void createExitButton(){
+        exitButtonTexture=new Texture("exitbutton.png");
+        ImageButton.ImageButtonStyle buttonStyle= new ImageButton.ImageButtonStyle();
+        buttonStyle.imageUp=new Image(exitButtonTexture).getDrawable();
 
+        exitButton= new ImageButton(buttonStyle);
+        exitButton.setSize(200,200);
 
+        exitButton.setPosition(Gdx.graphics.getWidth() - exitButton.getWidth() - 20, 20);
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clickSound.play();
+                Gdx.app.exit(); // Oyundan çık
+            }
+        });
+        stage.addActor(exitButton);
+    }
+
+    private  void createBackButton(){
+        backButtonTexture=new Texture("backbutton.png");
+        ImageButton.ImageButtonStyle buttonStyle=new ImageButton.ImageButtonStyle();
+        buttonStyle.imageUp=new Image(backButtonTexture).getDrawable();
+
+        backButton=new ImageButton(buttonStyle);
+        backButton.setSize(200,200);
+
+        backButton.setPosition(Gdx.graphics.getWidth() - exitButton.getWidth() - 20, Gdx.graphics.getHeight() - exitButton.getHeight() - 20);
+
+        backButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event,float x,float y){
+                clickSound.play();
+                MainMenuScreen mainMenuScreen=new MainMenuScreen(game);
+                game.setScreen(mainMenuScreen);
+            }
+        });
+        stage.addActor(backButton);
+    }
 
 
     @Override
     public void show(){
         Gdx.input.setInputProcessor(stage);
+        game.stopMusic();
     }
 
 
@@ -155,8 +197,14 @@ public class LevelMenuScreen implements Screen {
     }
    @Override
     public void dispose(){
-    clickSound.dispose();
-
+       stage.dispose();
+       batch.dispose();
+       levelbackgroundTexture.dispose();
+       exitButtonTexture.dispose();
+       clickSound.dispose();
+       exitButton.clearListeners();
+       backButtonTexture.dispose();
+       backButton.clearListeners();
 
    }
 }

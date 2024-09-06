@@ -53,7 +53,7 @@ public class Explosion {
     public void draw(SpriteBatch batch) {
         TextureRegion currentFrame = animation.getKeyFrame(animationTime);
         final float explosionSize = animation == smallExplosionAnimation ? SMALL_EXPLOSION_SIZE : LARGE_EXPLOSION_SIZE;
-        // Patlama boyutunu seç
+
         batch.draw(currentFrame, x - explosionSize / 2, y - explosionSize / 2, explosionSize, explosionSize);
     }
 
@@ -67,6 +67,8 @@ public class Explosion {
                 frame.dispose();
             }
             explosionFrames = null;
+            smallExplosionAnimation = null;
+            largeExplosionAnimation= null;
         }
     }
 }
