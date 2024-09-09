@@ -15,12 +15,12 @@ public class Creature1 extends Creature {
             frames[i] = new TextureRegion(texture);
         }
 
-        animation = new Animation<TextureRegion>(0.1f, frames); // Animasyon hızını ayarlayın (0.1f saniye)
+        animation = new Animation<TextureRegion>(0.1f, frames);
     }
 
     @Override
     public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime(); // Hareket
-        updateRectangle(); // Çarpışma alanını güncelle
+        x -= speed * Gdx.graphics.getDeltaTime();
+        updateRectangle();
     }
 }

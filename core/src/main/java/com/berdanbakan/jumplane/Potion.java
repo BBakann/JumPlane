@@ -29,8 +29,8 @@ public class Potion {
         texture=new Texture("poison_potion.png");
         sound=Gdx.audio.newSound(Gdx.files.internal("poison.mp3"));
         }
-        width=texture.getWidth()/5f;
-        height=texture.getHeight()/5f;
+        width=texture.getWidth()/4f;
+        height=texture.getHeight()/4f;
         rectangle=new Rectangle(x,y,width,height);
 
     }

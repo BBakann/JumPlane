@@ -24,7 +24,7 @@ public abstract class Creature {
         animationTime = 0;
     }
 
-    public abstract void update(); // Soyut update metodu
+    public abstract void update();
 
     public void draw(SpriteBatch batch) {
         animationTime += Gdx.graphics.getDeltaTime();

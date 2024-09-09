@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.utils.Timer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,6 +53,9 @@ public class GameScreen implements Screen {
     private boolean isPaused = false;
     private ShapeRenderer shapeRenderer; // Menü arka planı için
 
+    private Texture loadingBackgroundTexture;
+    public boolean isLoading = false;
+
 
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
@@ -86,24 +90,26 @@ public class GameScreen implements Screen {
         random = new Random();
 
         Gdx.input.setInputProcessor(inputHandler);
+        checkLevelCompleted();
 
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
         labelTexture = new Texture("label.png");
 
         stopButtonTexture = new Texture("stopbutton.png");
-        stopButtonRectangle = new Rectangle(Gdx.graphics.getWidth() - stopButtonTexture.getWidth() * 1.5f - 80, // Sola kaydırmak için çarpanı ve sabiti ayarlayın
-                Gdx.graphics.getHeight() - stopButtonTexture.getHeight() * 1.5f-40, // Sola kaydırmak için çarpanı ve sabiti ayarlayın
-                stopButtonTexture.getWidth() * 2f, // Büyütmek için çarpanı ayarlayın
-                stopButtonTexture.getHeight() * 2f // Büyütmek için çarpanı ayarlayın
+        stopButtonRectangle = new Rectangle(Gdx.graphics.getWidth() - stopButtonTexture.getWidth() * 1.5f - 80,
+                Gdx.graphics.getHeight() - stopButtonTexture.getHeight() * 1.5f-40,
+                stopButtonTexture.getWidth() * 2f,
+                stopButtonTexture.getHeight() * 2f
         );
         shapeRenderer = new ShapeRenderer();
 
+        loadingBackgroundTexture = new Texture("levelmenubackground.png");
 
         resetGame();
     }
 
-    private void checkLevelCompleted() {
+    public void checkLevelCompleted() {
         if (levelCompleted) {
             if (level == levelMenuScreen.unlockedLevel && level < 5) {
                 levelMenuScreen.setUnlockedLevel(level + 1);
@@ -113,8 +119,8 @@ public class GameScreen implements Screen {
 
     private void spawnPotion(){
         float potionX = Gdx.graphics.getWidth();
-        float potionY = random.nextFloat() * (Gdx.graphics.getHeight() - ground.groundHeight - 100) + ground.groundHeight; // Yere değmeyecek şekilde rastgele Y pozisyonu
-        Potion.PotionType type = random.nextBoolean() ? Potion.PotionType.HEALTH : Potion.PotionType.POISON; // Rastgele iksir tipi
+        float potionY = random.nextFloat() * (Gdx.graphics.getHeight() - ground.groundHeight - 100) + ground.groundHeight;
+        Potion.PotionType type = random.nextBoolean() ? Potion.PotionType.HEALTH : Potion.PotionType.POISON;
 
         Potion potion = new Potion(potionX, potionY, type);
         potions.add(potion);
@@ -130,7 +136,7 @@ public class GameScreen implements Screen {
         Iterator<Potion> iter = potions.iterator();
         while (iter.hasNext()) {
             Potion potion = iter.next();
-            potion.x -= 200 * deltaTime; // İksirleri sola doğru hareket ettir
+            potion.x -= 200 * deltaTime;
             potion.rectangle.set(potion.x, potion.y, potion.width, potion.height);
 
             if (potion.x < -potion.width) {
@@ -147,7 +153,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        game.stopMusic(); // Önceki müziği durdur
+        game.stopMusic();
         game.playMusic("gamemusic.mp3");
     }
 
@@ -157,8 +163,11 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0, 0, 0, 1);
 
         if (!isPaused) {
-            updateGameLogic(deltaTime);
+            if (!isLoading) {
+                updateGameLogic(deltaTime);
+            }
         }
+
         drawGame(deltaTime);
 
         if (isPaused) {
@@ -167,16 +176,16 @@ public class GameScreen implements Screen {
     }
 
     private void updateGameLogic(float deltaTime) {
-        if (Gdx.input.justTouched()) {
+        if (!isLoading && Gdx.input.justTouched()) {
             int touchX = Gdx.input.getX();
             int touchY = Gdx.graphics.getHeight() - Gdx.input.getY();
             if (stopButtonRectangle.contains(touchX, touchY)) {
                 isPaused = true;
-                return; // Dokunma işlemi durdurma düğmesi üzerindeyse, diğer güncellemeleri yapma
+                return;
             }
         }
 
-        if (!isPaused) {
+        if (!isPaused && !isLoading) {
             if (levelManager.gameStarted) {
                 player.update(deltaTime, inputHandler);
                 updatePotions(deltaTime);
@@ -193,35 +202,41 @@ public class GameScreen implements Screen {
         background.draw(batch);
         ground.draw(batch);
 
-        for (Potion potion : potions) {
-            batch.draw(potion.texture, potion.x, potion.y, potion.width, potion.height);
-        }
+        if (!isLoading) {
+            for (Potion potion : potions) {
+                batch.draw(potion.texture, potion.x, potion.y, potion.width, potion.height);
+            }
 
-        if (levelManager.isGameOver) {
+            if (levelManager.isGameOver) {
+                font.getData().setScale(2f);
+                font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 320, Gdx.graphics.getHeight() / 2 + 20);
+                font.getData().setScale(1f);} else if (!levelManager.gameStarted && levelManager.firstStart) {
+                font.getData().setScale(2f);
+                font.draw(batch, "TOUCH AND START!", Gdx.graphics.getWidth() / 2 - 400, Gdx.graphics.getHeight() / 2);
+                font.getData().setScale(1f);
+            } else if (levelManager.gameStarted && !levelManager.isGameOver) {
+                drawGameLabels();
+            }
+
+            player.draw(batch);
+            enemyManager.draw(batch);
+            hud.draw(batch, player.health, player.ammo);
+            inputHandler.drawDpad(batch);
+            inputHandler.drawShootButton(batch);
+            batch.draw(stopButtonTexture, stopButtonRectangle.x, stopButtonRectangle.y, stopButtonTexture.getWidth() * 2f, stopButtonTexture.getHeight() * 2f);
+        } else {
+
+            batch.draw(loadingBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
             font.getData().setScale(2f);
-            font.draw(batch, "TRY AGAIN!", Gdx.graphics.getWidth() / 2 - 320, Gdx.graphics.getHeight() / 2+20);
+            batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 330f, Gdx.graphics.getHeight() / 2f - 450f, 700, 200);
+            font.draw(batch, "LOADING...", Gdx.graphics.getWidth() / 2f - 240f, Gdx.graphics.getHeight() / 2f - 300f);
             font.getData().setScale(1f);
 
-        } else if (!levelManager.gameStarted && levelManager.firstStart) {
-            drawLevelCompletedMessage(levelManager.currentLevel - 1);
-        } else if (levelManager.gameStarted && !levelManager.isGameOver) {
-            drawGameLabels();
         }
-
-        if (levelManager.levelCompleted) {
-            drawLevelCompletedMessage(levelManager.currentLevel - 1);
-            handleLevelCompleted();
-        }
-
-        player.draw(batch);
-        enemyManager.draw(batch);
-        hud.draw(batch, player.health, player.ammo);
-        inputHandler.drawDpad(batch);
-        inputHandler.drawShootButton(batch);
-        batch.draw(stopButtonTexture, stopButtonRectangle.x, stopButtonRectangle.y, stopButtonTexture.getWidth() * 2f, stopButtonTexture.getHeight() * 2f);
 
         batch.end();
+
         if (isPaused) {
             drawPauseMenu();
         }
@@ -239,12 +254,12 @@ public class GameScreen implements Screen {
 
         batch.begin();
         font.getData().setScale(2f);
-        // "Devam Et" label'ı
+
         batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f + 10f, 580, 150);
 
-        font.draw(batch, "DEVAM ET !", Gdx.graphics.getWidth() / 2f - 234f, Gdx.graphics.getHeight() / 2f + 145f); // Sola kaydırmak için x koordinatını azaltın
+        font.draw(batch, "CONTINUE !", Gdx.graphics.getWidth() / 2f - 234f, Gdx.graphics.getHeight() / 2f + 145f); // Sola kaydırmak için x koordinatını azaltın
 
-        //"Ana Menü" label'ı
+
         batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f - 200f, 580, 150);
         font.draw(batch, "ANA MENU !", Gdx.graphics.getWidth() / 2f - 254f, Gdx.graphics.getHeight() / 2f - 65f); // Sola kaydırmak için x koordinatını azaltın
         font.getData().setScale(1f);
@@ -261,7 +276,7 @@ public class GameScreen implements Screen {
                 isPaused = false;
             }
 
-            // Ana Menü düğmesi - dokunma alanını genişlettik
+            // Ana Menü düğmesi
             if (touchX > Gdx.graphics.getWidth() / 2f - 300f && touchX < Gdx.graphics.getWidth() / 2f + 300f &&
                     touchY > Gdx.graphics.getHeight() / 2f - 200f && touchY < Gdx.graphics.getHeight() / 2f - 0f) {
                 game.setScreen(new MainMenuScreen(game));
@@ -269,26 +284,26 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void drawLevelCompletedMessage(int level) {
-        font.getData().setScale(2f);
-        font.draw(batch, "LEVEL: " + level + " COMPLETED!", Gdx.graphics.getWidth() / 2 - 500, Gdx.graphics.getHeight() / 2);
-        font.getData().setScale(1f);
-    }
-
-    private void handleLevelCompleted() {
-        player.updatePlaneTexture(levelManager.currentLevel);
-        background.setLevel(levelManager.currentLevel);
-
+    public void handleLevelCompleted() {
         if (!levelManager.winSoundPlayed) {
             winSound.play();
             levelManager.winSoundPlayed = true;
         }
 
-        if (Gdx.input.justTouched()) {
-            levelManager.levelCompleted = false;
-            levelManager.gameStarted = true;
-            levelManager.firstStart = false;
-        }
+        isLoading = true;
+        levelManager.gameStarted = false;
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                player.updatePlaneTexture(levelManager.currentLevel);
+                background.setLevel(levelManager.currentLevel);
+                levelManager.levelCompleted = false;
+                levelManager.gameStarted = true;
+                levelManager.firstStart = false;
+                isLoading = false;
+            }
+        }, 4f);
     }
 
     private void drawGameLabels() {
@@ -307,6 +322,7 @@ public class GameScreen implements Screen {
         enemyManager.reset();
         player.health = 6;
         potions.clear();
+        player.resetPosition();
     }
 
     @Override
@@ -335,6 +351,10 @@ public class GameScreen implements Screen {
         stopButtonTexture.dispose();
         shapeRenderer.dispose();
         game.stopMusic();
+        loadingBackgroundTexture.dispose();
+        if (loadingBackgroundTexture != null) {
+            loadingBackgroundTexture.dispose();
+        }
 
         for (Potion potion : potions) {
             potion.dispose();

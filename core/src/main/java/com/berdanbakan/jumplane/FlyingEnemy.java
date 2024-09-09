@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -20,9 +19,9 @@ public class FlyingEnemy {
     private float shootTimer;
     private static final int INITIAL_HEALTH = 2; // Başlangıç canı
     private static final float SHOOT_DELAY = 2f; // Ateş gecikmesi
-    private static final float SHOOT_PROBABILITY = 0.41f; //Ateş etme olasılığı
-    private static final float COLLISION_SCALE = 0.8f; // Çarpışma alanı ölçeği
-    private static final float BULLET_SPEED = 600f; // Mermi hızı
+    private static final float SHOOT_PROBABILITY = 0.50f; //Ateş etme olasılığı
+    private static final float COLLISION_SCALE = 0.95f; // Çarpışma alanı ölçeği
+    private static final float BULLET_SPEED = 750f; // Mermi hızı
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
     private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği
 
@@ -49,7 +48,7 @@ public class FlyingEnemy {
     }
 
     public void draw(SpriteBatch batch) {
-        // Alt sınıflar bu metodu override edecek
+
     }
 
     public void update(float deltaTime) {
