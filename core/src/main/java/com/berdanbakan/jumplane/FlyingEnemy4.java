@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class FlyingEnemy4 extends FlyingEnemy {
-    public float width = 401 /1.1f;
-    public float height = 249 / 1.1f;
+    public float width = 843 /3f;
+    public float height = 448 /2f;
 
     private Animation<TextureRegion> animation;
     private  float animationTime;
@@ -16,17 +16,17 @@ public class FlyingEnemy4 extends FlyingEnemy {
 
     public FlyingEnemy4(float x, float y, float speed, float width, float height) {
         super(x, y, speed, width, height);
+        loadAnimation();
 
     }
-    private void loadAnimation(){
-        TextureRegion[] frames = new TextureRegion[6];
-        for (int i=0 ; i<6 ;i++){
-            Texture texture=new Texture("enemyplane4"+ (i+1) + ".png");
+    private void loadAnimation() {
+        TextureRegion[] frames = new TextureRegion[2];
+        for (int i = 0; i < 2; i++) {
+            Texture texture = new Texture("enemyplane4_" + (i + 1) + ".png");
             frames[i] = new TextureRegion(texture);
         }
-        animation = new Animation<>(0.1f,frames);
-        animationTime=0;
-
+        animation = new Animation<>(0.1f, frames);
+        animationTime = 0;
     }
 
     @Override

@@ -16,9 +16,6 @@ import java.util.Map;
 import java.util.Random;
 
 public class EnemyManager {
-    private Texture enemyPlaneTexture;
-    private Texture creatureTexture;
-    private Texture obstacleTexture;
     private List<FlyingEnemy> flyingEnemies;
     private List<Creature> creatures;
     private List<Obstacle> obstacles;
@@ -43,10 +40,10 @@ public class EnemyManager {
 
 
         flyingEnemySizes = new HashMap<>();
-        flyingEnemySizes.put(1, new Vector2(473 / 3f, 468 / 3f)); // enemyplane1_1
+        flyingEnemySizes.put(1, new Vector2(273/1.1f,282/1.1f)); // enemyplane1_1
         flyingEnemySizes.put(2, new Vector2(958 / 3f, 586 / 3f)); // enemyplane2_1
-        flyingEnemySizes.put(3, new Vector2(401 / 3f, 249/ 3f)); // enemyplane3_1
-        flyingEnemySizes.put(4, new Vector2(748 / 3f, 354 / 3f)); // enemyplane4_1
+        flyingEnemySizes.put(3, new Vector2(473/2f,468/2f)); // enemyplane3_1
+        flyingEnemySizes.put(4, new Vector2(401/1.1f,249/1.1f)); // enemyplane4_1
         flyingEnemySizes.put(5, new Vector2(641 / 3f, 546 / 3f)); // enemyplane5_1
 
     }

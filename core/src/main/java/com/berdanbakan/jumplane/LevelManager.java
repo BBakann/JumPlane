@@ -9,6 +9,7 @@ public class LevelManager {
 
     public int currentLevel = 1;
     public int[] levelTargets = {10,15, 20, 25, 30};
+    public int[] levelCoinTargets = {3, 5, 7, 9,11};
     public boolean levelCompleted = false;
     private long levelCompletedTime;
     public boolean isGameOver = false;
@@ -31,27 +32,37 @@ public class LevelManager {
         this.gameScreen=gameScreen;
     }
 
-    public void checkLevelUp(int killedEnemies) {
-        if (killedEnemies >= levelTargets[currentLevel - 1]) {
+    public void checkLevelUp(int killedEnemies, int collectedCoins) {
+        if (levelCompleted) {
+            return;
+        }
+
+        if (killedEnemies >= levelTargets[currentLevel - 1] && collectedCoins >= levelCoinTargets[currentLevel- 1]) {
             gameScreen.isLoading = true;
             levelCompleted = true;
             gameStarted = false;
-            firstStart = false;levelCompletedTime = TimeUtils.millis();
+            firstStart = false;
+            levelCompletedTime = TimeUtils.millis();
 
             if (currentLevel < 5) {
                 currentLevel++;
                 enemyManager.setLevel(currentLevel);
-            } else {
-                isGameOver = true;
-            }
 
-            gameScreen.handleLevelCompleted();
+                gameScreen.handleLevelCompleted();
+
+            } else {
+                // Level 5 tamamlandığında MainMenuScreen'e dön
+                Timer.schedule(new Timer.Task() {@Override
+                public void run() {
+                    gameScreen.game.setScreen(new MainMenuScreen(gameScreen.game));
+                }
+                }, 3f); // 3 saniye sonra MainMenuScreen'e geç
+            }
 
             winSoundPlayed = false;
             gameScreen.checkLevelCompleted();
             gameScreen.resetGame();
         }
-
 
         if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {
             levelCompleted = false;

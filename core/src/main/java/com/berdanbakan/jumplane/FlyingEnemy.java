@@ -20,7 +20,7 @@ public class FlyingEnemy {
     private static final int INITIAL_HEALTH = 2; // Başlangıç canı
     private static final float SHOOT_DELAY = 2f; // Ateş gecikmesi
     private static final float SHOOT_PROBABILITY = 0.50f; //Ateş etme olasılığı
-    private static final float COLLISION_SCALE = 0.95f; // Çarpışma alanı ölçeği
+    private static final float COLLISION_SCALE = 0.90f; // Çarpışma alanı ölçeği
     private static final float BULLET_SPEED = 750f; // Mermi hızı
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
     private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği

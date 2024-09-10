@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Creature5 extends Creature {
 
     public Creature5(float x, float y, float speed, float width, float height) {
-    super(x, y, speed, width, height);
+    super(x, y, speed, width/2.5f, height/2.5f);
 
     TextureRegion[] frames = new TextureRegion[4];
     for (int i = 0; i < 4; i++) {

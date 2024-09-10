@@ -3,7 +3,6 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -23,7 +22,7 @@ import java.util.Random;
 
 public class GameScreen implements Screen {
 
-    private final JumPlane game;
+    public final JumPlane game;
     private SpriteBatch batch;
     private Player player;
     private InputHandler inputHandler;
@@ -55,6 +54,11 @@ public class GameScreen implements Screen {
 
     private Texture loadingBackgroundTexture;
     public boolean isLoading = false;
+
+    private List<Coin> coins;
+    private int collectedCoins;
+    private Random randomCoin;
+
 
 
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
@@ -91,6 +95,9 @@ public class GameScreen implements Screen {
 
         Gdx.input.setInputProcessor(inputHandler);
         checkLevelCompleted();
+
+        coins = new ArrayList<>();
+        random = new Random();
 
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
@@ -186,13 +193,46 @@ public class GameScreen implements Screen {
         }
 
         if (!isPaused && !isLoading) {
-            if (levelManager.gameStarted) {
-                player.update(deltaTime, inputHandler);
+            if (levelManager.gameStarted) {player.update(deltaTime, inputHandler);
                 updatePotions(deltaTime);
                 player.checkPotionCollision(potions);
                 enemyManager.update(player, levelManager);
                 enemyManager.checkCollisions(player, levelManager);
-                levelManager.checkLevelUp(enemyManager.killedEnemies);
+                levelManager.checkLevelUp(enemyManager.killedEnemies,collectedCoins);
+
+                if (coins.isEmpty()) {
+                    float x = Gdx.graphics.getWidth() + random.nextInt(2000);
+                    float y = random.nextInt(Gdx.graphics.getHeight() - 100);
+                    coins.add(new Coin(x, y));
+                }
+
+                Iterator<Coin> coinIterator = coins.iterator();
+                while (coinIterator.hasNext()) {
+                    Coin coin = coinIterator.next();
+                    coin.update(deltaTime);
+                    if (!coin.collected && player.playerPlaneRectangle.overlaps(coin.rectangle)) {
+                        coin.collected = true;
+                        collectedCoins++;
+                        coin.playSound();
+                    }
+                    if (coin.x < -coin.width) {
+                        coin.dispose();
+                        coinIterator.remove();
+
+
+                        if (random.nextFloat() < 0.4f) {
+                            for (int i = 0; i < 2; i++) {
+                                float x = Gdx.graphics.getWidth() + random.nextInt(2000);
+                                float y = random.nextInt(Gdx.graphics.getHeight() - 100);
+                                coins.add(new Coin(x, y));
+                            }
+                        } else {
+                            float x = Gdx.graphics.getWidth() + random.nextInt(2000);
+                            float y = random.nextInt(Gdx.graphics.getHeight() - 100);
+                            coins.add(new Coin(x, y));
+                        }
+                    }
+                }
             }
         }
     }
@@ -206,6 +246,11 @@ public class GameScreen implements Screen {
             for (Potion potion : potions) {
                 batch.draw(potion.texture, potion.x, potion.y, potion.width, potion.height);
             }
+
+            for (Coin coin : coins) {
+                coin.draw(batch);
+            }
+
 
             if (levelManager.isGameOver) {
                 font.getData().setScale(2f);
@@ -224,6 +269,7 @@ public class GameScreen implements Screen {
             inputHandler.drawDpad(batch);
             inputHandler.drawShootButton(batch);
             batch.draw(stopButtonTexture, stopButtonRectangle.x, stopButtonRectangle.y, stopButtonTexture.getWidth() * 2f, stopButtonTexture.getHeight() * 2f);
+
         } else {
 
             batch.draw(loadingBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -315,6 +361,15 @@ public class GameScreen implements Screen {
 
         font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 800, Gdx.graphics.getHeight() - 40);
         font.draw(batch, "Level: " + levelManager.currentLevel, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
+
+
+        String coinsText= "Coins: " + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
+        float levelTextX = Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80;
+        float spacing = 30 + killedEnemiesWidth - 500;
+        float labelWidth = 300;
+
+        batch.draw(labelTexture, levelTextX - labelWidth - spacing, Gdx.graphics.getHeight() - 110, labelWidth, 100);
+        font.draw(batch, coinsText, levelTextX - labelWidth - spacing + 25, Gdx.graphics.getHeight() - 40);
     }
 
     public void resetGame() {
@@ -323,6 +378,10 @@ public class GameScreen implements Screen {
         player.health = 6;
         potions.clear();
         player.resetPosition();
+
+        collectedCoins = 0;
+        coins.clear();
+
     }
 
     @Override
@@ -358,6 +417,9 @@ public class GameScreen implements Screen {
 
         for (Potion potion : potions) {
             potion.dispose();
+        }
+        for (Coin coin : coins) {
+            coin.dispose();
         }
     }
 }
