@@ -1,5 +1,6 @@
 package com.berdanbakan.jumplane;
 
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -74,11 +75,15 @@ public class GameScreen implements Screen {
     private String touchToStartText_tr = "DOKUN VE BASLA!";
     private String killedEnemiesText_tr = "Vurulan Canavar: ";
 
+    private Preferences prefs;
+
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
         this.level = level;
         this.levelMenuScreen = levelMenuScreen;
         batch = new SpriteBatch();
+
+        prefs = Gdx.app.getPreferences("My Preferences");
 
         background = new Background();
         background.setLevel(level);
@@ -326,21 +331,23 @@ public class GameScreen implements Screen {
         font.getData().setScale(1f);
         batch.end();
     }
+
     private void handlePauseMenuInput() {
         if (Gdx.input.justTouched()) {
             int touchX = Gdx.input.getX();
             int touchY = Gdx.graphics.getHeight() - Gdx.input.getY();
 
             // Devam Et düğmesi
-            if (touchX > Gdx.graphics.getWidth() / 2f - 300f && touchX < Gdx.graphics.getWidth() / 2f + 300f &&
-                    touchY >Gdx.graphics.getHeight() / 2f - 50f && touchY < Gdx.graphics.getHeight() / 2f + 150f) {
+            if (touchX> Gdx.graphics.getWidth() / 2f - 300f && touchX < Gdx.graphics.getWidth() / 2f + 300f &&
+                    touchY > Gdx.graphics.getHeight() / 2f - 50f && touchY < Gdx.graphics.getHeight() / 2f + 150f) {
                 isPaused = false;
             }
 
-            // Ana Menü düğmesi
-            if (touchX > Gdx.graphics.getWidth() / 2f - 300f && touchX < Gdx.graphics.getWidth() / 2f + 300f &&
+
+            if (touchX > Gdx.graphics.getWidth() / 2f - 300f && touchX< Gdx.graphics.getWidth() / 2f + 300f &&
                     touchY > Gdx.graphics.getHeight() / 2f - 200f && touchY < Gdx.graphics.getHeight() / 2f - 0f) {
-                game.setScreen(new MainMenuScreen(game));
+                levelMenuScreen.show();
+                game.setScreen(levelMenuScreen);
             }
         }
     }
@@ -353,6 +360,14 @@ public class GameScreen implements Screen {
 
         isLoading = true;
         levelManager.gameStarted = false;
+
+        if (levelManager.currentLevel > prefs.getInteger("unlockedLevel", 1)) {
+            prefs.putInteger("unlockedLevel", levelManager.currentLevel);
+            prefs.flush();
+
+
+            levelMenuScreen.setUnlockedLevel(levelManager.currentLevel);
+        }
 
         Timer.schedule(new Timer.Task() {
             @Override
@@ -374,7 +389,7 @@ public class GameScreen implements Screen {
             killedEnemiesText = killedEnemiesText_tr+ enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
             levelText = levelText_tr + levelManager.currentLevel;
             coinsText = coinsText_tr + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
-        } else { // currentLanguage.equals("en")
+        } else {
             killedEnemiesText = killedEnemiesText_en + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
             levelText =levelText_en + levelManager.currentLevel;
             coinsText = coinsText_en + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
@@ -435,9 +450,7 @@ public class GameScreen implements Screen {
         shapeRenderer.dispose();
         game.stopMusic();
         loadingBackgroundTexture.dispose();
-        if (loadingBackgroundTexture != null) {
-            loadingBackgroundTexture.dispose();
-        }
+
 
         for (Potion potion : potions) {
             potion.dispose();

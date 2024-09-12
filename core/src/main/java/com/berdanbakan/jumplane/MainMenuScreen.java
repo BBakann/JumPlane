@@ -1,6 +1,7 @@
 package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -62,6 +63,7 @@ public class MainMenuScreen implements Screen {
 
     private Texture languageButtonTexture_en;
     private Texture languageButtonTexture_tr;
+
 
     public MainMenuScreen(JumPlane game) {
         this.game = game;
