@@ -56,11 +56,12 @@ public class MainMenuScreen implements Screen {
     private ImageButton languageButton;
 
     private Texture settingsBackgroundTexture;
-    private Texture languageButtonTexture;
     private Texture closeButtonTexture;
 
     private ShapeRenderer shapeRenderer;
 
+    private Texture languageButtonTexture_en;
+    private Texture languageButtonTexture_tr;
 
     public MainMenuScreen(JumPlane game) {
         this.game = game;
@@ -114,9 +115,7 @@ public class MainMenuScreen implements Screen {
     private void createSettingsButton() {
         settingsButtonTexture = new Texture("settingsbutton.png");
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-        buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(settingsButtonTexture).getDrawable();
-
-        settingsButton = new ImageButton(buttonStyle);
+        buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(settingsButtonTexture).getDrawable();settingsButton = new ImageButton(buttonStyle);
         settingsButton.setSize(200, 200);
         settingsButton.setPosition(Gdx.graphics.getWidth() / 3 + 550, Gdx.graphics.getHeight() / 7);
 
@@ -128,6 +127,39 @@ public class MainMenuScreen implements Screen {
             }
         });
         stage.addActor(settingsButton);
+    }
+
+    private void createLanguageButton() {
+        languageButtonTexture_en = new Texture("language_button.png");
+        languageButtonTexture_tr = new Texture("language_button1.png");
+        ImageButton.ImageButtonStyle languageButtonStyle = new ImageButton.ImageButtonStyle();
+
+        // Başlangıç durumunu ayarla
+        if (GameScreen.currentLanguage.equals("tr")) {
+            languageButtonStyle.imageUp = new Image(languageButtonTexture_tr).getDrawable();
+        } else {
+            languageButtonStyle.imageUp = new Image(languageButtonTexture_en).getDrawable();
+        }
+
+        languageButton = new ImageButton(languageButtonStyle);
+        languageButton.setSize(150, 150);
+        languageButton.setPosition(40, 80);
+
+        languageButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameScreen.currentLanguage.equals("tr")) {
+                    GameScreen.currentLanguage = "en";
+                    languageButton.getStyle().imageUp = new Image(languageButtonTexture_en).getDrawable();
+                } else {
+                    GameScreen.currentLanguage = "tr";
+                    languageButton.getStyle().imageUp = new Image(languageButtonTexture_tr).getDrawable();
+                }
+
+            }
+        });
+
+        settingsScreen.addActor(languageButton);
     }
 
 
@@ -223,38 +255,21 @@ public class MainMenuScreen implements Screen {
         settingsScreen.setVisible(false); // Başlangıçta gizle
         stage.addActor(settingsScreen);
 
-
         settingsBackgroundTexture = new Texture("settings_background.png");
         Image settingsBackground = new Image(settingsBackgroundTexture);
-        settingsBackground.setSize(400,300);
+        settingsBackground.setSize(400, 300);
         settingsScreen.addActor(settingsBackground);
 
-
-        languageButtonTexture = new Texture("language_button.png");
-        ImageButton.ImageButtonStyle languageButtonStyle = new ImageButton.ImageButtonStyle();
-        languageButtonStyle.imageUp = new Image(languageButtonTexture).getDrawable();
-        languageButton = new ImageButton(languageButtonStyle);
-        languageButton.setSize(150,150);
-        languageButton.setPosition(40, 80);
-        languageButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Dil ayarlarını değiştir
-            }
-        });
-        settingsScreen.addActor(languageButton);
-
+        createLanguageButton(); // Dil düğmesini oluştur
 
         createVoiceButton();
         voiceButton.setPosition(210, 80);
         settingsScreen.addActor(voiceButton);
 
-
         closeButtonTexture = new Texture("exitbutton.png");
         ImageButton.ImageButtonStyle closeButtonStyle = new ImageButton.ImageButtonStyle();
         closeButtonStyle.imageUp = new Image(closeButtonTexture).getDrawable();
-        ImageButton closeButton = new ImageButton(closeButtonStyle);
-        closeButton.setSize(50,50);
+        ImageButton closeButton = new ImageButton(closeButtonStyle);closeButton.setSize(50, 50);
         closeButton.setPosition(settingsBackground.getWidth() - closeButton.getWidth() - 10,
                 settingsBackground.getHeight() - closeButton.getHeight() - 10);
         closeButton.addListener(new ClickListener() {
@@ -359,7 +374,9 @@ public class MainMenuScreen implements Screen {
 
 
         settingsBackgroundTexture.dispose();
-        languageButtonTexture.dispose();
+
+        languageButtonTexture_en.dispose();
+        languageButtonTexture_tr.dispose();
 
         settingsScreen.clear();
 

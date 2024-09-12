@@ -41,8 +41,10 @@ public class Coin {
     }
 
     public void update(float deltaTime) {
-        x -= speed * deltaTime;
-        rectangle.x = x;
+        if (!collected) {
+            x -= 200 * deltaTime;
+            rectangle.set(x, y, width, height);
+        }
     }
 
     public void draw(SpriteBatch batch) {

@@ -29,6 +29,15 @@ public class EnemyManager {
 
     private Map<Integer, Vector2> flyingEnemySizes;
 
+    private float creatureSpawnTimer;
+    private float creatureSpawnDelay;
+
+    private float flyingEnemySpawnTimer;
+    private float flyingEnemySpawnDelay;
+
+    private float obstacleSpawnTimer;
+    private float obstacleSpawnDelay;
+
     public EnemyManager() {;
         flyingEnemies = new ArrayList<>();
         creatures = new ArrayList<>();
@@ -47,15 +56,72 @@ public class EnemyManager {
         flyingEnemySizes.put(5, new Vector2(641 / 3f, 546 / 3f)); // enemyplane5_1
 
     }
+    public void setLevel(int level) {
+        this.currentLevel = level; // Mevcut seviyeyi güncelle
+
+        // Level'e göre gecikmesürelerini ayarla
+        switch (level) {
+            case 1:
+                creatureSpawnDelay = 3f;
+                flyingEnemySpawnDelay = 5f;
+                obstacleSpawnDelay = 7f;
+                break;
+            case 2:
+                creatureSpawnDelay = 2.5f;
+                flyingEnemySpawnDelay = 4f;
+                obstacleSpawnDelay = 6f;
+                break;
+            case 3:
+                creatureSpawnDelay = 2f;
+                flyingEnemySpawnDelay = 3f;
+                obstacleSpawnDelay = 5f;
+                break;
+            case 4:
+                creatureSpawnDelay = 1.5f;
+                flyingEnemySpawnDelay = 2.5f;
+                obstacleSpawnDelay = 4f;
+                break;
+            case 5:
+                creatureSpawnDelay = 1f;
+                flyingEnemySpawnDelay = 2f;
+                obstacleSpawnDelay = 3f;
+                break;
+            default:
+                // Varsayılan gecikme süreleri
+                creatureSpawnDelay = 2f;
+                flyingEnemySpawnDelay = 3f;
+                obstacleSpawnDelay = 5f;
+                break;
+        }
+    }
 
     public void update(Player player, LevelManager levelManager) {
 
-        float deltaTime = Gdx.graphics.getDeltaTime();
+        if (creatureSpawnTimer >= creatureSpawnDelay) {
+            spawnCreature();
+            creatureSpawnTimer = 0; // Zamanlayıcıyı sıfırla
+        } else {
+            creatureSpawnTimer += Gdx.graphics.getDeltaTime();
+        }
+
+        if (flyingEnemySpawnTimer >= flyingEnemySpawnDelay){
+            spawnFlyingEnemy();
+            flyingEnemySpawnTimer = 0; // Zamanlayıcıyı sıfırla
+        }else {
+            flyingEnemySpawnTimer += Gdx.graphics.getDeltaTime();
+        }
+
+        if (obstacleSpawnTimer >= obstacleSpawnDelay) {
+            spawnObstacle();
+            obstacleSpawnTimer = 0; // Zamanlayıcıyı sıfırla
+        } else {
+            obstacleSpawnTimer += Gdx.graphics.getDeltaTime();
+        }
 
         Iterator<FlyingEnemy> flyingEnemyIterator = flyingEnemies.iterator();
         while (flyingEnemyIterator.hasNext()) {
             FlyingEnemy enemy = flyingEnemyIterator.next();
-            enemy.update(deltaTime);
+            enemy.update(Gdx.graphics.getDeltaTime());
             if (enemy.x < -enemy.width) {
                 flyingEnemyIterator.remove();
             }
@@ -118,9 +184,6 @@ public class EnemyManager {
         for (Explosion explosion : explosions) {
             explosion.draw(batch);
         }
-    }
-    public void setLevel(int level) {
-         this.currentLevel = level;
     }
 
     public void spawnFlyingEnemy() {

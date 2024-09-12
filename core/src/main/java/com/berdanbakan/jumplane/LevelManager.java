@@ -9,7 +9,7 @@ public class LevelManager {
 
     public int currentLevel = 1;
     public int[] levelTargets = {10,15, 20, 25, 30};
-    public int[] levelCoinTargets = {3, 5, 7, 9,11};
+    public int[] levelCoinTargets = {5, 10,10 ,15,15};
     public boolean levelCompleted = false;
     private long levelCompletedTime;
     public boolean isGameOver = false;
@@ -18,7 +18,6 @@ public class LevelManager {
     public boolean winSoundPlayed = false;
 
     private EnemyManager enemyManager;
-    private Random random = new Random();
 
     private static final int MAX_AMMO = 6;
     private int ammo = MAX_AMMO;
@@ -75,27 +74,8 @@ public class LevelManager {
         reloadTime = 0;
         isGameOver = false;
 
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                if (!isGameOver) {
-                    spawnRandomEnemy();
-                    float randomDelay = random.nextFloat() * 7f + 1f;
-                    Timer.schedule(this, randomDelay);
-                }
-            }
-        }, 5f);
     }
 
-    private void spawnRandomEnemy() {
-        float chance = random.nextFloat();
-        if (chance < 0.33f) {
-            enemyManager.spawnFlyingEnemy();
-        } else if (chance < 0.66f) {enemyManager.spawnCreature();
-        } else {
-            enemyManager.spawnObstacle();
-        }
-    }
     public void gameOver(){
         isGameOver = true;
         gameStarted = false;

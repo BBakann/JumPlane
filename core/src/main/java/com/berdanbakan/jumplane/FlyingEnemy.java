@@ -52,7 +52,7 @@ public class FlyingEnemy {
     }
 
     public void update(float deltaTime) {
-        x -= speed * Gdx.graphics.getDeltaTime();
+        x -= speed * deltaTime;
 
         // Çarpışma alanını görselin ortasına ve boyutuna göre ayarla
         float collisionOffsetX = width * (1 - COLLISION_SCALE) / 2;
