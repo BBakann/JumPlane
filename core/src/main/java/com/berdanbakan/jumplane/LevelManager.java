@@ -1,34 +1,43 @@
 package com.berdanbakan.jumplane;
 
-
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
-import java.util.Random;
 
 public class LevelManager {
 
     public int currentLevel = 1;
-    public int[] levelTargets = {10,15, 20, 25, 30};
+    public int[] levelTargets = {10,15,20, 25, 30};
     public int[] levelCoinTargets = {5, 10,10 ,15,15};
     public boolean levelCompleted = false;
     private long levelCompletedTime;
     public boolean isGameOver = false;
     public boolean gameStarted = false;
-    public boolean firstStart = true;
     public boolean winSoundPlayed = false;
 
     private EnemyManager enemyManager;
+    private GameScreen gameScreen;
 
     private static final int MAX_AMMO = 6;
     private int ammo = MAX_AMMO;
-    private float reloadTime = 0.25f;
+    private float reloadTime= 0.25f;
     private int health = 6;
 
-    private GameScreen gameScreen;
+    private Sound winSound;
+    private Sound gameOverSound;
 
-    public LevelManager(EnemyManager enemyManager,GameScreen gameScreen) {
+    public boolean firstStart = true;
+    private SpriteBatch batch;
+
+    public LevelManager(EnemyManager enemyManager,GameScreen gameScreen,SpriteBatch batch) {
         this.enemyManager=enemyManager;
         this.gameScreen=gameScreen;
+        this.batch = batch;
+
+        winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("gameoversound.mp3"));
     }
 
     public void checkLevelUp(int killedEnemies, int collectedCoins) {
@@ -40,22 +49,15 @@ public class LevelManager {
             gameScreen.isLoading = true;
             levelCompleted = true;
             gameStarted = false;
-            firstStart = false;
             levelCompletedTime = TimeUtils.millis();
 
             if (currentLevel < 5) {
                 currentLevel++;
                 enemyManager.setLevel(currentLevel);
-
                 gameScreen.handleLevelCompleted();
-
             } else {
                 // Level 5 tamamlandığında MainMenuScreen'e dön
-                Timer.schedule(new Timer.Task() {@Override
-                public void run() {
-                    gameScreen.game.setScreen(new MainMenuScreen(gameScreen.game));
-                }
-                }, 3f); // 3 saniye sonra MainMenuScreen'e geç
+                gameScreen.game.setScreen(new MainMenuScreen(gameScreen.game,batch));
             }
 
             winSoundPlayed = false;
@@ -65,6 +67,7 @@ public class LevelManager {
 
         if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {
             levelCompleted = false;
+            gameScreen.isLoading = false; // Yükleme ekranını kapat
         }
     }
 
@@ -73,13 +76,13 @@ public class LevelManager {
         ammo = MAX_AMMO;
         reloadTime = 0;
         isGameOver = false;
-
     }
 
     public void gameOver(){
         isGameOver = true;
         gameStarted = false;
-
+        gameOverSound.play();
+        firstStart = true;
 
         Timer.instance().clear();
 
@@ -117,6 +120,9 @@ public class LevelManager {
     public void setHealth(int health) {
         this.health = health;
     }
+
+    public void dispose() {
+        winSound.dispose();
+        gameOverSound.dispose();
+    }
 }
-
-

@@ -1,6 +1,5 @@
 package com.berdanbakan.jumplane;
 
-import static com.badlogic.gdx.graphics.Colors.reset;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -155,7 +154,7 @@ public class InputHandler extends InputAdapter {
     public boolean scrolled(float amountX, float amountY) { return false; }
 
 
-    // Kullanılmayan metodları boş olarak override edin
+
     @Override
     public boolean keyDown(int keycode) { return false; }
     @Override
@@ -169,7 +168,7 @@ public class InputHandler extends InputAdapter {
 
 
 
-    public void drawDpad(SpriteBatch batch) { // drawDpad() metodu eklendi
+    public void drawDpad(SpriteBatch batch) {
         int screenX = Gdx.input.getX();
         int screenY = Gdx.graphics.getHeight() - Gdx.input.getY();
 
@@ -183,17 +182,17 @@ public class InputHandler extends InputAdapter {
             } else if (rightButtonBounds.contains(screenX, screenY)) {
                 batch.draw(dpad_rightTexture, dpadX, dpadY, dpadSize, dpadSize);
             } else {
-                // D-Pad dışına dokunulduğunda dpad.png'yi çiz
+
                 batch.draw(dpadTexture, dpadX, dpadY, dpadSize, dpadSize);
             }
         } else {
-            // Dokunma yokken dpad.png'yi çiz
+
             batch.draw(dpadTexture, dpadX, dpadY, dpadSize, dpadSize);
         }
 
     }
 
-    public void drawShootButton(SpriteBatch batch) { // drawShootButton() metodu eklendi
+    public void drawShootButton(SpriteBatch batch) {
         if (isButtonPressed) {
             batch.draw(shootButtonPressedTexture, buttonRectangle.x, buttonRectangle.y, buttonRectangle.width, buttonRectangle.height);
         } else {
@@ -203,7 +202,7 @@ public class InputHandler extends InputAdapter {
 
 
     private void shootBullet() {
-        player.shootBullet(levelManager.currentLevel); // player'ın shootBullet() metodunu çağır
+        player.shootBullet(levelManager.currentLevel);
     }
 
     public boolean isUpButtonPressed() {

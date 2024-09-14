@@ -3,20 +3,25 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class JumPlane extends Game {
 
-    private Music currentMusic; //Şu anda çalan müziği tutan değişken
-
+    private Music currentMusic;
+    private SpriteBatch batch;
+    private Texture splashBackgroundTexture;
     @Override
     public void create() {
-        setScreen(new SplashScreen(this));
+        batch = new SpriteBatch();
+        splashBackgroundTexture = new Texture("splash_background.png");
+        setScreen(new SplashScreen(this,batch,splashBackgroundTexture));
     }
 
     @Override
     public void dispose() {
         getScreen().dispose();
-        stopMusic(); // Uygulama kapatıldığında müziği durdur
+        stopMusic();
     }
 
     public void playMusic(String musicFile) {

@@ -10,7 +10,7 @@ public class FlyingEnemy5 extends FlyingEnemy {
     private Texture texture;
 
     public FlyingEnemy5(float x, float y, float speed, float width, float height) {
-        super(x, y, speed, width, height);
+        super(x, y, speed*1.6f, width, height);
         texture = new Texture("enemyplane5_1.png");
     }
 
@@ -18,7 +18,6 @@ public class FlyingEnemy5 extends FlyingEnemy {
     public void draw(SpriteBatch batch) {
         batch.draw(texture, x, y, width, height);
 
-        // Düşman mermilerini çiz
         for (Bullet bullet : getBullets()) {
             batch.draw(enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
         }

@@ -3,15 +3,16 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 public abstract class Creature {
     public float x, y, speed, width, height;
     public int health;
-    public Rectangle rectangle; // Çarpışma Alanı
+    public Rectangle rectangle;
 
-    protected Animation<TextureRegion> animation; // Animasyon değişkeni
-    protected float animationTime; // Animasyon zamanı
+    protected Animation<TextureRegion> animation;
+    protected float animationTime;
 
     public Creature(float x, float y, float speed, float width, float height) {
         this.x = x;

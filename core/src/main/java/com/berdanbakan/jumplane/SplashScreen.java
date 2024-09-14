@@ -13,10 +13,11 @@ public class SplashScreen implements Screen {
     private SpriteBatch batch;
     private Texture splashBackgroundTexture;
 
-    public SplashScreen(JumPlane game) {
+    public SplashScreen(JumPlane game,SpriteBatch batch,Texture splashBackgroundTexture) {
         this.game = game;
-        batch = new SpriteBatch();
-        splashBackgroundTexture = new Texture("splash_background.png"); // Arka plan resmini yükleyin
+        this.batch=batch;
+        this.splashBackgroundTexture= splashBackgroundTexture;
+
     }
 
     @Override
@@ -25,18 +26,18 @@ public class SplashScreen implements Screen {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                game.setScreen(new MainMenuScreen(game)); // Ana menüye geç
+                game.setScreen(new MainMenuScreen(game, batch)); // Ana menüye geç
             }
-        }, 2); // 2 saniye sonra ana menüye geç
+        }, 3); // 2 saniye sonra ana menüye geç
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1); // Arka plan rengini(siyah) ayarlayın
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-        batch.draw(splashBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Arka planı çiz
+        batch.draw(splashBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
     }
 

@@ -28,31 +28,40 @@ public class Obstacle {
         this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);
 
-        textures=new Texture[5];
-        for (int i=0;i<5;i++){
-            textures[i]=new Texture("obstacle"+(i+1)+".png");
+        if (textures == null) {
+            loadTextures();
         }
-        currentLevel=1;
+
+        currentLevel = 1;
     }
 
-    public void update() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
+    private void loadTextures() {
+        textures = new Texture[5];
+        for (int i = 0; i < 5; i++) {
+            textures[i] = new Texture("obstacle" + (i + 1) + ".png");
+        }
+    }
+
+    public void update() {float deltaTime = Gdx.graphics.getDeltaTime();
         x -= speed * deltaTime;
         rectangle.set(x + width * RECT_OFFSET_X_FACTOR, y + height * RECT_OFFSET_Y_FACTOR, width * RECT_WIDTH_FACTOR, height * RECT_HEIGHT_FACTOR);
     }
 
-    public void setLevel(int level){
-        currentLevel=level;
+    public void setLevel(int level) {
+        currentLevel = level;
     }
 
-    public void draw(SpriteBatch batch){
-        int index=(currentLevel-1)%5;
-        batch.draw(textures[index],x,y,width,height);
+    public void draw(SpriteBatch batch) {
+        int index = (currentLevel - 1) % 5;
+        batch.draw(textures[index], x, y, width, height);
     }
 
-    public void dispose(){
-        for (Texture texture : textures) {
-            texture.dispose();
+    public void dispose() {
+        if (textures != null) {
+            for (Texture texture : textures) {
+                texture.dispose();
+            }
+            textures = null;
         }
     }
 }

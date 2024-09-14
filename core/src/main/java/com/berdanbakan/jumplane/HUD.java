@@ -16,8 +16,8 @@ public class HUD {
     private static final float AMMO_Y = Gdx.graphics.getHeight() - 185f; // Mermi göstergesinin y koordinatı
     private static final float AMMO_SIZE = 168f; // Mermi göstergesinin boyutu
 
-    private static Texture[] healthTextures; // Statik olarak tanımlandı
-    private static Texture[] ammoTextures; // Statik olarak tanımlandı
+    private static Texture[] healthTextures;
+    private static Texture[] ammoTextures;
 
     public HUD() {
         if (healthTextures == null || ammoTextures == null) {

@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class Bullet {
     public float x, y, speedX, speedY, width, height;
     public Texture texture;
-    public Rectangle rectangle;//Çarpışma Alanı
+    public Rectangle rectangle;
     int damage;
 
     public Bullet(float x, float y, float speedX,float speedY, Texture texture, float width, float height,int damage) {
@@ -22,8 +22,8 @@ public class Bullet {
         this.rectangle = new Rectangle(x, y, width, height);
     }
     public void update() {
-        x += speedX * Gdx.graphics.getDeltaTime(); // speedX kullanıldı
-        y += speedY * Gdx.graphics.getDeltaTime(); // speedY kullanıldı
+        x += speedX * Gdx.graphics.getDeltaTime();
+        y += speedY * Gdx.graphics.getDeltaTime();
         rectangle.set(x, y, width, height);
     }
 }

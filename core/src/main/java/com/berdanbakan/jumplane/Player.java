@@ -162,7 +162,8 @@ public class Player {
         return bullets;
     }
 
-    public static void dispose() {for (Texture planeTexture : planeTextures) {
+    public static void dispose() {
+        for (Texture planeTexture : planeTextures) {
         planeTexture.dispose();
     }
         for (Texture bulletTexture : bulletTextures) {

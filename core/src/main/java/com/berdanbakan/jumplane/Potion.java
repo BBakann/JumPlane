@@ -9,7 +9,6 @@ public class Potion {
     public enum PotionType{
         HEALTH,POISON
     }
-
     public Texture texture;
     public PotionType type;
     public float x,y,width,height;

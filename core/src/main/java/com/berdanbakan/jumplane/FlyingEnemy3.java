@@ -7,22 +7,29 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class FlyingEnemy3 extends FlyingEnemy {
-    public float width =473/2f ;
-    public float height =468/2f ;
+    public float width = 473 / 2f;
+    public float height = 468 / 2f;
 
     private Animation<TextureRegion> animation;
     private float animationTime;
+    private Texture[] animationTextures = new Texture[11];
 
     public FlyingEnemy3(float x, float y, float speed, float width, float height) {
-        super(x, y, speed, width, height);
+        super(x, y, speed*1.3f, width, height);
+        loadTextures();
         loadAnimation();
+    }
+
+    private void loadTextures() {
+        for (int i = 0; i < 11; i++) {
+            animationTextures[i] = new Texture("enemyplane3_" + (i + 1) + ".png");
+        }
     }
 
     private void loadAnimation() {
         TextureRegion[] frames = new TextureRegion[11];
         for (int i = 0; i < 11; i++) {
-            Texture texture = new Texture("enemyplane3_" + (i + 1) + ".png");
-            frames[i] = new TextureRegion(texture);
+            frames[i] = new TextureRegion(animationTextures[i]);
         }
         animation = new Animation<>(0.1f, frames);
         animationTime = 0;
@@ -34,17 +41,15 @@ public class FlyingEnemy3 extends FlyingEnemy {
         TextureRegion currentFrame = animation.getKeyFrame(animationTime, true);
         batch.draw(currentFrame, x, y, width, height);
 
-        // Düşman mermilerini çiz
-        for (Bullet bullet : getBullets()) {
-            batch.draw(enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
+        for (Bullet bullet : getBullets()) {batch.draw(enemyBulletTexture, bullet.x, bullet.y, bullet.width, bullet.height);
         }
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        for (TextureRegion frame : animation.getKeyFrames()) {
-            frame.getTexture().dispose();
+        for (Texture texture : animationTextures) {
+            texture.dispose();
         }
     }
 }

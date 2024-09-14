@@ -36,7 +36,7 @@ public class MainMenuScreen implements Screen {
     private Sound clickSound;
 
     private ImageButton voiceButton;
-    private Texture voiceButtonTexture;
+
 
     private boolean isMusicPlaying = true;
 
@@ -64,31 +64,61 @@ public class MainMenuScreen implements Screen {
     private Texture languageButtonTexture_en;
     private Texture languageButtonTexture_tr;
 
+    private Texture voiceUpTexture;
+    private Texture voiceDownTexture;
 
-    public MainMenuScreen(JumPlane game) {
+
+    public MainMenuScreen(JumPlane game, SpriteBatch batch) {
         this.game = game;
-        stage = new Stage(new ScreenViewport());
-        backgroundTexture = new Texture("menubackground.png");
-        batch = new SpriteBatch();
+        this.batch = batch;
+        try {
+            stage = new Stage(new ScreenViewport());
 
-        createStartButton();
-        createSettingsButton();
-        createResultButton();
-        createInfoButton();
-        createExitButton();
-        createSettingsScreen();
+                backgroundTexture = new Texture("menubackground.png");
+
+                startButtonTexture = new Texture("openbutton.png");
+
+                settingsButtonTexture = new Texture("settingsbutton.png");
+
+                infoButtonTexture = new Texture("infobutton.png");
+
+                exitButtonTexture = new Texture("exitbutton.png");
+
+                resultButtonTexture = new Texture("resultbutton.png");
+
+                settingsBackgroundTexture = new Texture("settings_background.png");
+
+                closeButtonTexture = new Texture("exitbutton.png");
+
+                languageButtonTexture_en = new Texture("language_button.png");
+
+                languageButtonTexture_tr = new Texture("language_button1.png");
+
+                voiceUpTexture = new Texture("voiceup.png");
+
+                voiceDownTexture = new Texture("voice_down.png");
 
 
-        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color = Color.WHITE;
-        params.size = 40;
-        font = fontGen.generateFont(params);
+            createStartButton();
+            createSettingsButton();
+            createResultButton();
+            createInfoButton();
+            createExitButton();
+            createSettingsScreen();
 
-        game.playMusic("backgroundmusic.mp3");
-        shapeRenderer=new ShapeRenderer();
+            fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
+            FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            params.color = Color.WHITE;
+            params.size = 40;
+            font = fontGen.generateFont(params);
 
-        clickSound = Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
+            game.playMusic("backgroundmusic.mp3");
+            shapeRenderer = new ShapeRenderer();
+
+            clickSound = Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
+        } catch (Exception e) {
+
+        }
     }
 
     private void createStartButton() {
@@ -228,28 +258,27 @@ public class MainMenuScreen implements Screen {
         });
         stage.addActor(resultButton);
     }
+
     private void createVoiceButton() {
-        voiceButtonTexture = new Texture("voiceup.png");
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-        buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(voiceButtonTexture).getDrawable();
+        buttonStyle.imageUp = new Image(voiceUpTexture).getDrawable();
 
         voiceButton = new ImageButton(buttonStyle);
         voiceButton.setSize(150, 150);
 
         voiceButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                isMusicPlaying = !isMusicPlaying; // Müziğin durumunu değiştirmek için
+                isMusicPlaying = !isMusicPlaying;
 
                 if (isMusicPlaying) {
-                    game.playMusic("backgroundmusic.mp3"); // JumPlane üzerinden müziği başlat
-                    voiceButton.getStyle().imageUp = new Image(new Texture("voiceup.png")).getDrawable();
+                    game.playMusic("backgroundmusic.mp3");
+                    voiceButton.getStyle().imageUp = new Image(voiceUpTexture).getDrawable();
                 } else {
-                    game.stopMusic(); // JumPlane üzerinden müziği durdur
-                    voiceButton.getStyle().imageUp = new Image(new Texture("voice_down.png")).getDrawable();
+                    game.stopMusic();
+                    voiceButton.getStyle().imageUp = new Image(voiceDownTexture).getDrawable();
                 }
             }
         });
-
     }
 
     private void createSettingsScreen() {
@@ -262,7 +291,7 @@ public class MainMenuScreen implements Screen {
         settingsBackground.setSize(400, 300);
         settingsScreen.addActor(settingsBackground);
 
-        createLanguageButton(); // Dil düğmesini oluştur
+        createLanguageButton();
 
         createVoiceButton();
         voiceButton.setPosition(210, 80);
@@ -286,7 +315,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+            Gdx.input.setInputProcessor(stage);
     }
 
     @Override
@@ -295,7 +324,7 @@ public class MainMenuScreen implements Screen {
 
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.end(); // Batch'i burada kapatın
+        batch.end();
 
         if (infoButtonClicked) {
             // Ekranı karart
@@ -366,7 +395,6 @@ public class MainMenuScreen implements Screen {
             music.dispose();
         }
         clickSound.dispose();
-        voiceButtonTexture.dispose();
         infoButtonTexture.dispose();
         font.dispose();
         fontGen.dispose();
@@ -389,5 +417,8 @@ public class MainMenuScreen implements Screen {
         infoButton.clearListeners();
         exitButton.clearListeners();
         resultButton.clearListeners();
+
+        voiceUpTexture.dispose();
+        voiceDownTexture.dispose();
     }
 }

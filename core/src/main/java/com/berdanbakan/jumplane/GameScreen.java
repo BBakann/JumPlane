@@ -44,7 +44,7 @@ public class GameScreen implements Screen {
     private Random random;
 
     private float coinSpawnTimer;
-    private float coinSpawnDelay = 5f; // Coin spawn gecikmesi
+    private float coinSpawnDelay = 5f;
 
     private Sound winSound;
     private Texture labelTexture;
@@ -91,7 +91,7 @@ public class GameScreen implements Screen {
         ground = new Ground();
 
         enemyManager = new EnemyManager();
-        levelManager =new LevelManager(enemyManager,this);
+        levelManager =new LevelManager(enemyManager,this,batch);
         levelManager.currentLevel = this.level;
         enemyManager.setLevel(levelManager.currentLevel);
         player = new Player(ground, levelManager);
@@ -240,7 +240,7 @@ public class GameScreen implements Screen {
                 player.update(deltaTime, inputHandler);
                 updatePotions(deltaTime);
                 player.checkPotionCollision(potions);
-                enemyManager.update(player, levelManager); // Bu satırı buraya taşıdık
+                enemyManager.update(player, levelManager);
                 enemyManager.checkCollisions(player, levelManager);
                 levelManager.checkLevelUp(enemyManager.killedEnemies, collectedCoins);
                 updateCoins(deltaTime);
@@ -323,11 +323,11 @@ public class GameScreen implements Screen {
 
         batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f + 10f, 580, 150);
 
-        font.draw(batch, "CONTINUE !", Gdx.graphics.getWidth() / 2f - 234f, Gdx.graphics.getHeight() / 2f + 145f); // Sola kaydırmak için x koordinatını azaltın
+        font.draw(batch, "CONTINUE !", Gdx.graphics.getWidth() / 2f - 234f, Gdx.graphics.getHeight() / 2f + 145f);
 
 
         batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 280f, Gdx.graphics.getHeight() / 2f - 200f, 580, 150);
-        font.draw(batch, "ANA MENU !", Gdx.graphics.getWidth() / 2f - 254f, Gdx.graphics.getHeight() / 2f - 65f); // Sola kaydırmak için x koordinatını azaltın
+        font.draw(batch, "ANA MENU !", Gdx.graphics.getWidth() / 2f - 254f, Gdx.graphics.getHeight() / 2f - 65f);
         font.getData().setScale(1f);
         batch.end();
     }

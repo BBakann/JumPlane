@@ -20,13 +20,13 @@ public class FlyingEnemy {
     private static final int INITIAL_HEALTH = 2; // Başlangıç canı
     private static final float SHOOT_DELAY = 2f; // Ateş gecikmesi
     private static final float SHOOT_PROBABILITY = 0.50f; //Ateş etme olasılığı
-    private static final float COLLISION_SCALE = 0.90f; // Çarpışma alanı ölçeği
+    private static final float COLLISION_SCALE =0.90f; // Çarpışma alanı ölçeği
     private static final float BULLET_SPEED = 750f; // Mermi hızı
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
     private static final float BULLET_SCALE = 1/6f; // Mermi ölçeği
 
-    public static Texture enemyBulletTexture; // Statik olarak tanımlandı
-    private static Random random; // Statik olarak tanımlandı
+    public static Texture enemyBulletTexture;
+    private static Random random;
 
     public FlyingEnemy(float x, float y, float speed, float width, float height) {
         this.x = x;
@@ -43,8 +43,7 @@ public class FlyingEnemy {
             enemyBulletTexture = new Texture("bullet1.png");
         }
         if(random == null) {
-            random = new Random();
-        }
+            random = new Random();}
     }
 
     public void draw(SpriteBatch batch) {
@@ -75,7 +74,7 @@ public class FlyingEnemy {
         while (iter.hasNext()) {
             Bullet bullet = iter.next();
             bullet.update();
-            if (bullet.x < 0) { // Ekranın solundan çıkınca kaldır
+            if (bullet.x < 0) {
                 iter.remove();
             }
         }
@@ -94,6 +93,6 @@ public class FlyingEnemy {
     }
 
     public void dispose(){
-        enemyBulletTexture.dispose();
+        // enemyBulletTexture'ı burada dispose etmeyin
     }
 }

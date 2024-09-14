@@ -1,6 +1,5 @@
 <resources>
     <style name="GdxTheme" parent="android:Theme">
-        <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:windowNoTitle">true</item>

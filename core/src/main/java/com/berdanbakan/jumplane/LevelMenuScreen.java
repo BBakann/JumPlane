@@ -3,9 +3,7 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -33,11 +30,20 @@ public class LevelMenuScreen implements Screen {
 
     private Preferences prefs;
 
+    private Texture[] levelOpenedButtonTextures = new Texture[5];
+    private Texture[] levelClosedButtonTextures = new Texture[5];
+
     public LevelMenuScreen(JumPlane game){
         this.game=game;
         stage=new Stage(new ScreenViewport());
         levelbackgroundTexture=new Texture("levelmenubackground.png");
         batch=new SpriteBatch();
+
+        for (int i = 1; i <= 5; i++) {
+            levelOpenedButtonTextures[i-1] = new Texture("level" + i + "openedbutton.png");
+            if (i > 1) {
+                levelClosedButtonTextures[i-1] = new Texture("level" + i + "button.png");}
+        }
 
         createLevelButtons();
         createExitButton();
@@ -70,16 +76,14 @@ public class LevelMenuScreen implements Screen {
         for (int i = 1; i <= 5; i++){
             Texture levelbuttonTexture;
 
-            if (i == 1){
-                levelbuttonTexture = new Texture("level" + i + "openedbutton.png"); // 1. seviye her zaman açık
-            } else if (i <= unlockedLevel) {
-                levelbuttonTexture = new Texture("level" + i + "openedbutton.png"); // Açık seviye butonu
+            if (i <= unlockedLevel) {
+                levelbuttonTexture = levelOpenedButtonTextures[i-1];
             } else {
-                levelbuttonTexture = new Texture("level" + i + "button.png"); // Kapalı seviye butonu
+                levelbuttonTexture = levelClosedButtonTextures[i-1];
             }
 
             ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-            buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(levelbuttonTexture).getDrawable();
+            buttonStyle.imageUp = new Image(levelbuttonTexture).getDrawable();
 
             ImageButton levelButton = new ImageButton(buttonStyle);
             levelButtons[i-1] = levelButton;
@@ -156,7 +160,7 @@ public class LevelMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event,float x,float y){
                 clickSound.play();
-                game.setScreen(new MainMenuScreen(game));
+                game.setScreen(new MainMenuScreen(game,batch));
             }
         });
         stage.addActor(backButton);
@@ -165,10 +169,10 @@ public class LevelMenuScreen implements Screen {
 
     @Override
     public void show(){
-        if (stage == null) { // stage nesnesi yoksa oluştur
+        if (stage == null) {
             stage = new Stage(new ScreenViewport());
         } else {
-            stage.clear(); // stage nesnesi varsa temizle
+            stage.clear();
         }
 
         createLevelButtons();
@@ -189,21 +193,10 @@ public class LevelMenuScreen implements Screen {
         batch.begin();
         batch.draw(levelbackgroundTexture,0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
-
-
-
-
-
-
-
         batch.end();
 
         stage.act(delta);
         stage.draw();
-
-
-
-
 
     }
 
@@ -232,11 +225,14 @@ public class LevelMenuScreen implements Screen {
         batch.dispose();
         levelbackgroundTexture.dispose();
 
-
         exitButtonTexture.dispose();
         backButtonTexture.dispose();
 
         clickSound.dispose();
 
+        for (int i = 0; i < 5; i++) {
+            levelOpenedButtonTextures[i].dispose();
+            levelClosedButtonTextures[i].dispose();
+        }
     }
 }

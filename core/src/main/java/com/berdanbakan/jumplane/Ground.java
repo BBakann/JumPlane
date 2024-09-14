@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Ground {
-    private static final float GROUND_SCALE = 0.4f; // Zemin ölçeği
+    private static final float GROUND_SCALE = 0.4f;
 
-    private static Texture groundTexture; // Statik olarak tanımlandı
-    public final float groundHeight; // Zemin yüksekliği (final olarak tanımlandı)
+    private static Texture groundTexture;
+    public final float groundHeight;
 
     public Ground() {
         if (groundTexture == null) {
