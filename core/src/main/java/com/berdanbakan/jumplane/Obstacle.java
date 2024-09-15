@@ -23,7 +23,7 @@ public class Obstacle {
     public Obstacle(float x, float y, float speed, float width, float height) {
         this.x = x;
         this.y = y;
-        this.speed = speed;
+        this.speed = speed*2.8f;
         this.width = width;
         this.height = height;
         this.rectangle = new Rectangle(x, y, width, height);

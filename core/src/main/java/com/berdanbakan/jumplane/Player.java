@@ -1,6 +1,7 @@
 package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -29,6 +30,9 @@ public class Player {
     private Ground ground;
     private LevelManager levelManager;
 
+    private JumPlane game;
+
+
     static { // Statik blok içinde yükleyin
         planeTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
@@ -41,9 +45,10 @@ public class Player {
         }
     }
 
-    public Player(Ground ground, LevelManager levelManager) {
+    public Player(Ground ground, LevelManager levelManager,JumPlane game) {
         this.ground = ground;
         this.levelManager = levelManager;
+        this.game = game;
         playerPlaneRectangle = new Rectangle();
         bullets = new ArrayList<>();
         reset();
@@ -127,7 +132,7 @@ public class Player {
         updatePlaneTexture(levelManager.currentLevel);
     }
 
-    public void shootBullet(int level) {
+    public void shootBullet(int level, Sound ammoSound, Sound switchAmmoSound) {
         if (ammo > 0 && !dugmeGeciciOlarakBasili) {
             ammo--;
 
@@ -141,6 +146,7 @@ public class Player {
             bullets.add(bullet);
 
             dugmeGeciciOlarakBasili = true;
+            ammoSound.play();
 
             Timer.schedule(new Timer.Task() {
                 @Override
@@ -150,11 +156,13 @@ public class Player {
             }, 0.1f);
 
             if (ammo == 0) {
-                reloadTime = 1f;
+                reloadTime = 3f;
             }
         } else if (reloadTime <= 0) {
             ammo = MAX_AMMO;
-            reloadTime = 1f;
+            reloadTime = 2.5f;
+
+            switchAmmoSound.play();
         }
     }
 

@@ -40,15 +40,6 @@ public class InputHandler extends InputAdapter {
     private boolean dugmeGeciciOlarakBasili;
     private static final float SHOOT_DELAY = 0.125f;
 
-    // Uçak pozisyonu
-    private float planeX; // Uçağın yatay pozisyonu (sabit)
-    private float planeY; // Uçağın dikey pozisyonu
-    private float planeSpeed = 450f;
-
-    private float planeWidth;
-    private float planeHeight;
-
-    private float groundHeight;
 
     public boolean isUpButtonPressed = false;
     public boolean isDownButtonPressed = false;
@@ -113,7 +104,7 @@ public class InputHandler extends InputAdapter {
                     shootBullet();
                     dugmeGeciciOlarakBasili = false; // Ateş ettikten sonra bayrağı sıfırla
                 }
-            }, SHOOT_DELAY * 1.55f);
+            }, SHOOT_DELAY * 4f);
         } else if (upButtonBounds.contains(screenX, screenY)) {
             isUpButtonPressed = true;
         } else if (downButtonBounds.contains(screenX, screenY)) {
@@ -202,7 +193,7 @@ public class InputHandler extends InputAdapter {
 
 
     private void shootBullet() {
-        player.shootBullet(levelManager.currentLevel);
+        player.shootBullet(levelManager.currentLevel, gameScreen.getAmmoSound(), gameScreen.getSwitchAmmoSound());
     }
 
     public boolean isUpButtonPressed() {

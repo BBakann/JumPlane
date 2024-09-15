@@ -31,6 +31,9 @@ public class LevelManager {
     public boolean firstStart = true;
     private SpriteBatch batch;
 
+    public float[] levelTimes = {60f, 75f, 90f, 105f, 120f}; // Level süreleri
+    public float currentTime;
+
     public LevelManager(EnemyManager enemyManager,GameScreen gameScreen,SpriteBatch batch) {
         this.enemyManager=enemyManager;
         this.gameScreen=gameScreen;
@@ -119,6 +122,10 @@ public class LevelManager {
 
     public void setHealth(int health) {
         this.health = health;
+    }
+
+    public float getCurrentTime() {
+        return currentTime;
     }
 
     public void dispose() {

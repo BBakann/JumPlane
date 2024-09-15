@@ -67,14 +67,19 @@ public class GameScreen implements Screen {
     private String coinsText_en = "Coins: ";
     private String tryAgainText_en = "TRY AGAIN!";
     private String touchToStartText_en = "TOUCH AND START!";
+    private String timeText_en ="Time:";
 
     private String levelText_tr = "Seviye: ";
     private String coinsText_tr = "Altin: ";
     private String tryAgainText_tr = "TEKRAR DENE!";
     private String touchToStartText_tr = "DOKUN VE BASLA!";
     private String killedEnemiesText_tr = "Vurulan Canavar: ";
+    private String timeText_tr ="Sure:";
 
     private Preferences prefs;
+
+    private Sound ammoSound;
+    private Sound switchAmmoSound;
 
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
@@ -93,7 +98,7 @@ public class GameScreen implements Screen {
         levelManager =new LevelManager(enemyManager,this,batch);
         levelManager.currentLevel = this.level;
         enemyManager.setLevel(levelManager.currentLevel);
-        player = new Player(ground, levelManager);
+        player = new Player(ground, levelManager,game);
 
         inputHandler = new InputHandler(this, player, levelManager, enemyManager);
 
@@ -102,7 +107,7 @@ public class GameScreen implements Screen {
         font = new BitmapFont(Gdx.files.internal("negrita.fnt"), Gdx.files.internal("negrita.png"), false);
         font.setColor(Color.BLACK);
 
-
+        levelManager.currentTime = levelManager.levelTimes[level -1];
 
         potions = new ArrayList<>();
         potionSpawnTimer = 0;
@@ -118,6 +123,10 @@ public class GameScreen implements Screen {
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
         labelTexture = new Texture("label.png");
+
+        ammoSound = Gdx.audio.newSound(Gdx.files.internal("ammosound.mp3"));
+        switchAmmoSound = Gdx.audio.newSound(Gdx.files.internal("switchammo.mp3"));
+
 
         stopButtonTexture = new Texture("stopbutton.png");
         stopButtonRectangle = new Rectangle(Gdx.graphics.getWidth() - stopButtonTexture.getWidth() * 1.5f - 80,
@@ -226,22 +235,27 @@ public class GameScreen implements Screen {
         if (!isLoading && Gdx.input.justTouched()) {
             int touchX = Gdx.input.getX();
             int touchY = Gdx.graphics.getHeight() - Gdx.input.getY();
-            if (stopButtonRectangle.contains(touchX, touchY)) {
+            if (stopButtonRectangle.contains(touchX,touchY)) {
                 isPaused = true;
                 return;
             }
         }
 
-        if (!isPaused && !isLoading) {
-            if (levelManager.gameStarted) {
-                player.update(deltaTime, inputHandler);
-                updatePotions(deltaTime);
-                player.checkPotionCollision(potions);
-                enemyManager.update(player, levelManager);
-                enemyManager.checkCollisions(player, levelManager);
-                levelManager.checkLevelUp(enemyManager.killedEnemies, collectedCoins);
-                updateCoins(deltaTime);
+        if (!isPaused && !isLoading && levelManager.gameStarted) {
+            levelManager.currentTime -= deltaTime;
+
+            if (levelManager.currentTime <= 0) {
+                resetGame();
+                levelManager.isGameOver = true;
             }
+
+            player.update(deltaTime, inputHandler);
+            updatePotions(deltaTime);
+            player.checkPotionCollision(potions);
+            enemyManager.update(player, levelManager);
+            enemyManager.checkCollisions(player, levelManager);
+            levelManager.checkLevelUp(enemyManager.killedEnemies, collectedCoins);
+            updateCoins(deltaTime);
         }
     }
 
@@ -379,17 +393,26 @@ public class GameScreen implements Screen {
         }, 4f);
     }
 
+    public Sound getAmmoSound() {
+        return ammoSound;
+    }
+    public Sound getSwitchAmmoSound(){
+        return  switchAmmoSound;
+    }
+
     private void drawGameLabels() {
-        String killedEnemiesText, levelText, coinsText;
+        String killedEnemiesText, levelText, coinsText, timeText;
 
         if (currentLanguage.equals("tr")) {
             killedEnemiesText = killedEnemiesText_tr+ enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
             levelText = levelText_tr + levelManager.currentLevel;
             coinsText = coinsText_tr + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
+            timeText = timeText_tr + (int) levelManager.currentTime;
         } else {
             killedEnemiesText = killedEnemiesText_en + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
             levelText =levelText_en + levelManager.currentLevel;
             coinsText = coinsText_en + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
+            timeText = timeText_en + (int) levelManager.currentTime;
         }
 
 
@@ -406,6 +429,10 @@ public class GameScreen implements Screen {
 
         batch.draw(labelTexture, levelTextX - labelWidth - spacing, Gdx.graphics.getHeight() - 110, labelWidth, 100);
         font.draw(batch, coinsText, levelTextX - labelWidth - spacing + 25, Gdx.graphics.getHeight() - 40);
+
+
+        batch.draw(labelTexture, 325, Gdx.graphics.getHeight() - 110, 280, 100);
+        font.draw(batch, timeText, 380, Gdx.graphics.getHeight() - 40);
     }
 
     public void resetGame() {
@@ -414,6 +441,8 @@ public class GameScreen implements Screen {
         player.health = 6;
         potions.clear();
         player.resetPosition();
+
+        levelManager.currentTime = levelManager.levelTimes[levelManager.currentLevel - 1];
 
         collectedCoins = 0;
         coins.clear();
@@ -446,6 +475,9 @@ public class GameScreen implements Screen {
         shapeRenderer.dispose();
         game.stopMusic();
         loadingBackgroundTexture.dispose();
+
+        ammoSound.dispose();
+        switchAmmoSound.dispose();
 
 
         for (Potion potion : potions) {

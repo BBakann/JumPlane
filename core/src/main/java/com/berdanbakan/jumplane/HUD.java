@@ -12,8 +12,8 @@ public class HUD {
     private static final float HEALTH_Y = Gdx.graphics.getHeight() - 145f; // Can göstergesinin y koordinatı
     private static final float HEALTH_WIDTH = 432f; // Can göstergesinin genişliği
     private static final float HEALTH_HEIGHT = 136f; // Can göstergesinin yüksekliği
-    private static final float AMMO_X = 400f; // Mermi göstergesinin x koordinatı
-    private static final float AMMO_Y = Gdx.graphics.getHeight() - 185f; // Mermi göstergesinin y koordinatı
+    private static final float AMMO_X = 20f; // Mermi göstergesinin x koordinatı
+    private static final float AMMO_Y = Gdx.graphics.getHeight() - 305f; // Mermi göstergesinin y koordinatı
     private static final float AMMO_SIZE = 168f; // Mermi göstergesinin boyutu
 
     private static Texture[] healthTextures;

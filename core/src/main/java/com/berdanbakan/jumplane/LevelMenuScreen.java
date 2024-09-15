@@ -224,6 +224,7 @@ public class LevelMenuScreen implements Screen {
     public void dispose(){
         batch.dispose();
         levelbackgroundTexture.dispose();
+        stage.dispose();
 
         exitButtonTexture.dispose();
         backButtonTexture.dispose();

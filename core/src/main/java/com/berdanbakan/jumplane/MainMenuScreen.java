@@ -105,7 +105,7 @@ public class MainMenuScreen implements Screen {
             createSettingsScreen();
 
             font = new BitmapFont(Gdx.files.internal("negrita.fnt"), Gdx.files.internal("negrita.png"), false);
-            font.getData().setScale(0.616f);
+            font.getData().setScale(0.620f);
 
             game.playMusic("backgroundmusic.mp3");
             shapeRenderer = new ShapeRenderer();
@@ -123,7 +123,7 @@ public class MainMenuScreen implements Screen {
 
         startButton.setSize(200,200);
 
-        startButton.setPosition(Gdx.graphics.getWidth()/3+300,Gdx.graphics.getHeight()/7);
+        startButton.setPosition(Gdx.graphics.getWidth()/3+270,Gdx.graphics.getHeight()/7);
 
         startButton.addListener(new ClickListener() {
             @Override
@@ -142,7 +142,7 @@ public class MainMenuScreen implements Screen {
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
         buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(settingsButtonTexture).getDrawable();settingsButton = new ImageButton(buttonStyle);
         settingsButton.setSize(200, 200);
-        settingsButton.setPosition(Gdx.graphics.getWidth() / 3 + 550, Gdx.graphics.getHeight() / 7);
+        settingsButton.setPosition(Gdx.graphics.getWidth() / 3 + 520, Gdx.graphics.getHeight() / 7);
 
         settingsButton.addListener(new ClickListener() {
             @Override
@@ -238,7 +238,7 @@ public class MainMenuScreen implements Screen {
         resultButton=new ImageButton(buttonStyle);
         resultButton.setSize(200,200);
 
-        resultButton.setPosition(Gdx.graphics.getWidth()/3+50,Gdx.graphics.getHeight()/7);
+        resultButton.setPosition(Gdx.graphics.getWidth()/3+20,Gdx.graphics.getHeight()/7);
 
         resultButton.addListener(new ClickListener(){
 
@@ -332,7 +332,8 @@ public class MainMenuScreen implements Screen {
             batch.begin();
             font.draw(batch, "JumpLane\n\n" +
                     "Get ready for an adrenaline-fueled adventure as youpilot your plane through treacherous skies!\n" +
-                    "Tap the screen to make your plane soar, dodge obstacles, and collect coins to unlock awesome new planes and challenging levels.\n\n" +
+                    "Tap the screen to make your plane soar, dodge obstacles.\n" +
+                    "Collect coins to unlock awesome new planes and challenging levels.\n\n" +
                     "Features:\n" +
                     "* Simple and addictive one-touch gameplay\n" +"* Stunning graphics and immersive sound effects\n" +
                     "* A variety of unique planes to collect\n" +
