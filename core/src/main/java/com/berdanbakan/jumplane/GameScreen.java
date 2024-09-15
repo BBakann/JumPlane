@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.utils.Timer;
 
@@ -33,7 +32,7 @@ public class GameScreen implements Screen {
     private Ground ground;
     private HUD hud;
     private BitmapFont font;
-    private FreeTypeFontGenerator fontGen;
+
 
     private int level;
     private LevelMenuScreen levelMenuScreen;
@@ -100,12 +99,10 @@ public class GameScreen implements Screen {
 
         hud = new HUD();
 
-        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.color = Color.BLACK;
-        params.size = 65;
+        font = new BitmapFont(Gdx.files.internal("negrita.fnt"), Gdx.files.internal("negrita.png"), false);
+        font.setColor(Color.BLACK);
 
-        font = fontGen.generateFont(params);
+
 
         potions = new ArrayList<>();
         potionSpawnTimer = 0;
@@ -443,7 +440,6 @@ public class GameScreen implements Screen {
     public void dispose() {
         batch.dispose();
         font.dispose();
-        fontGen.dispose();
         winSound.dispose();
         labelTexture.dispose();
         stopButtonTexture.dispose();

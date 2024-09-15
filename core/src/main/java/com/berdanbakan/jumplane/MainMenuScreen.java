@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -45,7 +44,6 @@ public class MainMenuScreen implements Screen {
     private boolean infoButtonClicked = false;
 
     private BitmapFont font;
-    private FreeTypeFontGenerator fontGen;
 
     private Texture exitButtonTexture;
     private ImageButton exitButton;
@@ -71,32 +69,32 @@ public class MainMenuScreen implements Screen {
     public MainMenuScreen(JumPlane game, SpriteBatch batch) {
         this.game = game;
         this.batch = batch;
-        try {
+
             stage = new Stage(new ScreenViewport());
 
-                backgroundTexture = new Texture("menubackground.png");
+            backgroundTexture = new Texture("menubackground.png");
 
-                startButtonTexture = new Texture("openbutton.png");
+            startButtonTexture = new Texture("openbutton.png");
 
-                settingsButtonTexture = new Texture("settingsbutton.png");
+            settingsButtonTexture = new Texture("settingsbutton.png");
 
-                infoButtonTexture = new Texture("infobutton.png");
+            infoButtonTexture = new Texture("infobutton.png");
 
-                exitButtonTexture = new Texture("exitbutton.png");
+            exitButtonTexture = new Texture("exitbutton.png");
 
-                resultButtonTexture = new Texture("resultbutton.png");
+            resultButtonTexture = new Texture("resultbutton.png");
 
-                settingsBackgroundTexture = new Texture("settings_background.png");
+            settingsBackgroundTexture = new Texture("settings_background.png");
 
-                closeButtonTexture = new Texture("exitbutton.png");
+            closeButtonTexture = new Texture("exitbutton.png");
 
-                languageButtonTexture_en = new Texture("language_button.png");
+            languageButtonTexture_en = new Texture("language_button.png");
 
-                languageButtonTexture_tr = new Texture("language_button1.png");
+            languageButtonTexture_tr = new Texture("language_button1.png");
 
-                voiceUpTexture = new Texture("voiceup.png");
+            voiceUpTexture = new Texture("voiceup.png");
 
-                voiceDownTexture = new Texture("voice_down.png");
+            voiceDownTexture = new Texture("voice_down.png");
 
 
             createStartButton();
@@ -106,19 +104,14 @@ public class MainMenuScreen implements Screen {
             createExitButton();
             createSettingsScreen();
 
-            fontGen = new FreeTypeFontGenerator(Gdx.files.internal("negrita.ttf"));
-            FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            params.color = Color.WHITE;
-            params.size = 40;
-            font = fontGen.generateFont(params);
+            font = new BitmapFont(Gdx.files.internal("negrita.fnt"), Gdx.files.internal("negrita.png"), false);
+            font.getData().setScale(0.616f);
 
             game.playMusic("backgroundmusic.mp3");
             shapeRenderer = new ShapeRenderer();
 
             clickSound = Gdx.audio.newSound(Gdx.files.internal("clicksound.mp3"));
-        } catch (Exception e) {
 
-        }
     }
 
     private void createStartButton() {
@@ -315,7 +308,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-            Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(stage);
     }
 
     @Override
@@ -397,7 +390,6 @@ public class MainMenuScreen implements Screen {
         clickSound.dispose();
         infoButtonTexture.dispose();
         font.dispose();
-        fontGen.dispose();
         exitButtonTexture.dispose();
         resultButtonTexture.dispose();
         shapeRenderer.dispose();

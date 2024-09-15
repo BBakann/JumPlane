@@ -16,6 +16,7 @@ public class JumPlane extends Game {
         batch = new SpriteBatch();
         splashBackgroundTexture = new Texture("splash_background.png");
         setScreen(new SplashScreen(this,batch,splashBackgroundTexture));
+
     }
 
     @Override
