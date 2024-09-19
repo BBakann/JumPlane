@@ -26,6 +26,11 @@ public class InputHandler extends InputAdapter {
     private Rectangle leftButtonBounds;
     private Rectangle rightButtonBounds;
 
+    private Rectangle upRightButtonBounds;
+    private Rectangle downRightButtonBounds;
+    private Rectangle upLeftButtonBounds;
+    private Rectangle downLeftButtonBounds;
+
     private Texture shootButtonTexture;
     private Texture shootButtonPressedTexture;
     private boolean isButtonPressed;
@@ -46,6 +51,11 @@ public class InputHandler extends InputAdapter {
     public boolean isLeftButtonPressed = false;
     public boolean isRightButtonPressed = false;
 
+    public boolean isUpRightButtonPressed = false;
+    public boolean isDownRightButtonPressed = false;
+    public boolean isUpLeftButtonPressed = false;
+    public boolean isDownLeftButtonPressed = false;
+
 
     public InputHandler(GameScreen gameScreen,Player player,LevelManager levelManager,EnemyManager enemyManager) {
         this.player = player;
@@ -60,12 +70,17 @@ public class InputHandler extends InputAdapter {
         dpad_downTexture=new Texture("dpad_down.png");
         dpadX = 50;
         dpadY = 50;
-        dpadSize = 250;
+        dpadSize = 270;
 
         upButtonBounds = new Rectangle(dpadX + dpadSize / 3f, dpadY + 2 * dpadSize / 3f, dpadSize / 3f, dpadSize / 3f);
         downButtonBounds = new Rectangle(dpadX + dpadSize / 3f, dpadY, dpadSize / 3f, dpadSize / 3f);
         leftButtonBounds = new Rectangle(dpadX, dpadY + dpadSize / 3f, dpadSize / 3f, dpadSize/ 3f);
         rightButtonBounds = new Rectangle(dpadX + 2 * dpadSize / 3f, dpadY + dpadSize / 3f, dpadSize / 3f, dpadSize / 3f);
+
+        upRightButtonBounds= new Rectangle(dpadX + 2 * dpadSize / 3f, dpadY + 2 * dpadSize / 3f, dpadSize / 3f, dpadSize / 3f);
+        downRightButtonBounds = new Rectangle(dpadX + 2 * dpadSize / 3f, dpadY, dpadSize / 3f, dpadSize / 3f);
+        upLeftButtonBounds = new Rectangle(dpadX, dpadY + 2 * dpadSize / 3f, dpadSize / 3f, dpadSize / 3f);
+        downLeftButtonBounds = new Rectangle(dpadX, dpadY, dpadSize / 3f, dpadSize / 3f);
 
         shootButtonTexture = new Texture("shootbutton.png");
         shootButtonPressedTexture = new Texture("shootbuttonpressed.png");
@@ -105,6 +120,14 @@ public class InputHandler extends InputAdapter {
                     dugmeGeciciOlarakBasili = false; // Ateş ettikten sonra bayrağı sıfırla
                 }
             }, SHOOT_DELAY * 4f);
+        } else if (upRightButtonBounds.contains(screenX, screenY)) {
+            isUpRightButtonPressed = true;
+        } else if (downRightButtonBounds.contains(screenX, screenY)) {
+            isDownRightButtonPressed = true;
+        } else if (upLeftButtonBounds.contains(screenX, screenY)) {
+            isUpLeftButtonPressed = true;
+        } else if (downLeftButtonBounds.contains(screenX, screenY)) {
+            isDownLeftButtonPressed = true;
         } else if (upButtonBounds.contains(screenX, screenY)) {
             isUpButtonPressed = true;
         } else if (downButtonBounds.contains(screenX, screenY)) {
@@ -113,7 +136,9 @@ public class InputHandler extends InputAdapter {
             isLeftButtonPressed = true;
         } else if (rightButtonBounds.contains(screenX, screenY)) {
             isRightButtonPressed = true;
-        }return true;
+        }
+
+        return true;
     }
 
     @Override
@@ -130,7 +155,16 @@ public class InputHandler extends InputAdapter {
             isLeftButtonPressed = false;
         } else if (rightButtonBounds.contains(screenX, screenY)) {
             isRightButtonPressed = false;
+        } else if (upRightButtonBounds.contains(screenX, screenY)) {
+            isUpRightButtonPressed = false;
+        } else if (downRightButtonBounds.contains(screenX, screenY)) {
+            isDownRightButtonPressed = false;
+        } else if (upLeftButtonBounds.contains(screenX, screenY)) {
+            isUpLeftButtonPressed = false;
+        } else if (downLeftButtonBounds.contains(screenX, screenY)) {
+            isDownLeftButtonPressed = false;
         }
+
         return true;
     }
 
@@ -211,6 +245,21 @@ public class InputHandler extends InputAdapter {
         return Gdx.input.isTouched() && rightButtonBounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
+    public boolean isUpRightButtonPressed() {
+        return Gdx.input.isTouched() && upRightButtonBounds.contains(Gdx.input.getX(),Gdx.graphics.getHeight() - Gdx.input.getY());
+    }
+
+    public boolean isDownRightButtonPressed() {
+        return Gdx.input.isTouched() && downRightButtonBounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+    }
+
+    public boolean isUpLeftButtonPressed() {
+        return Gdx.input.isTouched() && upLeftButtonBounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+    }
+
+    public boolean isDownLeftButtonPressed() {return Gdx.input.isTouched() && downLeftButtonBounds.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+    }
+
     public boolean isButtonPressed() {
         return isButtonPressed;
     }
@@ -245,5 +294,29 @@ public class InputHandler extends InputAdapter {
 
     public Rectangle getRightButtonBounds() {
         return rightButtonBounds;
+    }
+
+    public void dispose() {
+        if (dpadTexture != null) {
+            dpadTexture.dispose();
+        }
+        if (dpad_upTexture != null) {
+            dpad_upTexture.dispose();
+        }
+        if (dpad_downTexture != null) {
+            dpad_downTexture.dispose();
+        }
+        if (dpad_leftTexture != null) {
+            dpad_leftTexture.dispose();
+        }
+        if (dpad_rightTexture != null) {
+            dpad_rightTexture.dispose();
+        }
+        if (shootButtonTexture != null) {
+            shootButtonTexture.dispose();
+        }
+        if (shootButtonPressedTexture != null) {
+            shootButtonPressedTexture.dispose();
+        }
     }
 }

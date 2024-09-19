@@ -21,7 +21,7 @@ public class Player {
     public float planeHeight;
     public float planeX;
     public float planeY;
-    private float planeSpeed = 550f;
+    private float planeSpeed = 600f;
     public int health;
     public int ammo;private float reloadTime;
     public Rectangle playerPlaneRectangle;
@@ -33,7 +33,7 @@ public class Player {
     private JumPlane game;
 
 
-    static { // Statik blok içinde yükleyin
+    static { // Statik blok içinde
         planeTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
             planeTextures[i] = new Texture("plane" + (i + 1) + ".png");
@@ -55,16 +55,26 @@ public class Player {
     }
 
     public void update(float deltaTime, InputHandler inputHandler) {
-        if (inputHandler.isUpButtonPressed()) {
+        if (inputHandler.isUpRightButtonPressed()) {
+            planeX += planeSpeed * deltaTime * 0.701f; // Sağ yukarı çapraz
+            planeY += planeSpeed * deltaTime * 0.701f;
+        } else if (inputHandler.isDownRightButtonPressed()) {
+            planeX += planeSpeed * deltaTime * 0.701f; // Sağ aşağı çapraz
+            planeY -= planeSpeed * deltaTime * 0.701f;
+        } else if (inputHandler.isUpLeftButtonPressed()) {
+            planeX -= planeSpeed * deltaTime * 0.701f; // Sol yukarı çapraz
+            planeY += planeSpeed * deltaTime * 0.701f;
+        } else if (inputHandler.isDownLeftButtonPressed()) {
+            planeX -= planeSpeed * deltaTime * 0.701f; // Sol aşağı çapraz
+            planeY -= planeSpeed * deltaTime * 0.701f;
+
+        } else if (inputHandler.isUpButtonPressed()) {
             planeY += planeSpeed * deltaTime;
-        }
-        if (inputHandler.isDownButtonPressed()) {
+        } else if (inputHandler.isDownButtonPressed()) {
             planeY -= planeSpeed * deltaTime;
-        }
-        if (inputHandler.isLeftButtonPressed()) {
+        } else if (inputHandler.isLeftButtonPressed()) {
             planeX -= planeSpeed * deltaTime;
-        }
-        if (inputHandler.isRightButtonPressed()) {
+        } else if (inputHandler.isRightButtonPressed()) {
             planeX += planeSpeed * deltaTime;
         }
 
@@ -101,8 +111,9 @@ public class Player {
     public void updatePlaneTexture(int currentLevel) {
         if (currentLevel >= 1 && currentLevel <= 5) {
             currentPlaneTexture = planeTextures[currentLevel - 1];
-            planeWidth = currentPlaneTexture.getWidth() / 2.5f;
-            planeHeight = currentPlaneTexture.getHeight() / 2.5f;
+            planeWidth = currentPlaneTexture.getWidth() / 2.6f;
+            planeHeight = currentPlaneTexture.getHeight() / 2.6f;
+            planeSpeed = 600 + (currentLevel - 1) * 50; // her levelde 50 speed artışı
         }
     }
 
@@ -139,7 +150,7 @@ public class Player {
             Texture bulletTexture = bulletTextures[Math.min(level - 1, bulletTextures.length - 1)];
             float bulletWidth = bulletTexture.getWidth() / 5;
             float bulletHeight = bulletTexture.getHeight() / 5;
-            float bulletSpeed = 500;
+            float bulletSpeed = 650;
 
             int bulletDamage = (level == 1) ? 1 : 2;
             Bullet bullet = new Bullet(planeX + planeWidth, planeY + planeHeight / 2 - bulletHeight / 2, bulletSpeed, 0, bulletTexture, bulletWidth, bulletHeight, bulletDamage);
@@ -156,11 +167,11 @@ public class Player {
             }, 0.1f);
 
             if (ammo == 0) {
-                reloadTime = 3f;
+                reloadTime = 1.25f;
             }
         } else if (reloadTime <= 0) {
             ammo = MAX_AMMO;
-            reloadTime = 2.5f;
+            reloadTime = 1.25f;
 
             switchAmmoSound.play();
         }
@@ -172,8 +183,8 @@ public class Player {
 
     public static void dispose() {
         for (Texture planeTexture : planeTextures) {
-        planeTexture.dispose();
-    }
+            planeTexture.dispose();
+        }
         for (Texture bulletTexture : bulletTextures) {
             bulletTexture.dispose();
         }

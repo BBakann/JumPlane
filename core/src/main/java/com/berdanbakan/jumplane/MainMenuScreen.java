@@ -65,12 +65,16 @@ public class MainMenuScreen implements Screen {
     private Texture voiceUpTexture;
     private Texture voiceDownTexture;
 
+    private Texture labelTexture;
+
 
     public MainMenuScreen(JumPlane game, SpriteBatch batch) {
         this.game = game;
         this.batch = batch;
 
             stage = new Stage(new ScreenViewport());
+
+            labelTexture = new Texture("label1.png");
 
             backgroundTexture = new Texture("menubackground.png");
 
@@ -123,7 +127,7 @@ public class MainMenuScreen implements Screen {
 
         startButton.setSize(200,200);
 
-        startButton.setPosition(Gdx.graphics.getWidth()/3+270,Gdx.graphics.getHeight()/7);
+        startButton.setPosition(Gdx.graphics.getWidth()/3+230,Gdx.graphics.getHeight()/7);
 
         startButton.addListener(new ClickListener() {
             @Override
@@ -142,7 +146,7 @@ public class MainMenuScreen implements Screen {
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
         buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(settingsButtonTexture).getDrawable();settingsButton = new ImageButton(buttonStyle);
         settingsButton.setSize(200, 200);
-        settingsButton.setPosition(Gdx.graphics.getWidth() / 3 + 520, Gdx.graphics.getHeight() / 7);
+        settingsButton.setPosition(Gdx.graphics.getWidth() / 3 + 480, Gdx.graphics.getHeight() / 7);
 
         settingsButton.addListener(new ClickListener() {
             @Override
@@ -238,7 +242,7 @@ public class MainMenuScreen implements Screen {
         resultButton=new ImageButton(buttonStyle);
         resultButton.setSize(200,200);
 
-        resultButton.setPosition(Gdx.graphics.getWidth()/3+20,Gdx.graphics.getHeight()/7);
+        resultButton.setPosition(Gdx.graphics.getWidth()/3-20,Gdx.graphics.getHeight()/7);
 
         resultButton.addListener(new ClickListener(){
 
@@ -316,7 +320,10 @@ public class MainMenuScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
+
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 400f, Gdx.graphics.getHeight() / 7f - 200f,800, 600);
         batch.end();
 
         if (infoButtonClicked) {

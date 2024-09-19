@@ -11,7 +11,7 @@ public class Creature3 extends Creature {
     private static final float HEIGHT = new Texture("creature3_1.png").getHeight()*1.1f;
 
     public Creature3(float x, float y, float speed) {
-        super(x, y, speed*3f, WIDTH, HEIGHT);
+        super(x, y, speed*3.2f, WIDTH, HEIGHT);
         loadTextures();
         loadAnimation();
     }
@@ -31,9 +31,8 @@ public class Creature3 extends Creature {
     }
 
     @Override
-    public void update() {
-        x -= speed * Gdx.graphics.getDeltaTime();
-        updateRectangle();
+    public void update(float deltaTime) {
+        super.update(deltaTime);
     }
 
     @Override

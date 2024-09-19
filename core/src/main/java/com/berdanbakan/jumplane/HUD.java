@@ -8,13 +8,14 @@ public class HUD {
     private static final int MAX_HEALTH = 6;// Maksimum can değeri
     private static final int MAX_AMMO = 6; // Maksimum mermi değeri
 
-    private static final float HEALTH_X = -50f; // Can göstergesinin x koordinatı
-    private static final float HEALTH_Y = Gdx.graphics.getHeight() - 145f; // Can göstergesinin y koordinatı
-    private static final float HEALTH_WIDTH = 432f; // Can göstergesinin genişliği
-    private static final float HEALTH_HEIGHT = 136f; // Can göstergesinin yüksekliği
-    private static final float AMMO_X = 20f; // Mermi göstergesinin x koordinatı
-    private static final float AMMO_Y = Gdx.graphics.getHeight() - 305f; // Mermi göstergesinin y koordinatı
-    private static final float AMMO_SIZE = 168f; // Mermi göstergesinin boyutu
+    private static final float HEALTH_X = -125f; // Can göstergesinin x koordinatı
+    private static final float HEALTH_Y = Gdx.graphics.getHeight() - 245f; // Can göstergesinin y koordinatı
+    private static final float HEALTH_WIDTH = 648f; // Can göstergesinin genişliği
+    private static final float HEALTH_HEIGHT = 175f; // Can göstergesinin yüksekliği
+    private static final float AMMO_X = 25f; // Mermi göstergesinin x koordinatı
+    private static final float AMMO_Y = Gdx.graphics.getHeight() - 125f; // Mermi göstergesinin y koordinatı
+    private static final float AMMO_WIDTH = 378f; // Mermi göstergesinin genişliği
+    private static final float AMMO_HEIGHT = 122.5f; // Mermi göstergesinin yüksekliği
 
     private static Texture[] healthTextures;
     private static Texture[] ammoTextures;
@@ -39,7 +40,7 @@ public class HUD {
         }
 
         if (ammo >= 0 && ammo <= MAX_AMMO) {
-            batch.draw(ammoTextures[ammo], AMMO_X, AMMO_Y, AMMO_SIZE, AMMO_SIZE);
+            batch.draw(ammoTextures[ammo], AMMO_X, AMMO_Y, AMMO_WIDTH, AMMO_HEIGHT);
         }
     }
 

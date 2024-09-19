@@ -47,6 +47,7 @@ public class GameScreen implements Screen {
 
     private Sound winSound;
     private Texture labelTexture;
+    private Texture labelTexture1;
 
     private boolean levelCompleted = false;
 
@@ -122,14 +123,14 @@ public class GameScreen implements Screen {
 
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
-        labelTexture = new Texture("label.png");
-
         ammoSound = Gdx.audio.newSound(Gdx.files.internal("ammosound.mp3"));
         switchAmmoSound = Gdx.audio.newSound(Gdx.files.internal("switchammo.mp3"));
 
+        labelTexture = new Texture("label.png");
+        labelTexture1 = new Texture("label1.png");
 
         stopButtonTexture = new Texture("stopbutton.png");
-        stopButtonRectangle = new Rectangle(Gdx.graphics.getWidth() - stopButtonTexture.getWidth() * 1.5f - 80,
+        stopButtonRectangle = new Rectangle(Gdx.graphics.getWidth() - stopButtonTexture.getWidth() * 1.5f-50f,
                 Gdx.graphics.getHeight() - stopButtonTexture.getHeight() * 1.5f-40,
                 stopButtonTexture.getWidth() * 2f,
                 stopButtonTexture.getHeight() * 2f
@@ -306,8 +307,10 @@ public class GameScreen implements Screen {
             batch.draw(loadingBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
             font.getData().setScale(2f);
-            batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 330f, Gdx.graphics.getHeight() / 2f - 450f, 700, 200);
-            font.draw(batch, "LOADING...", Gdx.graphics.getWidth() / 2f - 240f, Gdx.graphics.getHeight() / 2f - 300f);
+            font.setColor(Color.WHITE);
+            batch.draw(labelTexture1, Gdx.graphics.getWidth() / 2f - 300f, Gdx.graphics.getHeight() / 2f - 475f, 600, 450);
+            font.draw(batch, "LOADING...", Gdx.graphics.getWidth() / 2f - 200f, Gdx.graphics.getHeight() / 2f - 200f);
+            font.setColor(Color.BLACK);
             font.getData().setScale(1f);
 
         }
@@ -405,34 +408,33 @@ public class GameScreen implements Screen {
 
         if (currentLanguage.equals("tr")) {
             killedEnemiesText = killedEnemiesText_tr+ enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            levelText = levelText_tr + levelManager.currentLevel;
+            //levelText = levelText_tr + levelManager.currentLevel;
             coinsText = coinsText_tr + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
             timeText = timeText_tr + (int) levelManager.currentTime;
         } else {
             killedEnemiesText = killedEnemiesText_en + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            levelText =levelText_en + levelManager.currentLevel;
+            //levelText =levelText_en + levelManager.currentLevel;
             coinsText = coinsText_en + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
             timeText = timeText_en + (int) levelManager.currentTime;
         }
 
 
-        batch.draw(labelTexture, Gdx.graphics.getWidth() - 850, Gdx.graphics.getHeight() - 110, 650, 100);
+        batch.draw(labelTexture, Gdx.graphics.getWidth() - 790, Gdx.graphics.getHeight() - 110, 650, 100);
+        float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 740, Gdx.graphics.getHeight() - 40).width;
 
-        float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 830, Gdx.graphics.getHeight() - 40).width;
-        batch.draw(labelTexture, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100);
-
-        font.draw(batch, levelText, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
+        //batch.draw(labelTexture, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100);
+        //font.draw(batch, levelText, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
 
         float levelTextX = Gdx.graphics.getWidth() - 670 - killedEnemiesWidth +80;
-        float spacing = 30 + killedEnemiesWidth - 500;
+        float spacing = 30 + killedEnemiesWidth - 600;
         float labelWidth = 300;
 
+        batch.draw(labelTexture, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 110, labelWidth, 100);
+        font.draw(batch, coinsText, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 100, Gdx.graphics.getHeight() - 40);
+
+
         batch.draw(labelTexture, levelTextX - labelWidth - spacing, Gdx.graphics.getHeight() - 110, labelWidth, 100);
-        font.draw(batch, coinsText, levelTextX - labelWidth - spacing + 25, Gdx.graphics.getHeight() - 40);
-
-
-        batch.draw(labelTexture, 325, Gdx.graphics.getHeight() - 110, 280, 100);
-        font.draw(batch, timeText, 380, Gdx.graphics.getHeight() - 40);
+        font.draw(batch, timeText, levelTextX - labelWidth - spacing +45, Gdx.graphics.getHeight() - 40);
     }
 
     public void resetGame() {
@@ -475,6 +477,7 @@ public class GameScreen implements Screen {
         shapeRenderer.dispose();
         game.stopMusic();
         loadingBackgroundTexture.dispose();
+        inputHandler.dispose();
 
         ammoSound.dispose();
         switchAmmoSound.dispose();

@@ -100,6 +100,7 @@ public class EnemyManager {
     }
 
     public void update(Player player, LevelManager levelManager) {
+        float deltaTime = Gdx.graphics.getDeltaTime();
 
         if (creatureSpawnTimer >= creatureSpawnDelay) {
             spawnCreature();
@@ -135,7 +136,7 @@ public class EnemyManager {
         Iterator<Creature> creatureIterator = creatures.iterator();
         while (creatureIterator.hasNext()) {
             Creature creature = creatureIterator.next();
-            creature.update();
+            creature.update(deltaTime);
             if (creature.x < -creature.width) {
                 creature.dispose();
                 creatureIterator.remove();
@@ -234,21 +235,27 @@ public class EnemyManager {
         switch (currentLevel) {
             case 1:
                 creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                creature.health = 2 + (int) (Math.random() * 2);
                 break;
             case 2:
                 creature = new Creature2(creatureX, creatureY, creatureSpeed);
+                creature.health = 2 + (int) (Math.random() * 3); // 2 veya 3 can
                 break;
             case 3:
                 creature = new Creature3(creatureX, creatureY, creatureSpeed);
+                creature.health = 3 + (int) (Math.random() * 4);
                 break;
             case 4:
                 creature = new Creature4(creatureX, creatureY, creatureSpeed);
+                creature.health = 3 + (int) (Math.random() * 4);
                 break;
             case 5:
                 creature = new Creature5(creatureX, creatureY, creatureSpeed);
+                creature.health = 4 + (int) (Math.random() * 5);
                 break;
             default:
                 creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                creature.health = 2 + (int) (Math.random() * 3);
                 break;
         }
 
@@ -302,11 +309,11 @@ public class EnemyManager {
                 Creature creature = creatureIterator.next();
                 if (bullet.rectangle.overlaps(creature.rectangle)) {
                     bulletsToRemove.add(bullet);
-                    creature.health -= bullet.damage;
+                    int damage = 1 + (int) (Math.random() * 2); // 1 veya 2 hasar
+                    creature.health -= damage;
                     if (creature.health <= 0) {
                         creatureIterator.remove();
-                        explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, false));
-                        killedEnemies++;
+                        explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, false));killedEnemies++;
                     } else {
                         explosions.add(new Explosion(creature.x + creature.width / 2, creature.y + creature.height / 2, true));
                     }

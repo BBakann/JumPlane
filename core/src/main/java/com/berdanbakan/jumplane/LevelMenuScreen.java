@@ -30,8 +30,9 @@ public class LevelMenuScreen implements Screen {
 
     private Preferences prefs;
 
-    private Texture[] levelOpenedButtonTextures = new Texture[5];
-    private Texture[] levelClosedButtonTextures = new Texture[5];
+    private Texture[] levelOpenedButtonTextures = new Texture[6];
+    private Texture[] levelClosedButtonTextures = new Texture[6];
+
 
     public LevelMenuScreen(JumPlane game){
         this.game=game;
@@ -39,7 +40,7 @@ public class LevelMenuScreen implements Screen {
         levelbackgroundTexture=new Texture("levelmenubackground.png");
         batch=new SpriteBatch();
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 6; i++) {
             levelOpenedButtonTextures[i-1] = new Texture("level" + i + "openedbutton.png");
             if (i > 1) {
                 levelClosedButtonTextures[i-1] = new Texture("level" + i + "button.png");}
@@ -71,9 +72,9 @@ public class LevelMenuScreen implements Screen {
         float buttonWidth = 450;
         float buttonHeight = 300;
 
-        ImageButton[] levelButtons = new ImageButton[5];
+        ImageButton[] levelButtons = new ImageButton[6]; // 6 level için
 
-        for (int i = 1; i <= 5; i++){
+        for (int i = 1; i <= 6; i++){ // 6 level için döngü
             Texture levelbuttonTexture;
 
             if (i <= unlockedLevel) {
@@ -94,8 +95,8 @@ public class LevelMenuScreen implements Screen {
             }
 
             // Butonları konumlandır
-            float offsetX = 250f; // Kaydırma miktarı
-            float offsetY = 150f;
+            float offsetX = 270f; // Kaydırma miktarı
+            float offsetY = 200f;
 
             if (i == 1) {
                 levelButton.setPosition(offsetX, offsetY);
@@ -104,9 +105,11 @@ public class LevelMenuScreen implements Screen {
             } else if (i == 3) {
                 levelButton.setPosition(Gdx.graphics.getWidth() - buttonWidth - offsetX, offsetY);
             } else if (i == 4) {
-                levelButton.setPosition(Gdx.graphics.getWidth() / 4 - buttonWidth / 2 + 180, offsetY - buttonHeight + 100);
+                levelButton.setPosition(offsetX, offsetY - buttonHeight + 50); // 4.level
             } else if (i == 5) {
-                levelButton.setPosition(Gdx.graphics.getWidth() * 3 / 4 - buttonWidth / 2 - 180, offsetY - buttonHeight + 100);
+                levelButton.setPosition(Gdx.graphics.getWidth() / 2 - buttonWidth / 2, offsetY-buttonHeight+50); // 5. level
+            } else if (i == 6) {
+                levelButton.setPosition(Gdx.graphics.getWidth() - buttonWidth - offsetX, offsetY-buttonHeight+50); // Free Level (6. level)
             }
 
             final int level = i;
@@ -115,13 +118,22 @@ public class LevelMenuScreen implements Screen {
                 public void clicked(InputEvent event, float x, float y) {
                     clickSound.play();
                     if (level <= unlockedLevel) {
-                        game.setScreen(new GameScreen(game, level, LevelMenuScreen.this));
+                        if (level == 6) { // Free Level ise
+                            showNameInputDialog();
+                        } else {
+                            game.setScreen(new GameScreen(game, level, LevelMenuScreen.this));
+                        }
                     }
                 }
             });
 
             stage.addActor(levelButton);
         }
+    }
+    private void showNameInputDialog() {
+        // TODO: İsim girme ekranını gösteren kodları buraya ekleyeceğiz.
+        // Şimdilik, Free Level'a geçiş yapacak basit bir kod ekleyelim.
+        game.setScreen(new GameScreen(game, 6, LevelMenuScreen.this)); // 6. level Free Level
     }
 
 

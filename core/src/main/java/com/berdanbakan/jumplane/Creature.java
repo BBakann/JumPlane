@@ -14,6 +14,9 @@ public abstract class Creature {
     protected Animation<TextureRegion> animation;
     protected float animationTime;
 
+    private float speedIncreaseTimer =0; //Hızlanma zamanlayıcısı
+    private  boolean hasIncreasedSpeed = false; // Hız artışı kontrolü
+
     public Creature(float x, float y, float speed, float width, float height) {
         this.x = x;
         this.y = y;
@@ -25,7 +28,18 @@ public abstract class Creature {
         animationTime = 0;
     }
 
-    public abstract void update();
+    public void update(float deltaTime){
+        speedIncreaseTimer += deltaTime;
+
+        if (speedIncreaseTimer>= 4f && !hasIncreasedSpeed){ // 2.5 saniye sonra hız artışı 1 seferlik
+
+            speed *= 2.5f; // 2.5 kat hızlandırma
+            hasIncreasedSpeed = true; // hız artışı işareti
+        }
+
+        x-= speed * deltaTime;
+        updateRectangle();
+    }
 
     public void draw(SpriteBatch batch) {
         animationTime += Gdx.graphics.getDeltaTime();
@@ -40,7 +54,9 @@ public abstract class Creature {
         float collisionYOffset = (height - collisionHeight) * 0.2f; // Y ekseni ofseti
 
         rectangle.set(x + collisionXOffset, y + collisionYOffset, collisionWidth, collisionHeight);
-    }public void dispose() {
+    }
+
+    public void dispose() {
         for (TextureRegion frame : animation.getKeyFrames()) {
             frame.getTexture().dispose();
         }
