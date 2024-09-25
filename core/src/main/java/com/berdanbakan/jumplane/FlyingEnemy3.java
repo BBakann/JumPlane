@@ -14,8 +14,8 @@ public class FlyingEnemy3 extends FlyingEnemy {
     private float animationTime;
     private Texture[] animationTextures = new Texture[11];
 
-    public FlyingEnemy3(float x, float y, float speed, float width, float height) {
-        super(x, y, speed*1.25f, width, height);
+    public FlyingEnemy3(float x, float y, float speed, float width, float height,Player player) {
+        super(x, y, speed*1.25f, width, height,player);
         loadTextures();
         loadAnimation();
     }

@@ -110,10 +110,15 @@ public class Player {
 
     public void updatePlaneTexture(int currentLevel) {
         if (currentLevel >= 1 && currentLevel <= 5) {
-            currentPlaneTexture = planeTextures[currentLevel - 1];
+            currentPlaneTexture= planeTextures[currentLevel - 1];
             planeWidth = currentPlaneTexture.getWidth() / 2.6f;
             planeHeight = currentPlaneTexture.getHeight() / 2.6f;
             planeSpeed = 600 + (currentLevel - 1) * 50; // her levelde 50 speed artışı
+        } else if (currentLevel == 6) { // Free Level
+            currentPlaneTexture = planeTextures[4]; // Level 5 uçağını kullan
+            planeWidth = currentPlaneTexture.getWidth() / 2.6f;
+            planeHeight = currentPlaneTexture.getHeight() / 2.6f;
+            planeSpeed = 850; // Level 5 ile aynı hızı kullan
         }
     }
 

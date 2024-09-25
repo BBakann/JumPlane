@@ -82,6 +82,8 @@ public class GameScreen implements Screen {
     private Sound ammoSound;
     private Sound switchAmmoSound;
 
+    private int freeLevelCoins = 0;
+
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
         this.level = level;
@@ -193,6 +195,9 @@ public class GameScreen implements Screen {
             if (!coin.collected && player.playerPlaneRectangle.overlaps(coin.rectangle)) {
                 coin.collected = true;
                 collectedCoins++;
+                if (levelManager.currentLevel == 6) { // Free Level ise
+                    freeLevelCoins++; // Free Level coin sayısını artır
+                }
                 coin.playSound();
             }
             if (coin.x < -coin.width) {
@@ -246,8 +251,13 @@ public class GameScreen implements Screen {
             levelManager.currentTime -= deltaTime;
 
             if (levelManager.currentTime <= 0) {
-                resetGame();
-                levelManager.isGameOver = true;
+                if (levelManager.currentLevel == 6) {
+                    Gdx.app.log("Free Level Skor", "Toplanan Coin: " + freeLevelCoins);
+                    game.setScreen(new MainMenuScreen(game, batch)); // Ana menüye dön
+                } else {
+                    resetGame();
+                    levelManager.gameOver();
+                }
             }
 
             player.update(deltaTime, inputHandler);
@@ -404,37 +414,58 @@ public class GameScreen implements Screen {
     }
 
     private void drawGameLabels() {
-        String killedEnemiesText, levelText, coinsText, timeText;
-
-        if (currentLanguage.equals("tr")) {
-            killedEnemiesText = killedEnemiesText_tr+ enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            //levelText = levelText_tr + levelManager.currentLevel;
-            coinsText = coinsText_tr + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
-            timeText = timeText_tr + (int) levelManager.currentTime;
-        } else {
-            killedEnemiesText = killedEnemiesText_en + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
-            //levelText =levelText_en + levelManager.currentLevel;
-            coinsText = coinsText_en + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
-            timeText = timeText_en + (int) levelManager.currentTime;
-        }
-
-
-        batch.draw(labelTexture, Gdx.graphics.getWidth() - 790, Gdx.graphics.getHeight() - 110, 650, 100);
-        float killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 740, Gdx.graphics.getHeight() - 40).width;
-
-        //batch.draw(labelTexture, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 30, Gdx.graphics.getHeight() - 110, 300, 100);
-        //font.draw(batch, levelText, Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 40);
-
-        float levelTextX = Gdx.graphics.getWidth() - 670 - killedEnemiesWidth +80;
-        float spacing = 30 + killedEnemiesWidth - 600;
+        String killedEnemiesText, coinsText, timeText;
+        float killedEnemiesWidth = 0;
+        float levelTextX = 0;
+        float spacing = 0;
         float labelWidth = 300;
 
-        batch.draw(labelTexture, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 110, labelWidth, 100);
-        font.draw(batch, coinsText, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 100, Gdx.graphics.getHeight() - 40);
+        if (levelManager.currentLevel == 6) { // Free Level
+            String freeLevelCoinsText;
+            if (currentLanguage.equals("tr")) {
+                freeLevelCoinsText = "Toplanan Altin: " + freeLevelCoins;
+            } else {
+                freeLevelCoinsText = "Collected Coins: " + freeLevelCoins;
+            }
 
 
-        batch.draw(labelTexture, levelTextX - labelWidth - spacing, Gdx.graphics.getHeight() - 110, labelWidth, 100);
-        font.draw(batch, timeText, levelTextX - labelWidth - spacing +45, Gdx.graphics.getHeight() - 40);
+            batch.draw(labelTexture, stopButtonRectangle.x - labelWidth - 310, stopButtonRectangle.y, labelWidth*1.75f, 100);
+            font.draw(batch, freeLevelCoinsText, stopButtonRectangle.x - labelWidth - 295, stopButtonRectangle.y + 70);
+
+            float timeLabelWidth = 200;
+
+
+            batch.draw(labelTexture, stopButtonRectangle.x - timeLabelWidth - 750, stopButtonRectangle.y, timeLabelWidth*1.25f, 100);
+            if (currentLanguage.equals("tr")) {
+                timeText = timeText_tr + (int) levelManager.currentTime;
+            } else {
+                timeText = timeText_en + (int) levelManager.currentTime;
+            }
+            font.draw(batch, timeText, stopButtonRectangle.x - timeLabelWidth - 712, stopButtonRectangle.y + 70);
+
+        } else { // Diğer Level'lar
+            if (currentLanguage.equals("tr")) {
+                killedEnemiesText = killedEnemiesText_tr + enemyManager.killedEnemies + "/ " + levelManager.levelTargets[levelManager.currentLevel - 1];
+                coinsText = coinsText_tr +collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
+                timeText = timeText_tr + (int) levelManager.currentTime;
+            } else {
+                killedEnemiesText = killedEnemiesText_en + enemyManager.killedEnemies + " / " + levelManager.levelTargets[levelManager.currentLevel - 1];
+                coinsText = coinsText_en + collectedCoins + "/" + levelManager.levelCoinTargets[levelManager.currentLevel - 1];
+                timeText = timeText_en + (int) levelManager.currentTime;
+            }
+
+            batch.draw(labelTexture, Gdx.graphics.getWidth() - 790, Gdx.graphics.getHeight() - 110, 650, 100);
+            killedEnemiesWidth = font.draw(batch, killedEnemiesText, Gdx.graphics.getWidth() - 740, Gdx.graphics.getHeight() - 40).width;
+
+            levelTextX = Gdx.graphics.getWidth() - 670 - killedEnemiesWidth + 80;
+            spacing = 30 + killedEnemiesWidth - 600;
+
+            batch.draw(labelTexture, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 80, Gdx.graphics.getHeight() - 110, labelWidth, 100);
+            font.draw(batch, coinsText, Gdx.graphics.getWidth() - 620 - killedEnemiesWidth + 100, Gdx.graphics.getHeight() - 40);
+
+            batch.draw(labelTexture, levelTextX - labelWidth - spacing, Gdx.graphics.getHeight() - 110, labelWidth, 100);
+            font.draw(batch, timeText, levelTextX - labelWidth - spacing + 45, Gdx.graphics.getHeight() - 40);
+        }
     }
 
     public void resetGame() {
@@ -449,6 +480,9 @@ public class GameScreen implements Screen {
         collectedCoins = 0;
         coins.clear();
 
+        if (levelManager.currentLevel == 6) { // Free Level ise
+            freeLevelCoins = 0; // Free Level coin sayısını sıfırla
+        }
     }
 
     @Override
@@ -473,6 +507,7 @@ public class GameScreen implements Screen {
         font.dispose();
         winSound.dispose();
         labelTexture.dispose();
+        labelTexture1.dispose();
         stopButtonTexture.dispose();
         shapeRenderer.dispose();
         game.stopMusic();

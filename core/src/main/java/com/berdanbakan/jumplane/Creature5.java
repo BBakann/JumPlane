@@ -11,7 +11,7 @@ public class Creature5 extends Creature {
     private static final float HEIGHT = new Texture("creature5_1.png").getHeight() / 2f;
 
     public Creature5(float x, float y, float speed) {
-        super(x, y, speed*4.6f, WIDTH, HEIGHT);
+        super(x, y, speed*3f, WIDTH, HEIGHT);
         loadTextures();
         loadAnimation();
     }

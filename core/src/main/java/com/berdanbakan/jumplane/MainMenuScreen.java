@@ -420,5 +420,7 @@ public class MainMenuScreen implements Screen {
 
         voiceUpTexture.dispose();
         voiceDownTexture.dispose();
+
+        labelTexture.dispose();
     }
 }

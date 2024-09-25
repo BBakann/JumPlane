@@ -40,6 +40,8 @@ public class EnemyManager {
     private float obstacleSpawnTimer;
     private float obstacleSpawnDelay;
 
+    private  Player player;
+
     public EnemyManager() {
 
         flyingEnemies = new ArrayList<>();
@@ -100,6 +102,7 @@ public class EnemyManager {
     }
 
     public void update(Player player, LevelManager levelManager) {
+        this.player = player;
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         if (creatureSpawnTimer >= creatureSpawnDelay) {
@@ -196,31 +199,61 @@ public class EnemyManager {
         float enemyX = Gdx.graphics.getWidth();
         float enemyY = random.nextFloat() * (Gdx.graphics.getHeight() - flyingEnemySizes.get(5).y);
         float enemySpeed = 300 + random.nextFloat() * 100;
-        Vector2 size = flyingEnemySizes.get(currentLevel);
-        float enemyWidth = size.x;
-        float enemyHeight = size.y;
+        Vector2 size;
+        float enemyWidth;
+        float enemyHeight;
 
         FlyingEnemy enemy;
 
-        switch (currentLevel) {
-            case 1:
-                enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
-            case 2:
-                enemy = new FlyingEnemy2(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
-            case 3:
-                enemy = new FlyingEnemy3(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
-            case 4:
-                enemy = new FlyingEnemy4(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
-            case 5:
-                enemy = new FlyingEnemy5(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
-            default:
-                enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight);
-                break;
+        if (currentLevel == 6) { // Free Level
+            int randomLevel = random.nextInt(5) + 1;
+            size = flyingEnemySizes.get(randomLevel);
+            enemyWidth = size.x;
+            enemyHeight = size.y;
+
+            switch (randomLevel){
+                case 1:
+                    enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 2:
+                    enemy = new FlyingEnemy2(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 3:
+                    enemy = new FlyingEnemy3(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 4:
+                    enemy = new FlyingEnemy4(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 5:
+                    enemy = new FlyingEnemy5(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                default:
+                    enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+            }
+        } else {
+            size = flyingEnemySizes.get(currentLevel);
+            enemyWidth = size.x;
+            enemyHeight = size.y;switch (currentLevel) {
+                case 1:
+                    enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 2:
+                    enemy = new FlyingEnemy2(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 3:
+                    enemy = new FlyingEnemy3(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 4:
+                    enemy = new FlyingEnemy4(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                case 5:
+                    enemy = new FlyingEnemy5(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+                default:
+                    enemy = new FlyingEnemy1(enemyX, enemyY, enemySpeed, enemyWidth, enemyHeight, player);
+                    break;
+            }
         }
 
         flyingEnemies.add(enemy);
@@ -232,31 +265,62 @@ public class EnemyManager {
         float creatureSpeed = 100 + random.nextFloat() * 50;
 
         Creature creature;
-        switch (currentLevel) {
-            case 1:
-                creature = new Creature1(creatureX, creatureY, creatureSpeed);
-                creature.health = 2 + (int) (Math.random() * 2);
-                break;
-            case 2:
-                creature = new Creature2(creatureX, creatureY, creatureSpeed);
-                creature.health = 2 + (int) (Math.random() * 3); // 2 veya 3 can
-                break;
-            case 3:
-                creature = new Creature3(creatureX, creatureY, creatureSpeed);
-                creature.health = 3 + (int) (Math.random() * 4);
-                break;
-            case 4:
-                creature = new Creature4(creatureX, creatureY, creatureSpeed);
-                creature.health = 3 + (int) (Math.random() * 4);
-                break;
-            case 5:
-                creature = new Creature5(creatureX, creatureY, creatureSpeed);
-                creature.health = 4 + (int) (Math.random() * 5);
-                break;
-            default:
-                creature = new Creature1(creatureX, creatureY, creatureSpeed);
-                creature.health = 2 + (int) (Math.random() * 3);
-                break;
+
+        if (currentLevel == 6) { // Free Level
+            int randomLevel = random.nextInt(5) + 1;
+
+            switch (randomLevel) {
+                case 1:
+                    creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 2);
+                    break;
+                case 2:
+                    creature = new Creature2(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 3);
+                    break;
+                case 3:
+                    creature = new Creature3(creatureX, creatureY, creatureSpeed);
+                    creature.health = 3 + (int) (Math.random() * 4);
+                    break;
+                case 4:
+                    creature = new Creature4(creatureX, creatureY, creatureSpeed);creature.health = 3 + (int) (Math.random() * 4);
+                    break;
+                case 5:
+                    creature = new Creature5(creatureX, creatureY, creatureSpeed);
+                    creature.health = 4 + (int) (Math.random() * 5);
+                    break;
+                default:
+                    creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 3);
+                    break;
+            }
+        } else {
+            switch (currentLevel) {
+                case 1:
+                    creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 2);
+                    break;
+                case 2:
+                    creature = new Creature2(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 3); // 2 veya 3 can
+                    break;
+                case 3:
+                    creature = new Creature3(creatureX, creatureY, creatureSpeed);
+                    creature.health = 3 + (int) (Math.random() * 4);
+                    break;
+                case 4:
+                    creature = new Creature4(creatureX, creatureY, creatureSpeed);
+                    creature.health = 3 + (int) (Math.random() * 4);
+                    break;
+                case 5:
+                    creature = new Creature5(creatureX, creatureY, creatureSpeed);
+                    creature.health = 4 + (int) (Math.random() * 5);
+                    break;
+                default:
+                    creature = new Creature1(creatureX, creatureY, creatureSpeed);
+                    creature.health = 2 + (int) (Math.random() * 3);
+                    break;
+            }
         }
 
         creatures.add(creature);
@@ -270,7 +334,14 @@ public class EnemyManager {
         float obstacleHeight = new Texture("obstacle1.png").getHeight() / 1.18f;
 
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, obstacleSpeed, obstacleWidth, obstacleHeight);
-        obstacle.setLevel(currentLevel);
+
+        if (currentLevel == 6) { // Free Level
+            int randomLevel = random.nextInt(5) + 1;
+            obstacle.setLevel(randomLevel);
+        } else {
+            obstacle.setLevel(currentLevel);
+        }
+
         obstacles.add(obstacle);
     }
 

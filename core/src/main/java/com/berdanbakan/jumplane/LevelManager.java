@@ -9,8 +9,8 @@ import com.badlogic.gdx.utils.Timer;
 public class LevelManager {
 
     public int currentLevel = 1;
-    public int[] levelTargets = {10,15,20, 25, 30};
-    public int[] levelCoinTargets = {5, 10,10 ,15,15};
+    public int[] levelTargets = {10,15,20, 25, 1};
+    public int[] levelCoinTargets = {5, 10,10 ,15,1};
     public boolean levelCompleted = false;
     private long levelCompletedTime;
     public boolean isGameOver = false;
@@ -31,7 +31,7 @@ public class LevelManager {
     public boolean firstStart = true;
     private SpriteBatch batch;
 
-    public float[] levelTimes = {60f, 75f, 90f, 105f, 120f}; // Level süreleri
+    public float[] levelTimes = {60f, 75f, 90f, 105f, 120f,180f}; // Level süreleri
     public float currentTime;
 
     public LevelManager(EnemyManager enemyManager,GameScreen gameScreen,SpriteBatch batch) {
@@ -48,24 +48,24 @@ public class LevelManager {
             return;
         }
 
-        if (killedEnemies >= levelTargets[currentLevel - 1] && collectedCoins >= levelCoinTargets[currentLevel- 1]) {
+        if (currentLevel < 6 && killedEnemies >= levelTargets[currentLevel - 1] && collectedCoins >= levelCoinTargets[currentLevel - 1]) {
             gameScreen.isLoading = true;
             levelCompleted = true;
             gameStarted = false;
             levelCompletedTime = TimeUtils.millis();
 
-            if (currentLevel < 5) {
-                currentLevel++;
-                enemyManager.setLevel(currentLevel);
-                gameScreen.handleLevelCompleted();
-            } else {
-                // Level 5 tamamlandığında MainMenuScreen'e dön
-                gameScreen.game.setScreen(new MainMenuScreen(gameScreen.game,batch));
-            }
+            currentLevel++;
+            enemyManager.setLevel(currentLevel);
+            gameScreen.handleLevelCompleted();
 
             winSoundPlayed = false;
             gameScreen.checkLevelCompleted();
             gameScreen.resetGame();
+        } else if (currentLevel == 6) {
+            // Free Level'da süre dolduğunda ana menüyedön
+            if (currentTime <= 0) {
+                gameScreen.game.setScreen(new MainMenuScreen(gameScreen.game, batch));
+            }
         }
 
         if (levelCompleted && TimeUtils.timeSinceMillis(levelCompletedTime) > 3000) {

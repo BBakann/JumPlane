@@ -67,18 +67,15 @@ public class LevelMenuScreen implements Screen {
         createLevelButtons();
     }
 
-
     private void createLevelButtons(){
         float buttonWidth = 450;
-        float buttonHeight = 300;
-
-        ImageButton[] levelButtons = new ImageButton[6]; // 6 level için
+        float buttonHeight = 300;ImageButton[] levelButtons = new ImageButton[6]; // 6 level için
 
         for (int i = 1; i <= 6; i++){ // 6 level için döngü
             Texture levelbuttonTexture;
 
             if (i <= unlockedLevel) {
-                levelbuttonTexture = levelOpenedButtonTextures[i-1];
+                levelbuttonTexture =levelOpenedButtonTextures[i-1];
             } else {
                 levelbuttonTexture = levelClosedButtonTextures[i-1];
             }
@@ -92,6 +89,8 @@ public class LevelMenuScreen implements Screen {
 
             if (i > unlockedLevel) {
                 levelButton.setDisabled(true);
+            } else if (i ==6 && unlockedLevel < 5) {
+                levelButton.setDisabled(true); // Free Level'ı Level 5'ten önce devre dışı bırak
             }
 
             // Butonları konumlandır
@@ -130,6 +129,7 @@ public class LevelMenuScreen implements Screen {
             stage.addActor(levelButton);
         }
     }
+
     private void showNameInputDialog() {
         // TODO: İsim girme ekranını gösteren kodları buraya ekleyeceğiz.
         // Şimdilik, Free Level'a geçiş yapacak basit bir kod ekleyelim.

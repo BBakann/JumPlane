@@ -3,9 +3,7 @@ package com.berdanbakan.jumplane;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-
-import java.util.ArrayList;
+import com.badlogic.gdx.math.Rectangle;import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -15,11 +13,15 @@ public class FlyingEnemy {
     int health;
     Rectangle rectangle;
 
+    private Player player; // Player nesnesini tutmak için
+    private float targetX; // Oyuncunun x koordinatı
+    private float targetY; // Oyuncunun y koordinatı
+
     private final List<Bullet> bullets;
     private float shootTimer;
-    private static final int INITIAL_HEALTH = 2; // Başlangıç canı
+    private static final int INITIAL_HEALTH= 2; // Başlangıç canı
     private static final float SHOOT_DELAY = 2f; // Ateş gecikmesi
-    private static final float SHOOT_PROBABILITY = 0.50f; //Ateş etme olasılığı
+    private static final float SHOOT_PROBABILITY = 0.60f; //Ateş etme olasılığı
     private static final float COLLISION_SCALE =0.90f; // Çarpışma alanı ölçeği
     private static final float BULLET_SPEED = 750f; // Mermi hızı
     private static final int BULLET_DAMAGE = 1; // Mermi hasarı
@@ -28,7 +30,9 @@ public class FlyingEnemy {
     public static Texture enemyBulletTexture;
     private static Random random;
 
-    public FlyingEnemy(float x, float y, float speed, float width, float height) {
+    private float movementTimer = 0; // Hareket zamanlayıcısı
+
+    public FlyingEnemy(float x, float y, float speed, float width, float height, Player player) {
         this.x = x;
         this.y = y;
         this.speed = speed;
@@ -39,11 +43,16 @@ public class FlyingEnemy {
         bullets = new ArrayList<>();
         shootTimer = 0;
 
+        this.player = player;
+        this.targetX = player.planeX; // Oyuncunun x koordinatını alma
+        this.targetY = player.planeY; // Oyuncunun y koordinatını alma
+
         if (enemyBulletTexture == null) {
             enemyBulletTexture = new Texture("bullet1.png");
         }
         if(random == null) {
-            random = new Random();}
+            random = new Random();
+        }
     }
 
     public void draw(SpriteBatch batch) {
@@ -51,7 +60,28 @@ public class FlyingEnemy {
     }
 
     public void update(float deltaTime) {
-        x -= speed * deltaTime;
+        movementTimer += deltaTime;
+
+        if (movementTimer >= 4.5f) { // 4 saniye sonra oyuncuya doğru hareket et
+            targetX = player.planeX; // Oyuncunun güncel x koordinatını al
+            targetY = player.planeY; // Oyuncunun güncel y koordinatını al
+
+            float directionX = targetX - x;
+            float directionY = targetY - y;
+
+            float distance = (float) Math.sqrt(directionX * directionX + directionY * directionY);
+
+            if (distance > 0) {
+                directionX /= distance;
+                directionY /= distance;
+
+                x += directionX * speed * deltaTime;
+                y += directionY * speed * deltaTime;
+            }
+        } else {
+
+            x -= speed * deltaTime;
+        }
 
         // Çarpışma alanını görselin ortasına ve boyutuna göre ayarla
         float collisionOffsetX = width * (1 - COLLISION_SCALE) / 2;
@@ -65,8 +95,7 @@ public class FlyingEnemy {
         if (shootTimer >= SHOOT_DELAY) {
             shootTimer = 0;
             if (random.nextFloat() < SHOOT_PROBABILITY) {
-                shoot();
-            }
+                shoot();}
         }
 
         // Mermileri güncelle ve ekran dışına çıkanları kaldır
@@ -93,6 +122,6 @@ public class FlyingEnemy {
     }
 
     public void dispose(){
-        // enemyBulletTexture'ı burada dispose etmeyin
+
     }
 }

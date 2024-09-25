@@ -14,7 +14,7 @@ public class Background {
     }
 
     public void setLevel(int level) {
-        if (level >= 1 && level <= 5) {
+        if (level >= 1 && level <= 6) {
             if (level != currentLevel) {
                 if (background != null) {
                     background.dispose();
