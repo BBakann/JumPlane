@@ -9,8 +9,8 @@ import com.badlogic.gdx.utils.Timer;
 public class LevelManager {
 
     public int currentLevel = 1;
-    public int[] levelTargets = {10,15,20, 25, 1};
-    public int[] levelCoinTargets = {5, 10,10 ,15,1};
+    public int[] levelTargets = {10,15,20, 25, 30};
+    public int[] levelCoinTargets = {5, 10,10 ,15,30};
     public boolean levelCompleted = false;
     private long levelCompletedTime;
     public boolean isGameOver = false;

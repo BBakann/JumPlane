@@ -133,6 +133,9 @@ public class EnemyManager {
             if (enemy.x < -enemy.width) {
                 enemy.dispose();
                 flyingEnemyIterator.remove();
+                if (killedEnemies>0){
+                    killedEnemies--;
+                }
             }
         }
 
@@ -143,6 +146,10 @@ public class EnemyManager {
             if (creature.x < -creature.width) {
                 creature.dispose();
                 creatureIterator.remove();
+                if (killedEnemies>0){
+                    killedEnemies--;
+                }
+
             }
         }
 
