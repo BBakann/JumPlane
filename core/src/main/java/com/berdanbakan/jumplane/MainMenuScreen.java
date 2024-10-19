@@ -1,14 +1,13 @@
 package com.berdanbakan.jumplane;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -17,10 +16,13 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
 
 public class MainMenuScreen implements Screen {
     private final JumPlane game;
+
     private Stage stage;
     private Texture backgroundTexture;
     private SpriteBatch batch;
@@ -42,6 +44,10 @@ public class MainMenuScreen implements Screen {
     private Texture infoButtonTexture;
     private ImageButton infoButton;
     private boolean infoButtonClicked = false;
+
+    private Texture gameInfoButtonTexture;
+    private ImageButton gameInfoButton;
+    private boolean gameInfoButtonClicked = false;
 
     private BitmapFont font;
 
@@ -71,6 +77,7 @@ public class MainMenuScreen implements Screen {
     public MainMenuScreen(JumPlane game, SpriteBatch batch) {
         this.game = game;
         this.batch = batch;
+
 
             stage = new Stage(new ScreenViewport());
 
@@ -107,6 +114,7 @@ public class MainMenuScreen implements Screen {
             createInfoButton();
             createExitButton();
             createSettingsScreen();
+            createGameInfoButton();
 
             font = new BitmapFont(Gdx.files.internal("negrita.fnt"), Gdx.files.internal("negrita.png"), false);
             font.getData().setScale(0.620f);
@@ -212,6 +220,26 @@ public class MainMenuScreen implements Screen {
         });
         stage.addActor(infoButton);
     }
+    private void createGameInfoButton() {
+        gameInfoButtonTexture = new Texture("gameinfobutton.png");
+        ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
+        buttonStyle.imageUp = new com.badlogic.gdx.scenes.scene2d.ui.Image(gameInfoButtonTexture).getDrawable();
+
+        gameInfoButton = new ImageButton(buttonStyle);
+        gameInfoButton.setSize(200,200);
+
+
+        gameInfoButton.setPosition(20, Gdx.graphics.getHeight() - gameInfoButton.getHeight() - 20);
+
+        gameInfoButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clickSound.play();
+                gameInfoButtonClicked =! gameInfoButtonClicked;
+            }
+        });
+        stage.addActor(gameInfoButton);
+    }
 
     private void createExitButton() {
         exitButtonTexture = new Texture("exitbutton.png");
@@ -316,17 +344,16 @@ public class MainMenuScreen implements Screen {
     }
 
     @Override
-    public void render(float delta) {Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        batch.begin();
-
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 400f, Gdx.graphics.getHeight() / 7f - 200f,800, 600);
+        batch.draw(labelTexture, Gdx.graphics.getWidth() / 2f - 400f, Gdx.graphics.getHeight() / 7f - 200f, 800, 600);
         batch.end();
 
-        if (infoButtonClicked) {
+        boolean isAnyButtonClicked = infoButtonClicked || gameInfoButtonClicked;
+
+        if (isAnyButtonClicked) {
             // Ekranı karart
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -336,35 +363,121 @@ public class MainMenuScreen implements Screen {
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
 
-            batch.begin();
-            font.draw(batch, "JumpLane\n\n" +
-                    "Get ready for an adrenaline-fueled adventure as youpilot your plane through treacherous skies!\n" +
-                    "Tap the screen to make your plane soar, dodge obstacles.\n" +
-                    "Collect coins to unlock awesome new planes and challenging levels.\n\n" +
-                    "Features:\n" +
-                    "* Simple and addictive one-touch gameplay\n" +"* Stunning graphics and immersive sound effects\n" +
-                    "* A variety of unique planes to collect\n" +
-                    "* Endless levels with increasing difficulty\n" +
-                    "* Compete with friends and players worldwide on the leaderboards\n\n" +
-                    "Developed by Berdan Bakan\n\n" +
-                    "Design inspirations taken from bevoullin.com\n\n" +
-                    "All rights reserved @ 2024.", 20, 900);
-            batch.end();
-
-
+            // Düğmeleri gizle
             startButton.setVisible(false);
             settingsButton.setVisible(false);
             resultButton.setVisible(false);
             exitButton.setVisible(false);
         } else {
-
+            // Düğmeleri göster
             startButton.setVisible(true);
-            settingsButton.setVisible(true);resultButton.setVisible(true);
+            settingsButton.setVisible(true);
+            resultButton.setVisible(true);
             exitButton.setVisible(true);
         }
 
         stage.act(delta);
-        stage.draw();
+        stage.draw(); // Düğmeleri çiz
+
+            if (infoButtonClicked) {
+                batch.begin();
+                if (GameScreen.currentLanguage.equals("tr")){
+                    font.draw(batch, "JumpLane\n\n" +
+                            "Tehlikeli gokyuzunde ucaginizi yonlendirirken adrenalin dolu bir maceraya hazir olun!\n" +
+                            "Ucaginizin yukselmesi icin ekrana dokunun, engellerden kacinin.\n" +
+                            "Harika yeni ucaklarin ve zorlu seviyelerin kilidini acmak icin altinlari toplayin.\n\n" +
+                            "Ozellikler:\n" +
+                            "*Basit ve bagimlilik yapan tek dokunusla oynanis\n" +
+                            "* Carpici grafiklerve surukleyici ses efektleri\n" +
+                            "* Toplanacak cesitli benzersiz ucaklar\n" +
+                            "* Artan zorluk seviyeleriyle sonsuz seviyeler\n" +
+                            "* Liderlik tablolarinda arkadaslarinizla ve dunya capindaki oyuncularla yarisin\n\n" +
+                            "Gelistirici: Berdan Bakan\n\n" +
+                            "Tasarim ilhamlari bevoullin.com'dan alinmistir\n\n" +
+                            "Tum haklari saklidir @ 2024.", 20, 900);
+                }else {
+                    font.draw(batch, "JumpLane\n\n" +
+                            "Get ready for an adrenaline-fueled adventure as youpilot your plane through treacherous skies!\n" +
+                            "Tap the screen to make your plane soar, dodge obstacles.\n" +
+                            "Collect coins to unlock awesome new planes and challenging levels.\n\n" +
+                            "Features:\n" +
+                            "* Simple andaddictive one-touch gameplay\n" +"* Stunning graphics and immersive sound effects\n" +
+                            "* A variety of unique planes to collect\n" +
+                            "* Endless levels with increasing difficulty\n" +
+                            "* Compete with friends and players worldwide on the leaderboards\n\n" +
+                            "Developed by Berdan Bakan\n\n" +
+                            "Design inspirations taken from bevoullin.com\n\n" +
+                            "All rights reserved @ 2024.", 20, 900);
+                }
+                batch.end();
+            }
+            else if (gameInfoButtonClicked) {
+                batch.begin();
+
+                font.getData().setScale(0.50f); // Yazı boyutunu ayarla
+                float textX = 50; // Yazının sol kenar boşluğu
+                float imageSize = 200; // Görsel boyutufloat imageSpacing = 20; // Görseller arası boşluk
+
+                String titleText;
+                String gameInfoText;
+
+                if (GameScreen.currentLanguage.equals("tr")) {
+                    titleText = "NASIL OYNANIR?";
+                    gameInfoText = "JumpLane, bir ucagi kontrol ettiginiz 5 seviyeli bir oyundur.\n" +
+                            "Onceki seviyeleri tamamlayarak seviyelerin kilidini acin.\n" +
+                            "Kazanmak icin dusmanlari oldurun, altin toplayinve sure sinirinda hayatta kalin.\n" +
+                            "Zorluk ve sure her seviyede artar.\n" +
+                            "Son 'Serbest Seviye'de, 3 dakika icinde en cok altini toplayarak ilk 10'a girmeyi hedefleyin.\n\n" +
+                            "**Seviyeler:** Oyunda zorluk derecesi artan 5 seviye vardir.\n" +
+                            "**Dusmanlar:** Seviyelerde ilerlemek icin dusmanlari oldurmeniz gerekir.\n" +
+                            "**Altin:** Yeni ucaklarin ve seviyelerin kilidini acmak icin altin toplayin.\n" +
+                            "**Sure Siniri:** Her seviyeyi tamamlamak icin sinirli bir sureniz vardir.\n" +
+                            "**Engeller:** Hayatta kalmak icin engellerden kacinin.\n" +
+                            "**Saglik:** Ucaginizin sagligi vardir ve engellere veya dusmanlara carptiginizda azalir.\n" +
+                            "**Iksirler:** Sagliginizi geri kazanmak iciniksirleri toplayin.\n" +
+                            "**Ucaginiz:** Ekrana dokunarak ucaginizi kontrol edin.\n" +
+                            "**Serbest Seviye:** Son seviyede, 3 dakika icinde en cok altini toplamaya calisin.";
+                } else {
+                    titleText = "HOW TO PLAY?";
+                    gameInfoText = "JumpLane is a 5-level game where you control a plane.\n" +
+                            "Unlock levels by completing previous ones.\n" +
+                            "To win, kill enemies, collect gold, and survive within the time limit.\n" +
+                            "Difficulty and time increase with each level.\n" +
+                            "In the final 'Free Level', aim for the top 10 by collecting the most gold in 3 minutes.\n\n" +
+                            "**Levels:** There are 5 levels in the game, each with increasing difficulty.\n" +
+                            "**Enemies:** You need to kill enemies to progress through the levels.\n" +
+                            "**Gold:** Collect gold to unlock new planes and levels.\n" +
+                            "**Time Limit:** You have a limited time to complete each level.\n" +
+                            "**Obstacles:** Avoid obstacles to stay alive.\n" +
+                            "**Health:** Your plane has health, which decreases when you hit obstacles or enemies.\n" +
+                            "**Potions:** Collect potions to restore your health.\n" +
+                            "**Your Plane:** Control your plane by tapping the screen.\n" +
+                            "**Free Level:** In the final level, try to collect the most gold in 3 minutes.";
+                }
+
+                GlyphLayout titleLayout = new GlyphLayout(font, titleText);
+
+                float titleX = (Gdx.graphics.getWidth() - titleLayout.width) / 2.2f; // Başlığın x koordinatı
+                float titleY = Gdx.graphics.getHeight() - 50; // Başlığın y koordinatı
+
+                font.getData().setScale(1.5f); // Başlık yazı boyutu
+                font.draw(batch, titleText, titleX, titleY); // Başlık
+                font.getData().setScale(0.70f); // Yazı boyutu
+
+                GlyphLayout layout = new GlyphLayout(font, gameInfoText);
+
+                float width = layout.width; // Metnin genişliği
+                float height = layout.height; // Metnin yüksekliği
+
+                float x = textX; // Yazının x koordinatı
+                float y = titleY - titleLayout.height - 90; // Yazının y koordinatı
+
+                font.draw(batch, gameInfoText, x, y, width, Align.left, true); // Metin
+
+                batch.end();
+
+            }
+
     }
 
     @Override
