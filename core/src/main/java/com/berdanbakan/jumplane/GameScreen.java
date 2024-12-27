@@ -84,6 +84,10 @@ public class GameScreen implements Screen {
 
     private int freeLevelCoins = 0;
 
+    private List<AmmoBoost> ammoBoosts;
+    private float ammoBoostSpawnTimer;
+    private float ammoBoostSpawnDelay = 15f;
+
     public GameScreen(JumPlane game, int level, LevelMenuScreen levelMenuScreen) {
         this.game = game;
         this.level = level;
@@ -123,6 +127,7 @@ public class GameScreen implements Screen {
         coins = new ArrayList<>();
         random = new Random();
 
+        ammoBoosts = new ArrayList<>();
 
         winSound = Gdx.audio.newSound(Gdx.files.internal("winsound.mp3"));
         ammoSound = Gdx.audio.newSound(Gdx.files.internal("ammosound.mp3"));
@@ -213,6 +218,36 @@ public class GameScreen implements Screen {
         coins.add(new Coin(coinX, coinY));
     }
 
+    private void spawnAmmoBoost() {
+        float ammoBoostX = Gdx.graphics.getWidth();
+        float ammoBoostY = random.nextFloat() * (Gdx.graphics.getHeight() - ground.groundHeight - 100) + ground.groundHeight;
+        ammoBoosts.add(new AmmoBoost(ammoBoostX, ammoBoostY));
+    }
+
+    private void updateAmmoBoosts(float deltaTime) {
+        ammoBoostSpawnTimer += deltaTime;
+        if (ammoBoostSpawnTimer >= ammoBoostSpawnDelay) {
+            ammoBoostSpawnTimer = 0;
+            spawnAmmoBoost();
+        }
+
+        Iterator<AmmoBoost> iter = ammoBoosts.iterator();
+        while (iter.hasNext()) {
+            AmmoBoost ammoBoost = iter.next();
+            ammoBoost.update(deltaTime);
+            if (!ammoBoost.collected && player.playerPlaneRectangle.overlaps(ammoBoost.rectangle)) {
+                ammoBoost.collected = true;
+                player.ammo = Player.MAX_AMMO; // Mermi sayısını maksimum değere ayarla
+                ammoBoost.sound.play(); // Ses dosyasını oynat
+            }
+            if (ammoBoost.collected) { // Toplanmışsa veya ekran dışına çıkmışsa
+                ammoBoost.dispose();
+                iter.remove();
+            }
+        }
+    }
+
+
     @Override
     public void show() {
         game.stopMusic();
@@ -235,6 +270,7 @@ public class GameScreen implements Screen {
         if (isPaused) {
             handlePauseMenuInput();
         }
+
     }
 
     private void updateGameLogic(float deltaTime) {
@@ -267,6 +303,7 @@ public class GameScreen implements Screen {
             enemyManager.checkCollisions(player, levelManager);
             levelManager.checkLevelUp(enemyManager.killedEnemies, collectedCoins);
             updateCoins(deltaTime);
+            updateAmmoBoosts(deltaTime);
         }
     }
 
@@ -283,6 +320,10 @@ public class GameScreen implements Screen {
 
             for (Coin coin : coins) {
                 coin.draw(batch);
+            }
+
+            for (AmmoBoost ammoBoost : ammoBoosts) {
+                ammoBoost.draw(batch); // AmmoBoost nesnelerini burada çizdir
             }
 
             if (levelManager.isGameOver) {
@@ -523,6 +564,9 @@ public class GameScreen implements Screen {
         }
         for (Coin coin : coins) {
             coin.dispose();
+        }
+        for (AmmoBoost ammoBoost : ammoBoosts) {
+            ammoBoost.dispose();
         }
     }
 }

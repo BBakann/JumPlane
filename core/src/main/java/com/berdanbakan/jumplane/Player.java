@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Player {
-    private static final int MAX_AMMO = 6;
+    public static final int MAX_AMMO = 6;
     private static Texture[] planeTextures;
     private static Texture[] bulletTextures;
 
@@ -23,7 +23,8 @@ public class Player {
     public float planeY;
     private float planeSpeed = 600f;
     public int health;
-    public int ammo;private float reloadTime;
+    public int ammo;
+    private float reloadTime;
     public Rectangle playerPlaneRectangle;
     private List<Bullet> bullets;
     private boolean dugmeGeciciOlarakBasili;

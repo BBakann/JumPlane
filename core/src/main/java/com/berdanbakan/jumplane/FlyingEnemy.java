@@ -60,28 +60,8 @@ public class FlyingEnemy {
     }
 
     public void update(float deltaTime) {
-        movementTimer += deltaTime;
 
-        if (movementTimer >= 4.5f) { // 4 saniye sonra oyuncuya doğru hareket et
-            targetX = player.planeX; // Oyuncunun güncel x koordinatını al
-            targetY = player.planeY; // Oyuncunun güncel y koordinatını al
-
-            float directionX = targetX - x;
-            float directionY = targetY - y;
-
-            float distance = (float) Math.sqrt(directionX * directionX + directionY * directionY);
-
-            if (distance > 0) {
-                directionX /= distance;
-                directionY /= distance;
-
-                x += directionX * speed * deltaTime;
-                y += directionY * speed * deltaTime;
-            }
-        } else {
-
-            x -= speed * deltaTime;
-        }
+        x -= speed * deltaTime;
 
         // Çarpışma alanını görselin ortasına ve boyutuna göre ayarla
         float collisionOffsetX = width * (1 - COLLISION_SCALE) / 2;
